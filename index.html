@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EO · Eficiencia Operacional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Geist:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f2eb;--paper:#fbf9f3;--ink:#14130f;--soft:#6b6759;
+  --hair:#d8d3c2;--alert:#c4341a;--ok:#2c5530;--warn:#b07d00;
+  --lima:#c08a44;--prov:#4a6a8a;--nav:64px;
+}
+body{background:var(--bg);color:var(--ink);font-family:'Geist',sans-serif;
+  min-height:100vh;padding-bottom:calc(var(--nav) + 8px);
+  max-width:520px;margin:0 auto;font-size:15px}
+
+/* HEADER */
+.app-header{padding:16px 16px 0;background:var(--bg);position:sticky;top:0;z-index:10;
+  border-bottom:1px solid var(--hair)}
+.brand{font-family:'Fraunces',serif;font-weight:800;font-size:1.1rem;
+  letter-spacing:-0.02em;margin-bottom:10px}
+.brand .slash{color:var(--alert)}
+.header-controls{display:flex;gap:8px;align-items:center;padding-bottom:12px;flex-wrap:wrap}
+.header-controls input[type="date"]{border:1px solid var(--ink);background:var(--paper);
+  padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--ink);flex:1}
+.turno-tabs{display:flex;border:1px solid var(--ink);overflow:hidden}
+.turno-tabs button{border:0;background:var(--paper);padding:7px 11px;
+  font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;
+  letter-spacing:0.06em;cursor:pointer;color:var(--soft);border-right:1px solid var(--ink)}
+.turno-tabs button:last-child{border-right:0}
+.turno-tabs button.active{background:var(--ink);color:var(--paper)}
+
+/* VIEWS */
+.view{display:none;padding:18px 16px 24px}
+.view.active{display:block}
+
+/* NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);
+  background:var(--paper);border-top:1.5px solid var(--ink);
+  display:flex;max-width:520px;margin:0 auto}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;cursor:pointer;border:0;background:transparent;
+  color:var(--soft);font-size:0.58rem;text-transform:uppercase;letter-spacing:0.08em;
+  font-family:'Geist',sans-serif;font-weight:500;transition:color .15s}
+.nav-btn .ico{font-size:1.25rem;line-height:1}
+.nav-btn.active{color:var(--ink);background:var(--bg)}
+
+/* UTILS */
+.sec-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem;
+  margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline}
+.sec-title .hint{font-size:0.68rem;color:var(--soft);font-weight:400;font-style:italic}
+.divider{border:0;height:1px;background:var(--hair);margin:22px 0}
+.pill{display:inline-block;padding:1px 7px;border:1px solid var(--ink);
+  font-size:0.65rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.pill.dia{background:#fff4d4}
+.pill.noche{background:var(--ink);color:var(--paper)}
+.btn-primary{width:100%;background:var(--ink);color:var(--paper);border:0;
+  padding:14px;font-family:'Fraunces',serif;font-size:1rem;font-weight:600;cursor:pointer}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-add{width:100%;border:1px dashed var(--soft);background:transparent;padding:10px;
+  font-family:'JetBrains Mono',monospace;font-size:0.72rem;text-transform:uppercase;
+  letter-spacing:0.1em;cursor:pointer;color:var(--ink);margin-top:8px}
+.btn-add:hover{background:var(--ink);color:var(--paper);border-style:solid}
+.btn-del{background:transparent;border:1px solid var(--hair);width:22px;height:22px;
+  cursor:pointer;font-size:0.8rem;color:var(--soft);line-height:1}
+.btn-del:hover{background:var(--alert);color:white;border-color:var(--alert)}
+
+/* TOAST */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--paper);padding:10px 20px;
+  font-family:'JetBrains Mono',monospace;font-size:0.78rem;z-index:999;
+  opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.toast.error{background:var(--alert)}
+
+/* LOADING */
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(245,242,235,.8);
+  align-items:center;justify-content:center;z-index:50;font-family:'Fraunces',serif;
+  font-size:1.2rem;font-weight:600}
+.loading-overlay.active{display:flex}
+
+/* HERO */
+.hero{background:var(--ink);color:var(--paper);padding:20px;margin-bottom:18px}
+.hero-eye{font-family:'JetBrains Mono',monospace;font-size:0.62rem;text-transform:uppercase;
+  letter-spacing:0.14em;color:rgba(251,249,243,.5);margin-bottom:10px}
+.hero-main{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hero-num{font-family:'Fraunces',serif;font-weight:800;font-size:3.8rem;
+  line-height:.9;color:#ffb89a;letter-spacing:-0.04em}
+.hero-text{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:400}
+.hero-foot{border-top:1px solid rgba(255,255,255,.12);margin-top:14px;padding-top:12px;
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  font-family:'JetBrains Mono',monospace;font-size:0.72rem}
+.hero-foot .lbl{color:rgba(251,249,243,.55);display:block;margin-bottom:3px}
+.hero-foot .val{font-weight:700;font-size:.88rem}
+.hero-foot .eff{color:#a8d4a8}
+
+/* TURN CARDS */
+.turn-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.tc{background:var(--paper);border:1px solid var(--hair);padding:14px 12px}
+.tc-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);
+  margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.tc-big{font-family:'Fraunces',serif;font-weight:700;font-size:1.9rem;
+  line-height:1;letter-spacing:-0.03em}
+.tc-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft);margin-top:3px}
+.tc-sep{height:1px;background:var(--hair);margin:10px 0}
+.tc-eff-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:2px}
+.tc-eff-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.15rem;letter-spacing:-0.02em}
+.tc-eff-tgt{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--soft)}
+
+/* FLUJOS TABLE */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;padding:0 8px 8px;font-size:.6rem;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--soft);border-bottom:1px solid var(--hair)}
+.tbl td{padding:11px 8px;border-bottom:1px solid var(--hair);font-size:.85rem}
+.tbl td.num{text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600}
+.tbl td.tag{font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.tbl .tfoot td{border-top:1px solid var(--ink);border-bottom:0;font-weight:700;
+  font-family:'Fraunces',serif;font-size:.92rem;padding-top:12px}
+.tbl td input.inline-num{border:0;border-bottom:1px solid var(--hair);background:transparent;
+  font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.85rem;
+  text-align:right;width:80px;padding:2px 4px}
+.tbl td input.inline-num:focus{outline:0;border-bottom-color:var(--ink)}
+
+/* SIMULADOR */
+.sim-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.sim-field label{display:block;font-size:.6rem;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--soft);margin-bottom:6px}
+.stepper{display:flex;border:1px solid var(--ink)}
+.stepper button{width:38px;border:0;background:var(--paper);font-family:'JetBrains Mono',monospace;
+  font-size:1.1rem;font-weight:700;cursor:pointer;color:var(--ink)}
+.stepper button:hover{background:var(--ink);color:var(--paper)}
+.stepper input{flex:1;border:0;border-left:1px solid var(--ink);border-right:1px solid var(--ink);
+  background:white;font-family:'JetBrains Mono',monospace;font-size:1rem;
+  font-weight:700;text-align:center;padding:8px 4px;width:0}
+.sim-recom{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--soft);margin-top:5px}
+.sim-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sim-card{background:var(--paper);border:1px solid var(--hair);padding:14px 12px}
+.sim-card-t{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--soft);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.sim-eff{font-family:'Fraunces',serif;font-weight:800;font-size:2.2rem;
+  letter-spacing:-0.04em;line-height:1}
+.sim-eff.ok{color:var(--ok)}.sim-eff.warn{color:var(--warn)}.sim-eff.bad{color:var(--alert)}
+.sim-unit{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft);margin-top:3px}
+.sim-badge{display:inline-block;margin-top:8px;padding:3px 8px;
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;border:1px solid}
+.sim-badge.ok{background:#e2ebe1;color:var(--ok);border-color:var(--ok)}
+.sim-badge.warn{background:#fff4d4;color:var(--warn);border-color:var(--warn)}
+.sim-badge.bad{background:#fde8e3;color:var(--alert);border-color:var(--alert)}
+
+/* PLANILLA */
+.plan-card{background:var(--paper);border:1px solid var(--hair);padding:18px;margin-bottom:14px}
+.plan-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.plan-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem}
+.plan-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);
+  margin-bottom:7px;display:block}
+.plan-stepper{display:flex;border:1px solid var(--ink);margin-bottom:12px}
+.plan-stepper button{width:44px;border:0;background:var(--paper);font-size:1.2rem;
+  font-weight:700;cursor:pointer;color:var(--ink)}
+.plan-stepper button:hover{background:var(--ink);color:var(--paper)}
+.plan-stepper input{flex:1;border:0;border-left:1px solid var(--ink);
+  border-right:1px solid var(--ink);padding:12px 8px;font-family:'Fraunces',serif;
+  font-size:2rem;font-weight:700;text-align:center;background:white}
+.plan-calc{background:var(--bg);padding:10px 12px;font-family:'JetBrains Mono',monospace;
+  font-size:.78rem;color:var(--soft)}
+.plan-calc strong{color:var(--ink);font-size:.88rem}
+.plan-total{background:var(--ink);color:var(--paper);padding:12px 16px;margin-top:4px;
+  font-family:'JetBrains Mono',monospace;font-size:.8rem;display:flex;justify-content:space-between}
+.plan-total strong{font-family:'Fraunces',serif;font-size:1.1rem}
+
+/* CIERRE */
+.cierre-card{background:var(--paper);border:1px solid var(--hair);padding:18px;margin-bottom:14px}
+.cc-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.cc-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem}
+.cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.cc-field label{display:block;font-size:.6rem;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--soft);margin-bottom:6px}
+.cc-field input{width:100%;border:1px solid var(--ink);background:white;
+  padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700}
+.cc-result{background:var(--bg);padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ccr-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);
+  display:block;margin-bottom:3px}
+.ccr-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.4rem;letter-spacing:-0.02em}
+.ccr-val.ok{color:var(--ok)}.ccr-val.bad{color:var(--alert)}.ccr-val.neutral{color:var(--ink)}
+
+/* HISTORICO */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.kpi{background:var(--paper);border:1px solid var(--hair);padding:12px}
+.kpi-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:4px}
+.kpi-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.4rem;
+  line-height:1;letter-spacing:-0.03em}
+.kpi-val.ok{color:var(--ok)}.kpi-val.bad{color:var(--alert)}
+.kpi-sub{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--soft);margin-top:3px}
+.hist-tbl{width:100%;border-collapse:collapse}
+.hist-tbl th{text-align:left;padding:0 6px 8px;font-size:.58rem;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--soft);border-bottom:1px solid var(--hair)}
+.hist-tbl th.num,.hist-tbl td.num{text-align:right;font-family:'JetBrains Mono',monospace}
+.hist-tbl td{padding:10px 6px;border-bottom:1px solid var(--hair);font-size:.8rem}
+.hist-tbl .today-row td{font-weight:700;background:#fff9ee}
+.dname{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.75rem;
+  text-transform:uppercase;display:block}
+.ddate{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft)}
+.desv{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.75rem}
+.desv.up{color:var(--ok)}.desv.dn{color:var(--alert)}.desv.fl{color:var(--soft)}
+
+/* CONFIG */
+.cfg-block{margin-bottom:26px}
+.cfg-block-t{font-family:'Fraunces',serif;font-weight:600;font-size:.88rem;color:var(--soft);
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;padding-bottom:8px;
+  border-bottom:1px solid var(--hair)}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cf label{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--soft);margin-bottom:5px}
+.cf input,.cf select{width:100%;border:1px solid var(--hair);background:white;
+  padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
+.cf .sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft);margin-top:3px}
+.split-cfg-row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+.split-cfg-row .slbl{font-size:.78rem;font-weight:600;min-width:58px;
+  display:flex;align-items:center;gap:6px}
+.split-inp{flex:1;background:white;border:1px solid var(--hair);
+  padding:8px 10px;display:flex;align-items:center;gap:5px}
+.split-inp.lm{border-left:3px solid var(--lima)}
+.split-inp.pr{border-left:3px solid var(--prov)}
+.split-inp label{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);white-space:nowrap}
+.split-inp input{border:0;background:transparent;font-family:'JetBrains Mono',monospace;
+  font-size:.9rem;font-weight:700;width:100%;text-align:right}
+.split-inp span{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--soft)}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loader">Cargando…</div>
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="brand">EO<span class="slash">/</span>Eficiencia Operacional</div>
+  <div class="header-controls">
+    <input type="date" id="fecha-picker">
+    <div class="turno-tabs">
+      <button class="active" data-t="noche" onclick="setTurno('noche',this)">Noche</button>
+      <button data-t="dia" onclick="setTurno('dia',this)">Día</button>
+      <button data-t="ambos" onclick="setTurno('ambos',this)">Ambos</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VISTA 1: PROYECCIÓN ══ -->
+<div class="view active" id="v-proyeccion">
+  <!-- Hero -->
+  <div class="hero" id="hero-box">
+    <div class="hero-eye">Recomendación del sistema</div>
+    <div class="hero-main">
+      <span class="hero-num" id="h-terceros">—</span>
+      <span class="hero-text">terceros hoy</span>
+    </div>
+    <div class="hero-foot">
+      <div><span class="lbl">Distribución</span><span class="val" id="h-dist">— día · — noche</span></div>
+      <div><span class="lbl">Eficiencia esp.</span><span class="val eff" id="h-eff">— fol/h</span></div>
+    </div>
+  </div>
+
+  <!-- Cards por turno -->
+  <div class="sec-title">Por turno <span class="hint">calculado</span></div>
+  <div class="turn-cards" id="turn-cards">
+    <div class="tc" id="tc-dia">
+      <div class="tc-lbl"><span class="pill dia">Día</span></div>
+      <div class="tc-big" id="tc-dia-folios">—</div>
+      <div class="tc-sub" id="tc-dia-sub">— terceros</div>
+      <div class="tc-sep"></div>
+      <div class="tc-eff-lbl">Eficiencia esp.</div>
+      <div class="tc-eff-val" id="tc-dia-eff">—</div>
+      <div class="tc-eff-tgt">target <span id="tc-dia-tgt">—</span> fol/h</div>
+    </div>
+    <div class="tc" id="tc-noche">
+      <div class="tc-lbl"><span class="pill noche">Noche</span></div>
+      <div class="tc-big" id="tc-noche-folios">—</div>
+      <div class="tc-sub" id="tc-noche-sub">— terceros</div>
+      <div class="tc-sep"></div>
+      <div class="tc-eff-lbl">Eficiencia esp.</div>
+      <div class="tc-eff-val" id="tc-noche-eff">—</div>
+      <div class="tc-eff-tgt">target <span id="tc-noche-tgt">—</span> fol/h</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Flujos -->
+  <div class="sec-title">Flujos del día <span class="hint">editable</span></div>
+  <table class="tbl">
+    <thead><tr><th>Flujo</th><th>Turno</th><th class="num">Folios</th><th></th></tr></thead>
+    <tbody id="flujos-tbody"></tbody>
+    <tfoot>
+      <tr class="tfoot">
+        <td colspan="2">Total</td>
+        <td class="num" id="flujos-total">0</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+  <button class="btn-add" onclick="addFlujoRow()">＋ Agregar flujo</button>
+
+  <hr class="divider">
+
+  <!-- Simulador -->
+  <div class="sec-title">Simulador <span class="hint">¿qué pasa si…?</span></div>
+  <div class="sim-row">
+    <div class="sim-field">
+      <label><span class="pill dia">Día</span> Terceros</label>
+      <div class="stepper">
+        <button onclick="stepSim('dia',-1)">−</button>
+        <input type="number" id="sim-dia" value="0" oninput="renderSim()">
+        <button onclick="stepSim('dia',1)">+</button>
+      </div>
+      <div class="sim-recom" id="sim-dia-recom">recomendado: —</div>
+    </div>
+    <div class="sim-field">
+      <label><span class="pill noche">Noche</span> Terceros</label>
+      <div class="stepper">
+        <button onclick="stepSim('noche',-1)">−</button>
+        <input type="number" id="sim-noche" value="0" oninput="renderSim()">
+        <button onclick="stepSim('noche',1)">+</button>
+      </div>
+      <div class="sim-recom" id="sim-noche-recom">recomendado: —</div>
+    </div>
+  </div>
+  <div class="sim-cards">
+    <div class="sim-card">
+      <div class="sim-card-t"><span class="pill dia">Día</span></div>
+      <div class="sim-eff" id="sim-eff-dia">—</div>
+      <div class="sim-unit">folios / hora</div>
+      <div id="sim-badge-dia"></div>
+    </div>
+    <div class="sim-card">
+      <div class="sim-card-t"><span class="pill noche">Noche</span></div>
+      <div class="sim-eff" id="sim-eff-noche">—</div>
+      <div class="sim-unit">folios / hora</div>
+      <div id="sim-badge-noche"></div>
+    </div>
+  </div>
+
+  <div style="margin-top:20px">
+    <button class="btn-primary" onclick="guardarProyeccion()">Guardar proyección →</button>
+  </div>
+</div>
+
+<!-- ══ VISTA 2: PLANILLA ══ -->
+<div class="view" id="v-planilla">
+  <div class="sec-title" style="margin-bottom:18px">Planilla disponible hoy <span class="hint">ingresa las personas</span></div>
+
+  <div class="plan-card" id="plan-card-dia">
+    <div class="plan-head">
+      <span class="pill dia">Día</span>
+      <div class="plan-title">Turno Día</div>
+    </div>
+    <span class="plan-lbl">Personas de planilla</span>
+    <div class="plan-stepper">
+      <button onclick="stepPlan('dia',-1)">−</button>
+      <input type="number" id="plan-dia" value="0" oninput="renderPlanilla()">
+      <button onclick="stepPlan('dia',1)">+</button>
+    </div>
+    <div class="plan-calc">
+      Jornada: <strong>8h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-dia-hrs">0h</strong>
+    </div>
+  </div>
+
+  <div class="plan-card" id="plan-card-noche">
+    <div class="plan-head">
+      <span class="pill noche">Noche</span>
+      <div class="plan-title">Turno Noche</div>
+    </div>
+    <span class="plan-lbl">Personas de planilla</span>
+    <div class="plan-stepper">
+      <button onclick="stepPlan('noche',-1)">−</button>
+      <input type="number" id="plan-noche" value="0" oninput="renderPlanilla()">
+      <button onclick="stepPlan('noche',1)">+</button>
+    </div>
+    <div class="plan-calc">
+      Jornada: <strong>9.36h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-noche-hrs">0h</strong>
+    </div>
+  </div>
+
+  <div class="plan-total">
+    <span>Total horas planilla hoy</span>
+    <strong id="plan-total-hrs">0h</strong>
+  </div>
+
+  <div style="margin-top:16px">
+    <button class="btn-primary" onclick="guardarPlanilla()">Guardar planilla →</button>
+  </div>
+</div>
+
+<!-- ══ VISTA 3: CIERRE ══ -->
+<div class="view" id="v-cierre">
+  <div class="sec-title" style="margin-bottom:18px">Cierre del día <span class="hint">ingresa los reales</span></div>
+
+  <div class="cierre-card" id="cc-dia">
+    <div class="cc-head"><span class="pill dia">Día</span><div class="cc-title">Turno Día</div></div>
+    <div class="cc-grid">
+      <div class="cc-field">
+        <label>Folios despachados</label>
+        <input type="number" id="cc-folios-dia" placeholder="0" oninput="calcCierre('dia')">
+      </div>
+      <div class="cc-field">
+        <label>Horas trabajadas</label>
+        <input type="number" id="cc-horas-dia" placeholder="0.0" step="0.1" oninput="calcCierre('dia')">
+      </div>
+    </div>
+    <div class="cc-result">
+      <div><span class="ccr-lbl">Eficiencia real</span><div class="ccr-val neutral" id="ccr-eff-dia">—</div></div>
+      <div><span class="ccr-lbl">Vs proyectado</span><div class="ccr-val neutral" id="ccr-desv-dia">—</div></div>
+    </div>
+  </div>
+
+  <div class="cierre-card" id="cc-noche">
+    <div class="cc-head"><span class="pill noche">Noche</span><div class="cc-title">Turno Noche</div></div>
+    <div class="cc-grid">
+      <div class="cc-field">
+        <label>Folios despachados</label>
+        <input type="number" id="cc-folios-noche" placeholder="0" oninput="calcCierre('noche')">
+      </div>
+      <div class="cc-field">
+        <label>Horas trabajadas</label>
+        <input type="number" id="cc-horas-noche" placeholder="0.0" step="0.1" oninput="calcCierre('noche')">
+      </div>
+    </div>
+    <div class="cc-result">
+      <div><span class="ccr-lbl">Eficiencia real</span><div class="ccr-val neutral" id="ccr-eff-noche">—</div></div>
+      <div><span class="ccr-lbl">Vs proyectado</span><div class="ccr-val neutral" id="ccr-desv-noche">—</div></div>
+    </div>
+  </div>
+
+  <button class="btn-primary" onclick="guardarCierre()">Guardar cierre →</button>
+</div>
+
+<!-- ══ VISTA 4: HISTÓRICO ══ -->
+<div class="view" id="v-historico">
+  <div class="sec-title" style="margin-bottom:14px">Este mes <span class="hint">acumulado</span></div>
+  <div class="kpi-row" id="kpi-row">
+    <div class="kpi"><div class="kpi-lbl">Efic. prom.</div><div class="kpi-val" id="kpi-eff">—</div><div class="kpi-sub" id="kpi-eff-sub">—</div></div>
+    <div class="kpi"><div class="kpi-lbl">Folios reales</div><div class="kpi-val" id="kpi-folios">—</div><div class="kpi-sub" id="kpi-folios-sub">—</div></div>
+    <div class="kpi"><div class="kpi-lbl">Terceros prom.</div><div class="kpi-val" id="kpi-terceros">—</div><div class="kpi-sub">por día</div></div>
+  </div>
+  <hr class="divider" style="margin-top:8px">
+  <div class="sec-title" style="margin-bottom:14px">Últimos 7 días</div>
+  <table class="hist-tbl">
+    <thead>
+      <tr>
+        <th>Día</th>
+        <th class="num">Proy.</th>
+        <th class="num">Real</th>
+        <th class="num">Efic.</th>
+        <th class="num">Desv.</th>
+      </tr>
+    </thead>
+    <tbody id="hist-tbody"></tbody>
+  </table>
+</div>
+
+<!-- ══ VISTA 5: CONFIG ══ -->
+<div class="view" id="v-config">
+  <div class="cfg-block">
+    <div class="cfg-block-t">Productividad target (folios/h)</div>
+    <div class="cfg-grid">
+      <div class="cf"><label><span class="pill dia">Día</span> Lun–Vie</label><input type="number" id="cfg-pd-s" value="15"><div class="sub">folios/h</div></div>
+      <div class="cf"><label><span class="pill noche">Noche</span> Lun–Vie</label><input type="number" id="cfg-pn-s" value="25"><div class="sub">folios/h</div></div>
+      <div class="cf"><label><span class="pill dia">Día</span> Sáb–Dom</label><input type="number" id="cfg-pd-f" value="12"><div class="sub">folios/h</div></div>
+      <div class="cf"><label><span class="pill noche">Noche</span> Sáb–Dom</label><input type="number" id="cfg-pn-f" value="20"><div class="sub">folios/h</div></div>
+    </div>
+  </div>
+  <div class="cfg-block">
+    <div class="cfg-block-t">Split Lima / Provincia (default)</div>
+    <div class="split-cfg-row">
+      <span class="slbl"><span class="pill dia">Día</span></span>
+      <div class="split-inp lm"><label>Lima</label><input type="number" id="cfg-sl-d" value="60"><span>%</span></div>
+      <div class="split-inp pr"><label>Prov</label><input type="number" id="cfg-sp-d" value="40"><span>%</span></div>
+    </div>
+    <div class="split-cfg-row">
+      <span class="slbl"><span class="pill noche">Noche</span></span>
+      <div class="split-inp lm"><label>Lima</label><input type="number" id="cfg-sl-n" value="92"><span>%</span></div>
+      <div class="split-inp pr"><label>Prov</label><input type="number" id="cfg-sp-n" value="8"><span>%</span></div>
+    </div>
+  </div>
+  <div class="cfg-block">
+    <div class="cfg-block-t">Catálogo de flujos</div>
+    <table class="tbl">
+      <thead><tr><th>Nombre</th><th>Turno</th><th></th></tr></thead>
+      <tbody id="cfg-flujos-tbody"></tbody>
+    </table>
+    <button class="btn-add" onclick="addCatFlujo()">＋ Agregar flujo</button>
+  </div>
+  <button class="btn-primary" onclick="guardarConfig()">Guardar configuración →</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showView('proyeccion',this)"><span class="ico">📊</span>Proyección</button>
+  <button class="nav-btn" onclick="showView('planilla',this)"><span class="ico">👥</span>Planilla</button>
+  <button class="nav-btn" onclick="showView('cierre',this)"><span class="ico">✅</span>Cierre</button>
+  <button class="nav-btn" onclick="showView('historico',this)"><span class="ico">📈</span>Histórico</button>
+  <button class="nav-btn" onclick="showView('config',this)"><span class="ico">⚙️</span>Config</button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── INIT ──────────────────────────────────────────────
+const SUPA_URL = 'https://lflenisloinbqyuptxzc.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbGVuaXNsb2luYnF5dXB0eHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MzAxNDQsImV4cCI6MjA5MTEwNjE0NH0.jcjKs2xCgxf4mvGbf9a5eRETWAOKf0SXg_JC0iy4UsI';
+const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ── ESTADO ────────────────────────────────────────────
+const S = {
+  turno: 'noche',
+  fecha: hoy(),
+  config: {},       // { dia_semana, dia_finde, noche_semana, noche_finde }
+  catalogo: [],     // eo_flujos activos
+  proyeccion: null, // fila actual eo_proyecciones
+  flujos_hoy: [],   // { flujo_id, nombre, turno, folios }
+  cierre: null,     // fila actual eo_cierres
+  historico: [],    // últimos 7 días
+  calc: {}          // resultados calculados
+};
+
+// ── UTILES ────────────────────────────────────────────
+function hoy() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+}
+function tipoDia(fecha) {
+  const d = new Date(fecha + 'T12:00:00');
+  return (d.getDay() === 0 || d.getDay() === 6) ? 'finde' : 'semana';
+}
+function getCfg(turno) {
+  const td = tipoDia(S.fecha);
+  return S.config[`${turno}_${td}`] || {};
+}
+function fmt(n, dec = 1) {
+  if (n == null || isNaN(n)) return '—';
+  return Number(n).toFixed(dec);
+}
+function fmtInt(n) {
+  if (n == null || isNaN(n)) return '—';
+  return Math.round(n).toLocaleString('es-PE');
+}
+function loading(on) {
+  document.getElementById('loader').classList.toggle('active', on);
+}
+function toast(msg, err = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (err ? ' error' : '');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── CÁLCULOS ─────────────────────────────────────────
+function calcTurno(turno) {
+  const cfg = getCfg(turno);
+  const prod = cfg.productividad || (turno === 'dia' ? 15 : 25);
+  const jornada = cfg.jornada_planilla || (turno === 'dia' ? 8 : 9.36);
+  const planilla = turno === 'dia'
+    ? (+document.getElementById('plan-dia').value || 0)
+    : (+document.getElementById('plan-noche').value || 0);
+  const folios = S.flujos_hoy
+    .filter(f => f.turno === turno)
+    .reduce((a, f) => a + (f.folios || 0), 0);
+  const hrs_plan = planilla * jornada;
+  const hrs_nec = folios > 0 ? folios / prod : 0;
+  const gap = Math.max(0, hrs_nec - hrs_plan);
+  const terceros = folios > 0 ? Math.ceil(gap / 8) : 0;
+  const hrs_total = hrs_plan + terceros * 8;
+  const eficiencia = hrs_total > 0 ? folios / hrs_total : 0;
+  return { folios, prod, planilla, hrs_plan, hrs_nec, gap, terceros, eficiencia };
+}
+
+function recalc() {
+  const dia = calcTurno('dia');
+  const noche = calcTurno('noche');
+  S.calc = { dia, noche };
+
+  // Hero
+  const total_t = dia.terceros + noche.terceros;
+  const total_f = dia.folios + noche.folios;
+  const eff_gen = (dia.hrs_plan + dia.terceros * 8 + noche.hrs_plan + noche.terceros * 8) > 0
+    ? total_f / (dia.hrs_plan + dia.terceros * 8 + noche.hrs_plan + noche.terceros * 8)
+    : 0;
+
+  document.getElementById('h-terceros').textContent = total_f > 0 ? total_t : '—';
+  document.getElementById('h-dist').textContent = `${dia.terceros} día · ${noche.terceros} noche`;
+  document.getElementById('h-eff').textContent = total_f > 0 ? fmt(eff_gen) + ' fol/h' : '— fol/h';
+
+  // Cards
+  document.getElementById('tc-dia-folios').textContent = fmtInt(dia.folios);
+  document.getElementById('tc-dia-sub').textContent = `folios · ${dia.terceros} terceros`;
+  document.getElementById('tc-dia-eff').textContent = fmt(dia.eficiencia);
+  document.getElementById('tc-dia-tgt').textContent = fmt(dia.prod, 0);
+  document.getElementById('tc-noche-folios').textContent = fmtInt(noche.folios);
+  document.getElementById('tc-noche-sub').textContent = `folios · ${noche.terceros} terceros`;
+  document.getElementById('tc-noche-eff').textContent = fmt(noche.eficiencia);
+  document.getElementById('tc-noche-tgt').textContent = fmt(noche.prod, 0);
+
+  // Simulador default values
+  document.getElementById('sim-dia').value = dia.terceros;
+  document.getElementById('sim-noche').value = noche.terceros;
+  document.getElementById('sim-dia-recom').textContent = `recomendado: ${dia.terceros}`;
+  document.getElementById('sim-noche-recom').textContent = `recomendado: ${noche.terceros}`;
+
+  // Filtro de turno en cards
+  applyTurnoFilter();
+  renderFlujosTotals();
+  renderSim();
+}
+
+// ── FILTRO TURNO ─────────────────────────────────────
+function applyTurnoFilter() {
+  const t = S.turno;
+  document.getElementById('tc-dia').style.display = (t === 'noche') ? 'none' : 'block';
+  document.getElementById('tc-noche').style.display = (t === 'dia') ? 'none' : 'block';
+  document.getElementById('plan-card-dia').style.display = (t === 'noche') ? 'none' : 'block';
+  document.getElementById('plan-card-noche').style.display = (t === 'dia') ? 'none' : 'block';
+  document.getElementById('cc-dia').style.display = (t === 'noche') ? 'none' : 'block';
+  document.getElementById('cc-noche').style.display = (t === 'dia') ? 'none' : 'block';
+  // Flujos: show/hide rows
+  document.querySelectorAll('.flujo-row').forEach(row => {
+    const rt = row.dataset.turno;
+    row.style.display = (t === 'ambos' || t === rt) ? '' : 'none';
+  });
+}
+
+function setTurno(t, btn) {
+  S.turno = t;
+  document.querySelectorAll('.turno-tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyTurnoFilter();
+  if (document.getElementById('v-historico').classList.contains('active')) renderHistorico();
+}
+
+// ── FLUJOS ────────────────────────────────────────────
+function renderFlujos() {
+  const tbody = document.getElementById('flujos-tbody');
+  tbody.innerHTML = '';
+  S.flujos_hoy.forEach((f, i) => {
+    const tr = document.createElement('tr');
+    tr.className = 'flujo-row';
+    tr.dataset.turno = f.turno;
+    tr.innerHTML = `
+      <td class="tag">${f.nombre}</td>
+      <td><span class="pill ${f.turno}">${f.turno === 'dia' ? 'Día' : 'Noche'}</span></td>
+      <td class="num"><input class="inline-num" type="number" value="${f.folios||0}"
+        oninput="S.flujos_hoy[${i}].folios=+this.value;renderFlujosTotals();recalc()" min="0"></td>
+      <td><button class="btn-del" onclick="removeFlujoRow(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+  applyTurnoFilter();
+  renderFlujosTotals();
+}
+
+function renderFlujosTotals() {
+  const visible = S.turno === 'ambos'
+    ? S.flujos_hoy
+    : S.flujos_hoy.filter(f => f.turno === S.turno);
+  const total = visible.reduce((a, f) => a + (f.folios || 0), 0);
+  document.getElementById('flujos-total').textContent = fmtInt(total);
+}
+
+function addFlujoRow() {
+  if (!S.catalogo.length) { toast('Sin flujos en catálogo', true); return; }
+  const f = S.catalogo[0];
+  S.flujos_hoy.push({ flujo_id: f.id, nombre: f.nombre, turno: f.turno, folios: 0 });
+  renderFlujos();
+  recalc();
+}
+
+function removeFlujoRow(i) {
+  S.flujos_hoy.splice(i, 1);
+  renderFlujos();
+  recalc();
+}
+
+// ── PLANILLA ─────────────────────────────────────────
+function renderPlanilla() {
+  const pd = +document.getElementById('plan-dia').value || 0;
+  const pn = +document.getElementById('plan-noche').value || 0;
+  document.getElementById('plan-dia-hrs').textContent = fmt(pd * 8, 1) + 'h';
+  document.getElementById('plan-noche-hrs').textContent = fmt(pn * 9.36, 1) + 'h';
+  document.getElementById('plan-total-hrs').textContent = fmt(pd * 8 + pn * 9.36, 1) + 'h';
+  recalc();
+}
+function stepPlan(t, d) {
+  const el = document.getElementById('plan-' + t);
+  el.value = Math.max(0, (+el.value || 0) + d);
+  renderPlanilla();
+}
+
+// ── SIMULADOR ────────────────────────────────────────
+function renderSim() {
+  ['dia', 'noche'].forEach(t => {
+    const c = S.calc[t] || {};
+    const n3 = +document.getElementById('sim-' + t).value || 0;
+    const hrs = (c.hrs_plan || 0) + n3 * 8;
+    const eff = hrs > 0 ? (c.folios || 0) / hrs : 0;
+    const cob = c.hrs_nec > 0 ? hrs / c.hrs_nec : 1;
+    const el_eff = document.getElementById('sim-eff-' + t);
+    const el_b = document.getElementById('sim-badge-' + t);
+    el_eff.textContent = fmt(eff);
+    el_eff.className = 'sim-eff ' + (cob >= 1 ? 'ok' : cob >= 0.9 ? 'warn' : 'bad');
+    const falta = Math.max(0, (c.hrs_nec || 0) - hrs);
+    if (cob >= 1) {
+      el_b.innerHTML = '<div class="sim-badge ok">✓ alcanza</div>';
+    } else {
+      const cl = cob >= 0.9 ? 'warn' : 'bad';
+      const ic = cob >= 0.9 ? '⚠' : '✕';
+      el_b.innerHTML = `<div class="sim-badge ${cl}">${ic} faltan ${fmt(falta, 1)}h</div>`;
+    }
+  });
+}
+function stepSim(t, d) {
+  const el = document.getElementById('sim-' + t);
+  el.value = Math.max(0, (+el.value || 0) + d);
+  renderSim();
+}
+
+// ── CIERRE ───────────────────────────────────────────
+function calcCierre(t) {
+  const f = +document.getElementById(`cc-folios-${t}`).value || 0;
+  const h = +document.getElementById(`cc-horas-${t}`).value || 0;
+  const eff = h > 0 ? f / h : 0;
+  const proy_eff = S.calc[t]?.eficiencia || 0;
+  const desv = proy_eff > 0 ? ((eff - proy_eff) / proy_eff) * 100 : 0;
+  const el_eff = document.getElementById(`ccr-eff-${t}`);
+  const el_desv = document.getElementById(`ccr-desv-${t}`);
+  el_eff.textContent = h > 0 ? fmt(eff) : '—';
+  el_eff.className = 'ccr-val ' + (eff === 0 ? 'neutral' : eff >= proy_eff ? 'ok' : 'bad');
+  el_desv.textContent = h > 0 ? (desv >= 0 ? '+' : '') + fmt(desv) + '%' : '—';
+  el_desv.className = 'ccr-val ' + (desv >= 0 ? 'ok' : 'bad');
+}
+
+// ── HISTÓRICO RENDER ─────────────────────────────────
+function renderHistorico() {
+  const t = S.turno;
+  const tbody = document.getElementById('hist-tbody');
+  tbody.innerHTML = '';
+  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+  let tot_real = 0, tot_proy = 0, tot_eff = 0, cnt_eff = 0, tot_3ros = 0, cnt_3ros = 0;
+
+  S.historico.forEach(row => {
+    const esHoy = row.fecha === S.fecha;
+    const d = new Date(row.fecha + 'T12:00:00');
+    const dow = dias[d.getDay()];
+    const fmtDate = d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+
+    let proy = 0, real = 0, eff = null, t3 = 0;
+    if (t === 'dia' || t === 'ambos') { proy += row.folios_dia || 0; real += row.folios_real_dia || 0; }
+    if (t === 'noche' || t === 'ambos') { proy += row.folios_noche || 0; real += row.folios_real_noche || 0; }
+    if (t === 'dia') { eff = row.eficiencia_real_dia; t3 = row.terceros_dia || 0; }
+    else if (t === 'noche') { eff = row.eficiencia_real_noche; t3 = row.terceros_noche || 0; }
+    else {
+      eff = row.eff_real_gen;
+      t3 = (row.terceros_dia || 0) + (row.terceros_noche || 0);
+    }
+
+    const desv = proy > 0 && real > 0 ? ((real - proy) / proy) * 100 : null;
+    const dclass = desv == null ? 'fl' : desv >= 0 ? 'up' : 'dn';
+    const dtext = desv == null ? '—' : (desv >= 0 ? '+' : '') + fmt(Math.abs(desv)) + '%';
+
+    if (real > 0) { tot_real += real; }
+    tot_proy += proy;
+    if (eff) { tot_eff += eff; cnt_eff++; }
+    if (t3 > 0) { tot_3ros += t3; cnt_3ros++; }
+
+    tbody.innerHTML += `<tr class="${esHoy ? 'today-row' : ''}">
+      <td><span class="dname">${dow}${esHoy ? ' · hoy' : ''}</span><span class="ddate">${fmtDate}</span></td>
+      <td class="num">${proy > 0 ? fmtInt(proy) : '—'}</td>
+      <td class="num">${real > 0 ? fmtInt(real) : '—'}</td>
+      <td class="num">${eff ? fmt(eff) : '—'}</td>
+      <td class="num"><span class="desv ${dclass}">${dtext}</span></td>
+    </tr>`;
+  });
+
+  // KPIs
+  const eff_prom = cnt_eff > 0 ? tot_eff / cnt_eff : null;
+  const tgt = t === 'dia' ? 15 : t === 'noche' ? 25 : 20;
+  const el_eff = document.getElementById('kpi-eff');
+  el_eff.textContent = eff_prom ? fmt(eff_prom) : '—';
+  el_eff.className = 'kpi-val ' + (eff_prom ? (eff_prom >= tgt ? 'ok' : 'bad') : '');
+  document.getElementById('kpi-eff-sub').textContent = `target ${tgt}`;
+  document.getElementById('kpi-folios').textContent = tot_real > 0 ? fmtInt(tot_real) : '—';
+  document.getElementById('kpi-folios-sub').textContent = `proy ${fmtInt(tot_proy)}`;
+  document.getElementById('kpi-terceros').textContent = cnt_3ros > 0 ? fmt(tot_3ros / cnt_3ros, 1) : '—';
+}
+
+// ── CONFIG RENDER ─────────────────────────────────────
+function renderConfig() {
+  const c = S.config;
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+  set('cfg-pd-s', c.dia_semana?.productividad);
+  set('cfg-pn-s', c.noche_semana?.productividad);
+  set('cfg-pd-f', c.dia_finde?.productividad);
+  set('cfg-pn-f', c.noche_finde?.productividad);
+  set('cfg-sl-d', c.dia_semana?.split_lima);
+  set('cfg-sp-d', c.dia_semana?.split_provincia);
+  set('cfg-sl-n', c.noche_semana?.split_lima);
+  set('cfg-sp-n', c.noche_semana?.split_provincia);
+
+  const tbody = document.getElementById('cfg-flujos-tbody');
+  tbody.innerHTML = '';
+  S.catalogo.forEach(f => {
+    tbody.innerHTML += `<tr>
+      <td class="tag">${f.nombre}</td>
+      <td><span class="pill ${f.turno}">${f.turno === 'dia' ? 'Día' : 'Noche'}</span></td>
+      <td><button class="btn-del" onclick="delCatFlujo(${f.id})">×</button></td>
+    </tr>`;
+  });
+}
+
+// ── DB: CARGAR ────────────────────────────────────────
+async function cargarTodo() {
+  loading(true);
+  try {
+    // Config
+    const { data: cfgData } = await db.from('eo_configuracion').select('*');
+    if (cfgData) {
+      cfgData.forEach(r => {
+        S.config[`${r.turno}_${r.tipo_dia}`] = r;
+      });
+    }
+
+    // Catálogo flujos
+    const { data: catData } = await db.from('eo_flujos').select('*').eq('activo', true).order('nombre');
+    S.catalogo = catData || [];
+
+    await cargarFecha();
+    renderConfig();
+  } catch (e) {
+    toast('Error cargando datos', true);
+    console.error(e);
+  } finally {
+    loading(false);
+  }
+}
+
+async function cargarFecha() {
+  loading(true);
+  try {
+    // Proyección del día
+    const { data: proy } = await db.from('eo_proyecciones')
+      .select('*, eo_proyeccion_flujos(*, eo_flujos(nombre,turno))')
+      .eq('fecha', S.fecha).maybeSingle();
+
+    S.proyeccion = proy;
+    if (proy) {
+      document.getElementById('plan-dia').value = proy.planilla_dia || 0;
+      document.getElementById('plan-noche').value = proy.planilla_noche || 0;
+      S.flujos_hoy = (proy.eo_proyeccion_flujos || []).map(pf => ({
+        id: pf.id, flujo_id: pf.flujo_id,
+        nombre: pf.eo_flujos?.nombre || '—',
+        turno: pf.eo_flujos?.turno || 'noche',
+        folios: pf.folios
+      }));
+    } else {
+      document.getElementById('plan-dia').value = 0;
+      document.getElementById('plan-noche').value = 0;
+      // Default: todos los flujos del catálogo con 0
+      S.flujos_hoy = S.catalogo.map(f => ({
+        flujo_id: f.id, nombre: f.nombre, turno: f.turno, folios: 0
+      }));
+    }
+
+    // Cierre
+    const { data: cierre } = await db.from('eo_cierres')
+      .select('*').eq('fecha', S.fecha).maybeSingle();
+    S.cierre = cierre;
+    if (cierre) {
+      document.getElementById('cc-folios-dia').value = cierre.folios_real_dia || '';
+      document.getElementById('cc-horas-dia').value = cierre.horas_real_dia || '';
+      document.getElementById('cc-folios-noche').value = cierre.folios_real_noche || '';
+      document.getElementById('cc-horas-noche').value = cierre.horas_real_noche || '';
+      calcCierre('dia'); calcCierre('noche');
+    } else {
+      ['cc-folios-dia','cc-horas-dia','cc-folios-noche','cc-horas-noche']
+        .forEach(id => document.getElementById(id).value = '');
+      ['ccr-eff-dia','ccr-desv-dia','ccr-eff-noche','ccr-desv-noche']
+        .forEach(id => { const el=document.getElementById(id); el.textContent='—'; el.className='ccr-val neutral'; });
+    }
+
+    // Histórico (últimos 7 días)
+    const desde = new Date(S.fecha);
+    desde.setDate(desde.getDate() - 6);
+    const { data: hData } = await db.from('eo_proyecciones')
+      .select('fecha,folios_dia,folios_noche,terceros_dia,terceros_noche,eficiencia_esp_dia,eficiencia_esp_noche')
+      .gte('fecha', desde.toLocaleDateString('en-CA'))
+      .lte('fecha', S.fecha)
+      .order('fecha', { ascending: true });
+    const { data: cData } = await db.from('eo_cierres')
+      .select('fecha,folios_real_dia,horas_real_dia,eficiencia_real_dia,folios_real_noche,horas_real_noche,eficiencia_real_noche')
+      .gte('fecha', desde.toLocaleDateString('en-CA'))
+      .lte('fecha', S.fecha);
+
+    const cierresMap = {};
+    (cData || []).forEach(c => { cierresMap[c.fecha] = c; });
+
+    S.historico = (hData || []).map(p => {
+      const c = cierresMap[p.fecha] || {};
+      const tot_hrs = (p.folios_dia||0)+(p.folios_noche||0) > 0
+        ? (p.eficiencia_esp_dia||0)*8 + (p.eficiencia_esp_noche||0)*9.36 : 0;
+      return { ...p, ...c,
+        eff_real_gen: c.horas_real_dia && c.horas_real_noche
+          ? ((c.folios_real_dia||0)+(c.folios_real_noche||0)) / ((c.horas_real_dia||0)+(c.horas_real_noche||0))
+          : null
+      };
+    });
+
+    renderFlujos();
+    renderPlanilla();
+    renderHistorico();
+    recalc();
+  } catch (e) {
+    toast('Error cargando fecha', true);
+    console.error(e);
+  } finally {
+    loading(false);
+  }
+}
+
+// ── DB: GUARDAR ───────────────────────────────────────
+async function guardarPlanilla() {
+  loading(true);
+  try {
+    const pd = +document.getElementById('plan-dia').value || 0;
+    const pn = +document.getElementById('plan-noche').value || 0;
+    await db.from('eo_proyecciones').upsert({
+      fecha: S.fecha, planilla_dia: pd, planilla_noche: pn,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'fecha' });
+    toast('Planilla guardada ✓');
+    recalc();
+  } catch (e) { toast('Error al guardar', true); } finally { loading(false); }
+}
+
+async function guardarProyeccion() {
+  loading(true);
+  try {
+    const { dia, noche } = S.calc;
+    const pd = +document.getElementById('plan-dia').value || 0;
+    const pn = +document.getElementById('plan-noche').value || 0;
+    const cfg_d = getCfg('dia');
+    const cfg_n = getCfg('noche');
+
+    const { data: pRow, error } = await db.from('eo_proyecciones').upsert({
+      fecha: S.fecha,
+      planilla_dia: pd, planilla_noche: pn,
+      folios_dia: dia.folios, folios_noche: noche.folios,
+      split_lima_dia: cfg_d.split_lima, split_lima_noche: cfg_n.split_lima,
+      prod_dia: dia.prod, prod_noche: noche.prod,
+      terceros_dia: dia.terceros, terceros_noche: noche.terceros,
+      eficiencia_esp_dia: dia.eficiencia, eficiencia_esp_noche: noche.eficiencia,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'fecha' }).select().single();
+
+    if (error) throw error;
+
+    // Flujos detalle
+    await db.from('eo_proyeccion_flujos').delete().eq('proyeccion_id', pRow.id);
+    if (S.flujos_hoy.length) {
+      await db.from('eo_proyeccion_flujos').insert(
+        S.flujos_hoy.map(f => ({ proyeccion_id: pRow.id, flujo_id: f.flujo_id, folios: f.folios || 0 }))
+      );
+    }
+    S.proyeccion = pRow;
+    toast('Proyección guardada ✓');
+  } catch (e) { toast('Error al guardar', true); console.error(e); } finally { loading(false); }
+}
+
+async function guardarCierre() {
+  loading(true);
+  try {
+    const fd = +document.getElementById('cc-folios-dia').value || 0;
+    const hd = +document.getElementById('cc-horas-dia').value || 0;
+    const fn = +document.getElementById('cc-folios-noche').value || 0;
+    const hn = +document.getElementById('cc-horas-noche').value || 0;
+    const eff_d = hd > 0 ? fd / hd : null;
+    const eff_n = hn > 0 ? fn / hn : null;
+    const proy_d = S.proyeccion?.eficiencia_esp_dia;
+    const proy_n = S.proyeccion?.eficiencia_esp_noche;
+
+    await db.from('eo_cierres').upsert({
+      fecha: S.fecha,
+      folios_real_dia: fd || null, horas_real_dia: hd || null, eficiencia_real_dia: eff_d,
+      folios_real_noche: fn || null, horas_real_noche: hn || null, eficiencia_real_noche: eff_n,
+      desviacion_dia: proy_d && eff_d ? ((eff_d - proy_d) / proy_d) * 100 : null,
+      desviacion_noche: proy_n && eff_n ? ((eff_n - proy_n) / proy_n) * 100 : null,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'fecha' });
+    toast('Cierre guardado ✓');
+  } catch (e) { toast('Error al guardar', true); } finally { loading(false); }
+}
+
+async function guardarConfig() {
+  loading(true);
+  try {
+    const vals = [
+      { turno:'dia',   tipo_dia:'semana', productividad:+document.getElementById('cfg-pd-s').value, split_lima:+document.getElementById('cfg-sl-d').value, split_provincia:+document.getElementById('cfg-sp-d').value },
+      { turno:'noche', tipo_dia:'semana', productividad:+document.getElementById('cfg-pn-s').value, split_lima:+document.getElementById('cfg-sl-n').value, split_provincia:+document.getElementById('cfg-sp-n').value },
+      { turno:'dia',   tipo_dia:'finde',  productividad:+document.getElementById('cfg-pd-f').value, split_lima:+document.getElementById('cfg-sl-d').value, split_provincia:+document.getElementById('cfg-sp-d').value },
+      { turno:'noche', tipo_dia:'finde',  productividad:+document.getElementById('cfg-pn-f').value, split_lima:+document.getElementById('cfg-sl-n').value, split_provincia:+document.getElementById('cfg-sp-n').value },
+    ];
+    for (const v of vals) {
+      await db.from('eo_configuracion')
+        .update({ productividad: v.productividad, split_lima: v.split_lima, split_provincia: v.split_provincia, updated_at: new Date().toISOString() })
+        .eq('turno', v.turno).eq('tipo_dia', v.tipo_dia);
+      S.config[`${v.turno}_${v.tipo_dia}`] = { ...S.config[`${v.turno}_${v.tipo_dia}`], ...v };
+    }
+    toast('Configuración guardada ✓');
+    recalc();
+  } catch (e) { toast('Error al guardar', true); } finally { loading(false); }
+}
+
+async function addCatFlujo() {
+  const nombre = prompt('Nombre del flujo (ej: FLUJO_E):');
+  if (!nombre) return;
+  const turno = confirm('¿Es turno noche? (Cancelar = día)') ? 'noche' : 'dia';
+  loading(true);
+  try {
+    const { data } = await db.from('eo_flujos').insert({ nombre: nombre.toUpperCase(), turno, activo: true }).select().single();
+    S.catalogo.push(data);
+    renderConfig();
+    toast('Flujo agregado ✓');
+  } catch (e) { toast('Error al agregar', true); } finally { loading(false); }
+}
+
+async function delCatFlujo(id) {
+  if (!confirm('¿Eliminar este flujo del catálogo?')) return;
+  loading(true);
+  try {
+    await db.from('eo_flujos').update({ activo: false }).eq('id', id);
+    S.catalogo = S.catalogo.filter(f => f.id !== id);
+    renderConfig();
+    toast('Flujo eliminado ✓');
+  } catch (e) { toast('Error al eliminar', true); } finally { loading(false); }
+}
+
+// ── NAVEGACIÓN ────────────────────────────────────────
+function showView(id, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('v-' + id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'historico') renderHistorico();
+}
+
+// ── ARRANQUE ──────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const fp = document.getElementById('fecha-picker');
+  fp.value = S.fecha;
+  fp.addEventListener('change', () => {
+    S.fecha = fp.value;
+    cargarFecha();
+  });
+  cargarTodo();
+});
+</script>
+</body>
+</html>
