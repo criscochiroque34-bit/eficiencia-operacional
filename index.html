@@ -10,225 +10,320 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f5f2eb;--paper:#fbf9f3;--ink:#14130f;--soft:#6b6759;
-  --hair:#d8d3c2;--alert:#c4341a;--ok:#2c5530;--warn:#b07d00;
-  --lima:#c08a44;--prov:#4a6a8a;--nav:64px;
+  --bg:#050505;--card:#0f0f0f;--card2:#141414;
+  --border:#1e1e1e;--border2:#2a2a2a;
+  --text:#efefef;--soft:#666;--mid:#999;
+  --noche:#818cf8;--dia:#fbbf24;
+  --ok:#4ade80;--alert:#f87171;--warn:#fb923c;
+  --hero-num:#a78bfa;
+  --nav:64px;
 }
-body{background:var(--bg);color:var(--ink);font-family:'Geist',sans-serif;
-  min-height:100vh;padding-bottom:calc(var(--nav) + 8px);
-  max-width:520px;margin:0 auto;font-size:15px}
+html,body{background:var(--bg);color:var(--text);font-family:'Geist',sans-serif;min-height:100vh}
+body{font-size:15px}
 
-/* HEADER */
-.app-header{padding:16px 16px 0;background:var(--bg);position:sticky;top:0;z-index:10;
-  border-bottom:1px solid var(--hair)}
-.brand{font-family:'Fraunces',serif;font-weight:800;font-size:1.1rem;
-  letter-spacing:-0.02em;margin-bottom:10px}
-.brand .slash{color:var(--alert)}
+/* ── LAYOUT RESPONSIVE ── */
+.app{display:flex;max-width:1100px;margin:0 auto;min-height:100vh}
+.side-nav{display:none}
+.app-main{flex:1;max-width:560px;margin:0 auto;width:100%;padding-bottom:calc(var(--nav) + 10px)}
+
+@media (min-width:900px){
+  .app{gap:24px;padding:0 20px}
+  .side-nav{
+    display:flex;flex-direction:column;width:200px;
+    border-right:1px solid var(--border);padding:20px 12px;
+    position:sticky;top:0;height:100vh;
+  }
+  .bottom-nav{display:none !important}
+  .app-main{margin:0;max-width:none;padding-bottom:20px}
+}
+
+/* ── SIDE NAV (desktop) ── */
+.side-brand{
+  font-family:'Fraunces',serif;font-weight:800;font-size:1.05rem;
+  letter-spacing:-0.02em;margin-bottom:24px;padding:8px;
+  background:linear-gradient(90deg,var(--noche),var(--hero-num));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.side-nav .nav-link{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;
+  background:transparent;border:0;color:var(--soft);cursor:pointer;
+  font-family:'Geist',sans-serif;font-size:0.85rem;font-weight:500;
+  text-align:left;border-radius:6px;margin-bottom:3px;transition:all .15s;
+}
+.side-nav .nav-link:hover{background:var(--card)}
+.side-nav .nav-link.active{background:rgba(129,140,248,0.12);color:var(--noche)}
+.side-nav .nav-link .ico{font-size:1.15rem}
+
+/* ── HEADER ── */
+.app-header{
+  padding:16px 16px 0;background:var(--bg);
+  position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);
+}
+@media(min-width:900px){.app-header{padding:24px 0 0;border-bottom:1px solid var(--border)}}
+.brand-mobile{
+  font-family:'Fraunces',serif;font-weight:800;font-size:1.1rem;
+  letter-spacing:-0.02em;margin-bottom:10px;
+  background:linear-gradient(90deg,var(--noche),var(--hero-num));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+@media(min-width:900px){.brand-mobile{display:none}}
 .header-controls{display:flex;gap:8px;align-items:center;padding-bottom:12px;flex-wrap:wrap}
-.header-controls input[type="date"]{border:1px solid var(--ink);background:var(--paper);
-  padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--ink);flex:1}
-.turno-tabs{display:flex;border:1px solid var(--ink);overflow:hidden}
-.turno-tabs button{border:0;background:var(--paper);padding:7px 11px;
-  font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;
-  letter-spacing:0.06em;cursor:pointer;color:var(--soft);border-right:1px solid var(--ink)}
+.header-controls input[type="date"]{
+  background:var(--card);border:1px solid var(--border2);
+  padding:7px 10px;font-family:'JetBrains Mono',monospace;
+  font-size:0.8rem;color:var(--text);flex:1;color-scheme:dark;
+}
+.turno-tabs{display:flex;border:1px solid var(--border2);overflow:hidden}
+.turno-tabs button{
+  border:0;background:var(--card);padding:7px 11px;
+  font-family:'JetBrains Mono',monospace;font-size:0.68rem;
+  text-transform:uppercase;letter-spacing:0.06em;
+  cursor:pointer;color:var(--soft);
+  border-right:1px solid var(--border2);transition:all .15s;
+}
 .turno-tabs button:last-child{border-right:0}
-.turno-tabs button.active{background:var(--ink);color:var(--paper)}
+.turno-tabs button.active.t-noche{background:var(--noche);color:#000;font-weight:700}
+.turno-tabs button.active.t-dia{background:var(--dia);color:#000;font-weight:700}
+.turno-tabs button.active.t-ambos{background:var(--border2);color:var(--text);font-weight:700}
 
-/* VIEWS */
+/* ── VIEWS ── */
 .view{display:none;padding:18px 16px 24px}
+@media(min-width:900px){.view{padding:24px 0}}
 .view.active{display:block}
 
-/* NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);
-  background:var(--paper);border-top:1.5px solid var(--ink);
-  display:flex;max-width:520px;margin:0 auto}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:3px;cursor:pointer;border:0;background:transparent;
-  color:var(--soft);font-size:0.58rem;text-transform:uppercase;letter-spacing:0.08em;
-  font-family:'Geist',sans-serif;font-weight:500;transition:color .15s}
-.nav-btn .ico{font-size:1.25rem;line-height:1}
-.nav-btn.active{color:var(--ink);background:var(--bg)}
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;height:var(--nav);
+  background:var(--card);border-top:1px solid var(--border2);
+  display:flex;max-width:560px;margin:0 auto;z-index:20;
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;border:0;background:transparent;color:var(--soft);
+  font-size:0.58rem;text-transform:uppercase;letter-spacing:0.08em;
+  font-family:'Geist',sans-serif;font-weight:500;transition:all .15s;
+}
+.nav-btn .ico{font-size:1.2rem;line-height:1}
+.nav-btn.active{color:var(--noche);background:rgba(129,140,248,0.08)}
 
-/* UTILS */
-.sec-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem;
-  margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline}
+/* ── UTILS ── */
+.sec-title{
+  font-family:'Fraunces',serif;font-weight:600;font-size:1rem;
+  margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline;
+}
 .sec-title .hint{font-size:0.68rem;color:var(--soft);font-weight:400;font-style:italic}
-.divider{border:0;height:1px;background:var(--hair);margin:22px 0}
-.pill{display:inline-block;padding:1px 7px;border:1px solid var(--ink);
-  font-size:0.65rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
-.pill.dia{background:#fff4d4}
-.pill.noche{background:var(--ink);color:var(--paper)}
-.btn-primary{width:100%;background:var(--ink);color:var(--paper);border:0;
-  padding:14px;font-family:'Fraunces',serif;font-size:1rem;font-weight:600;cursor:pointer}
-.btn-primary:hover{opacity:.9}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.btn-add{width:100%;border:1px dashed var(--soft);background:transparent;padding:10px;
-  font-family:'JetBrains Mono',monospace;font-size:0.72rem;text-transform:uppercase;
-  letter-spacing:0.1em;cursor:pointer;color:var(--ink);margin-top:8px}
-.btn-add:hover{background:var(--ink);color:var(--paper);border-style:solid}
-.btn-del{background:transparent;border:1px solid var(--hair);width:22px;height:22px;
-  cursor:pointer;font-size:0.8rem;color:var(--soft);line-height:1}
-.btn-del:hover{background:var(--alert);color:white;border-color:var(--alert)}
+.divider{border:0;height:1px;background:var(--border);margin:22px 0}
+.pill{
+  display:inline-block;padding:2px 8px;font-size:0.65rem;
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+  letter-spacing:0.05em;font-weight:700;border-radius:2px;
+}
+.pill.dia{background:rgba(251,191,36,0.15);color:var(--dia);border:1px solid rgba(251,191,36,0.3)}
+.pill.noche{background:rgba(129,140,248,0.15);color:var(--noche);border:1px solid rgba(129,140,248,0.3)}
+.btn-primary{
+  width:100%;background:linear-gradient(135deg,var(--noche),#6366f1);color:#fff;
+  border:0;padding:14px;font-family:'Fraunces',serif;font-size:1rem;
+  font-weight:600;cursor:pointer;letter-spacing:-0.01em;transition:opacity .15s;
+}
+.btn-primary:hover{opacity:.85}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
 
-/* TOAST */
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);
-  background:var(--ink);color:var(--paper);padding:10px 20px;
+/* ── TOAST / LOADING ── */
+.toast{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%);
+  background:var(--card2);color:var(--text);padding:10px 20px;
   font-family:'JetBrains Mono',monospace;font-size:0.78rem;z-index:999;
-  opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+  opacity:0;transition:opacity .3s;pointer-events:none;
+  border:1px solid var(--border2);white-space:nowrap;
+}
 .toast.show{opacity:1}
-.toast.error{background:var(--alert)}
-
-/* LOADING */
-.loading-overlay{display:none;position:fixed;inset:0;background:rgba(245,242,235,.8);
-  align-items:center;justify-content:center;z-index:50;font-family:'Fraunces',serif;
-  font-size:1.2rem;font-weight:600}
+.toast.ok{border-color:var(--ok);color:var(--ok)}
+.toast.error{border-color:var(--alert);color:var(--alert)}
+.loading-overlay{
+  display:none;position:fixed;inset:0;background:rgba(5,5,5,0.85);
+  align-items:center;justify-content:center;z-index:50;
+  font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;color:var(--noche);
+}
 .loading-overlay.active{display:flex}
 
-/* HERO */
-.hero{background:var(--ink);color:var(--paper);padding:20px;margin-bottom:18px}
-.hero-eye{font-family:'JetBrains Mono',monospace;font-size:0.62rem;text-transform:uppercase;
-  letter-spacing:0.14em;color:rgba(251,249,243,.5);margin-bottom:10px}
+/* ══ HERO ══ */
+.hero{
+  background:var(--card);border:1px solid var(--border2);
+  padding:22px 20px;margin-bottom:20px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle,rgba(129,140,248,0.12),transparent 70%);
+  pointer-events:none;
+}
+.hero-eye{
+  font-family:'JetBrains Mono',monospace;font-size:0.62rem;
+  text-transform:uppercase;letter-spacing:0.14em;color:var(--soft);margin-bottom:12px;
+}
 .hero-main{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.hero-num{font-family:'Fraunces',serif;font-weight:800;font-size:3.8rem;
-  line-height:.9;color:#ffb89a;letter-spacing:-0.04em}
-.hero-text{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:400}
-.hero-foot{border-top:1px solid rgba(255,255,255,.12);margin-top:14px;padding-top:12px;
+.hero-num{
+  font-family:'Fraunces',serif;font-weight:800;font-size:4.2rem;
+  line-height:0.9;color:var(--hero-num);letter-spacing:-0.04em;
+}
+.hero-text{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:400;color:var(--mid)}
+.hero-foot{
+  border-top:1px solid var(--border);margin-top:16px;padding-top:14px;
   display:grid;grid-template-columns:1fr 1fr;gap:10px;
-  font-family:'JetBrains Mono',monospace;font-size:0.72rem}
-.hero-foot .lbl{color:rgba(251,249,243,.55);display:block;margin-bottom:3px}
-.hero-foot .val{font-weight:700;font-size:.88rem}
-.hero-foot .eff{color:#a8d4a8}
+  font-family:'JetBrains Mono',monospace;font-size:0.72rem;
+}
+.hero-foot .lbl{color:var(--soft);display:block;margin-bottom:3px}
+.hero-foot .val{font-weight:700;font-size:0.9rem;color:var(--text)}
+.hero-foot .eff{color:var(--ok)}
 
-/* TURN CARDS */
+/* ── INPUT TOTAL ── */
+.total-input-wrap{background:var(--card);border:1px solid var(--border2);padding:20px;margin-bottom:20px}
+.total-input-wrap label{
+  display:block;font-family:'JetBrains Mono',monospace;font-size:0.65rem;
+  text-transform:uppercase;letter-spacing:0.12em;color:var(--soft);margin-bottom:10px;
+}
+.total-input-big{display:flex;align-items:center;gap:10px}
+.total-input-big input{
+  flex:1;background:var(--card2);border:1px solid var(--border2);padding:14px 16px;
+  font-family:'Fraunces',serif;font-size:2.4rem;font-weight:800;color:var(--text);
+  text-align:center;letter-spacing:-0.03em;transition:border-color .2s;
+}
+.total-input-big input:focus{outline:0;border-color:var(--noche)}
+.total-unit{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--soft);white-space:nowrap}
+
+/* ── SPLIT PCT ── */
+.split-pct{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.split-pct-card{background:var(--card2);border:1px solid var(--border);padding:12px}
+.split-pct-card.dia-card{border-color:rgba(251,191,36,0.4)}
+.split-pct-card.noche-card{border-color:rgba(129,140,248,0.4)}
+.spc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.spc-hint{font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--soft);font-style:italic}
+.spc-pct-row{display:flex;align-items:center;gap:6px}
+.spc-pct-row input{
+  flex:1;background:transparent;border:0;border-bottom:1px solid var(--border2);
+  font-family:'Fraunces',serif;font-size:1.8rem;font-weight:800;
+  color:var(--text);text-align:right;padding:2px 0;
+}
+.spc-pct-row input.dia-val{color:var(--dia)}
+.spc-pct-row input.noche-val{color:var(--noche)}
+.spc-pct-row input:focus{outline:0;border-bottom-color:var(--noche)}
+.spc-sym{font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:var(--soft);font-weight:700}
+.spc-folios{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--mid);margin-top:6px}
+.spc-folios strong{color:var(--text)}
+
+/* ── TURN CARDS ── */
 .turn-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
-.tc{background:var(--paper);border:1px solid var(--hair);padding:14px 12px}
-.tc-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);
-  margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.tc-big{font-family:'Fraunces',serif;font-weight:700;font-size:1.9rem;
-  line-height:1;letter-spacing:-0.03em}
+.tc{background:var(--card);border:1px solid var(--border2);padding:14px 12px;transition:border-color .2s}
+.tc.tc-dia:hover{border-color:rgba(251,191,36,0.3)}
+.tc.tc-noche:hover{border-color:rgba(129,140,248,0.3)}
+.tc-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:8px}
+.tc-big{font-family:'Fraunces',serif;font-weight:700;font-size:1.9rem;line-height:1;letter-spacing:-0.03em}
+.tc-big.dia{color:var(--dia)}.tc-big.noche{color:var(--noche)}
 .tc-sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft);margin-top:3px}
-.tc-sep{height:1px;background:var(--hair);margin:10px 0}
+.tc-sep{height:1px;background:var(--border);margin:10px 0}
 .tc-eff-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:2px}
-.tc-eff-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.15rem;letter-spacing:-0.02em}
+.tc-eff-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.2rem;letter-spacing:-0.02em;color:var(--ok)}
 .tc-eff-tgt{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--soft)}
 
-/* FLUJOS TABLE */
-.tbl{width:100%;border-collapse:collapse}
-.tbl th{text-align:left;padding:0 8px 8px;font-size:.6rem;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--soft);border-bottom:1px solid var(--hair)}
-.tbl td{padding:11px 8px;border-bottom:1px solid var(--hair);font-size:.85rem}
-.tbl td.num{text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600}
-.tbl td.tag{font-family:'JetBrains Mono',monospace;font-size:.78rem}
-.tbl .tfoot td{border-top:1px solid var(--ink);border-bottom:0;font-weight:700;
-  font-family:'Fraunces',serif;font-size:.92rem;padding-top:12px}
-.tbl td input.inline-num{border:0;border-bottom:1px solid var(--hair);background:transparent;
-  font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.85rem;
-  text-align:right;width:80px;padding:2px 4px}
-.tbl td input.inline-num:focus{outline:0;border-bottom-color:var(--ink)}
-
-/* SIMULADOR */
+/* ── SIMULADOR ── */
 .sim-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-.sim-field label{display:block;font-size:.6rem;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--soft);margin-bottom:6px}
-.stepper{display:flex;border:1px solid var(--ink)}
-.stepper button{width:38px;border:0;background:var(--paper);font-family:'JetBrains Mono',monospace;
-  font-size:1.1rem;font-weight:700;cursor:pointer;color:var(--ink)}
-.stepper button:hover{background:var(--ink);color:var(--paper)}
-.stepper input{flex:1;border:0;border-left:1px solid var(--ink);border-right:1px solid var(--ink);
-  background:white;font-family:'JetBrains Mono',monospace;font-size:1rem;
-  font-weight:700;text-align:center;padding:8px 4px;width:0}
-.sim-recom{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--soft);margin-top:5px}
+.sim-field label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:6px}
+.stepper{display:flex;border:1px solid var(--border2);background:var(--card)}
+.stepper button{width:38px;border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;cursor:pointer;color:var(--soft);transition:all .15s}
+.stepper button:hover{background:var(--noche);color:#000}
+.stepper input{flex:1;border:0;border-left:1px solid var(--border2);border-right:1px solid var(--border2);background:var(--card2);font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;text-align:center;padding:8px 4px;color:var(--text);width:0}
+.sim-recom{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft);margin-top:5px}
 .sim-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.sim-card{background:var(--paper);border:1px solid var(--hair);padding:14px 12px}
-.sim-card-t{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;
-  color:var(--soft);margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.sim-eff{font-family:'Fraunces',serif;font-weight:800;font-size:2.2rem;
-  letter-spacing:-0.04em;line-height:1}
+.sim-card{background:var(--card);border:1px solid var(--border2);padding:14px 12px}
+.sim-card-t{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.sim-eff{font-family:'Fraunces',serif;font-weight:800;font-size:2.2rem;letter-spacing:-0.04em;line-height:1}
 .sim-eff.ok{color:var(--ok)}.sim-eff.warn{color:var(--warn)}.sim-eff.bad{color:var(--alert)}
 .sim-unit{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft);margin-top:3px}
-.sim-badge{display:inline-block;margin-top:8px;padding:3px 8px;
-  font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;border:1px solid}
-.sim-badge.ok{background:#e2ebe1;color:var(--ok);border-color:var(--ok)}
-.sim-badge.warn{background:#fff4d4;color:var(--warn);border-color:var(--warn)}
-.sim-badge.bad{background:#fde8e3;color:var(--alert);border-color:var(--alert)}
+.sim-badge{display:inline-block;margin-top:8px;padding:3px 8px;font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;border:1px solid;border-radius:2px}
+.sim-badge.ok{background:rgba(74,222,128,.1);color:var(--ok);border-color:rgba(74,222,128,.3)}
+.sim-badge.warn{background:rgba(251,146,60,.1);color:var(--warn);border-color:rgba(251,146,60,.3)}
+.sim-badge.bad{background:rgba(248,113,113,.1);color:var(--alert);border-color:rgba(248,113,113,.3)}
 
-/* PLANILLA */
-.plan-card{background:var(--paper);border:1px solid var(--hair);padding:18px;margin-bottom:14px}
+/* ── PLANILLA ── */
+.plan-card{background:var(--card);border:1px solid var(--border2);padding:18px;margin-bottom:14px}
 .plan-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .plan-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem}
-.plan-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);
-  margin-bottom:7px;display:block}
-.plan-stepper{display:flex;border:1px solid var(--ink);margin-bottom:12px}
-.plan-stepper button{width:44px;border:0;background:var(--paper);font-size:1.2rem;
-  font-weight:700;cursor:pointer;color:var(--ink)}
-.plan-stepper button:hover{background:var(--ink);color:var(--paper)}
-.plan-stepper input{flex:1;border:0;border-left:1px solid var(--ink);
-  border-right:1px solid var(--ink);padding:12px 8px;font-family:'Fraunces',serif;
-  font-size:2rem;font-weight:700;text-align:center;background:white}
-.plan-calc{background:var(--bg);padding:10px 12px;font-family:'JetBrains Mono',monospace;
-  font-size:.78rem;color:var(--soft)}
-.plan-calc strong{color:var(--ink);font-size:.88rem}
-.plan-total{background:var(--ink);color:var(--paper);padding:12px 16px;margin-top:4px;
-  font-family:'JetBrains Mono',monospace;font-size:.8rem;display:flex;justify-content:space-between}
-.plan-total strong{font-family:'Fraunces',serif;font-size:1.1rem}
+.plan-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:7px;display:block}
+.plan-stepper{display:flex;border:1px solid var(--border2);margin-bottom:12px;background:var(--card2)}
+.plan-stepper button{width:44px;border:0;background:transparent;font-size:1.2rem;font-weight:700;cursor:pointer;color:var(--soft);transition:all .15s}
+.plan-stepper button:hover{background:var(--noche);color:#000}
+.plan-stepper input{flex:1;border:0;border-left:1px solid var(--border2);border-right:1px solid var(--border2);padding:12px 8px;font-family:'Fraunces',serif;font-size:2rem;font-weight:700;text-align:center;background:transparent;color:var(--text)}
+.plan-calc{background:var(--card2);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--soft)}
+.plan-calc strong{color:var(--ok);font-size:.88rem}
+.plan-total{background:linear-gradient(135deg,rgba(129,140,248,.15),rgba(167,139,250,.1));border:1px solid rgba(129,140,248,.3);padding:14px 16px;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:.82rem;display:flex;justify-content:space-between;align-items:center;color:var(--mid)}
+.plan-total strong{font-family:'Fraunces',serif;font-size:1.2rem;color:var(--noche)}
 
-/* CIERRE */
-.cierre-card{background:var(--paper);border:1px solid var(--hair);padding:18px;margin-bottom:14px}
+/* ── CIERRE ── */
+.cierre-card{background:var(--card);border:1px solid var(--border2);padding:18px;margin-bottom:14px}
 .cc-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .cc-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem}
-.cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.cc-field label{display:block;font-size:.6rem;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--soft);margin-bottom:6px}
-.cc-field input{width:100%;border:1px solid var(--ink);background:white;
-  padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700}
-.cc-result{background:var(--bg);padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.ccr-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);
-  display:block;margin-bottom:3px}
+.cc-section-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.cc-section-lbl:first-of-type{margin-top:0}
+.cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cc-field label{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:5px}
+.cc-field input{width:100%;background:var(--card2);border:1px solid var(--border2);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;color:var(--text);transition:border-color .2s}
+.cc-field input:focus{outline:0;border-color:var(--noche)}
+.cc-result{background:var(--card2);padding:12px;margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;border:1px solid var(--border)}
+.ccr-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);display:block;margin-bottom:3px}
 .ccr-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.4rem;letter-spacing:-0.02em}
-.ccr-val.ok{color:var(--ok)}.ccr-val.bad{color:var(--alert)}.ccr-val.neutral{color:var(--ink)}
+.ccr-val.ok{color:var(--ok)}.ccr-val.bad{color:var(--alert)}.ccr-val.neutral{color:var(--mid)}
+.cc-totales{background:linear-gradient(135deg,rgba(129,140,248,.08),rgba(167,139,250,.05));border:1px solid rgba(129,140,248,.2);padding:14px 16px;margin-bottom:14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--mid)}
+.cc-totales-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.cc-totales-row:last-child{margin-bottom:0}
+.cc-totales-row strong{font-family:'Fraunces',serif;font-size:1.05rem;color:var(--noche)}
 
-/* HISTORICO */
+/* ── HISTÓRICO ── */
 .kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-.kpi{background:var(--paper);border:1px solid var(--hair);padding:12px}
+.kpi{background:var(--card);border:1px solid var(--border2);padding:12px}
 .kpi-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:4px}
-.kpi-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.4rem;
-  line-height:1;letter-spacing:-0.03em}
-.kpi-val.ok{color:var(--ok)}.kpi-val.bad{color:var(--alert)}
+.kpi-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.4rem;line-height:1;letter-spacing:-0.03em}
+.kpi-val.ok{color:var(--ok)}.kpi-val.bad{color:var(--alert)}.kpi-val.neutral{color:var(--text)}
 .kpi-sub{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--soft);margin-top:3px}
+
+/* CHARTS */
+.chart-wrap{background:var(--card);border:1px solid var(--border2);padding:14px;margin-bottom:16px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.chart-title{font-family:'Fraunces',serif;font-weight:600;font-size:.95rem}
+.chart-legend{display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--soft);flex-wrap:wrap}
+.lg-item{display:flex;align-items:center;gap:6px}
+.lg-dot{width:9px;height:9px;border-radius:2px}
+.lg-dot.dia{background:var(--dia)}
+.lg-dot.noche{background:var(--noche)}
+.lg-line{width:14px;height:2px;background:currentColor;opacity:.6}
+.chart-svg{width:100%;height:auto;display:block}
+
+/* TABLA HIST */
 .hist-tbl{width:100%;border-collapse:collapse}
-.hist-tbl th{text-align:left;padding:0 6px 8px;font-size:.58rem;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--soft);border-bottom:1px solid var(--hair)}
+.hist-tbl th{text-align:left;padding:0 6px 8px;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);border-bottom:1px solid var(--border)}
 .hist-tbl th.num,.hist-tbl td.num{text-align:right;font-family:'JetBrains Mono',monospace}
-.hist-tbl td{padding:10px 6px;border-bottom:1px solid var(--hair);font-size:.8rem}
-.hist-tbl .today-row td{font-weight:700;background:#fff9ee}
-.dname{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.75rem;
-  text-transform:uppercase;display:block}
+.hist-tbl td{padding:11px 6px;border-bottom:1px solid var(--border);font-size:.8rem}
+.hist-tbl .today-row td{color:var(--noche);font-weight:600}
+.hist-tbl .today-row{background:rgba(129,140,248,.05)}
+.dname{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.75rem;text-transform:uppercase;display:block}
 .ddate{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft)}
 .desv{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.75rem}
 .desv.up{color:var(--ok)}.desv.dn{color:var(--alert)}.desv.fl{color:var(--soft)}
 
-/* CONFIG */
+/* ── CONFIG ── */
 .cfg-block{margin-bottom:26px}
-.cfg-block-t{font-family:'Fraunces',serif;font-weight:600;font-size:.88rem;color:var(--soft);
-  text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;padding-bottom:8px;
-  border-bottom:1px solid var(--hair)}
+.cfg-block-t{font-family:'Fraunces',serif;font-weight:600;font-size:.88rem;color:var(--mid);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cf label{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;
-  color:var(--soft);margin-bottom:5px}
-.cf input,.cf select{width:100%;border:1px solid var(--hair);background:white;
-  padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}
+.cf label{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:5px}
+.cf input{width:100%;background:var(--card2);border:1px solid var(--border2);padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600;color:var(--text)}
+.cf input:focus{outline:0;border-color:var(--noche)}
 .cf .sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft);margin-top:3px}
-.split-cfg-row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
-.split-cfg-row .slbl{font-size:.78rem;font-weight:600;min-width:58px;
-  display:flex;align-items:center;gap:6px}
-.split-inp{flex:1;background:white;border:1px solid var(--hair);
-  padding:8px 10px;display:flex;align-items:center;gap:5px}
-.split-inp.lm{border-left:3px solid var(--lima)}
-.split-inp.pr{border-left:3px solid var(--prov)}
-.split-inp label{font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--soft);white-space:nowrap}
-.split-inp input{border:0;background:transparent;font-family:'JetBrains Mono',monospace;
-  font-size:.9rem;font-weight:700;width:100%;text-align:right}
-.split-inp span{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--soft)}
+
+/* Desktop adjustments */
+@media (min-width:900px) {
+  .turn-cards{grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .turn-cards .third-col{display:block}
+  .chart-svg{max-height:280px}
+}
 </style>
 </head>
 <body>
@@ -236,830 +331,906 @@ body{background:var(--bg);color:var(--ink);font-family:'Geist',sans-serif;
 <div class="loading-overlay" id="loader">Cargando…</div>
 <div class="toast" id="toast"></div>
 
-<!-- HEADER -->
-<div class="app-header">
-  <div class="brand">EO<span class="slash">/</span>Eficiencia Operacional</div>
-  <div class="header-controls">
-    <input type="date" id="fecha-picker">
-    <div class="turno-tabs">
-      <button class="active" data-t="noche" onclick="setTurno('noche',this)">Noche</button>
-      <button data-t="dia" onclick="setTurno('dia',this)">Día</button>
-      <button data-t="ambos" onclick="setTurno('ambos',this)">Ambos</button>
-    </div>
-  </div>
-</div>
+<div class="app">
 
-<!-- ══ VISTA 1: PROYECCIÓN ══ -->
-<div class="view active" id="v-proyeccion">
-  <!-- Hero -->
-  <div class="hero" id="hero-box">
-    <div class="hero-eye">Recomendación del sistema</div>
-    <div class="hero-main">
-      <span class="hero-num" id="h-terceros">—</span>
-      <span class="hero-text">terceros hoy</span>
-    </div>
-    <div class="hero-foot">
-      <div><span class="lbl">Distribución</span><span class="val" id="h-dist">— día · — noche</span></div>
-      <div><span class="lbl">Eficiencia esp.</span><span class="val eff" id="h-eff">— fol/h</span></div>
-    </div>
-  </div>
+  <!-- SIDE NAV (desktop only) -->
+  <aside class="side-nav">
+    <div class="side-brand">EO / Eficiencia Operacional</div>
+    <button class="nav-link active" data-view="proyeccion" onclick="showView('proyeccion',this)"><span class="ico">📊</span>Proyección</button>
+    <button class="nav-link" data-view="planilla" onclick="showView('planilla',this)"><span class="ico">👥</span>Planilla</button>
+    <button class="nav-link" data-view="cierre" onclick="showView('cierre',this)"><span class="ico">✅</span>Cierre</button>
+    <button class="nav-link" data-view="historico" onclick="showView('historico',this)"><span class="ico">📈</span>Histórico</button>
+    <button class="nav-link" data-view="config" onclick="showView('config',this)"><span class="ico">⚙️</span>Config</button>
+  </aside>
 
-  <!-- Cards por turno -->
-  <div class="sec-title">Por turno <span class="hint">calculado</span></div>
-  <div class="turn-cards" id="turn-cards">
-    <div class="tc" id="tc-dia">
-      <div class="tc-lbl"><span class="pill dia">Día</span></div>
-      <div class="tc-big" id="tc-dia-folios">—</div>
-      <div class="tc-sub" id="tc-dia-sub">— terceros</div>
-      <div class="tc-sep"></div>
-      <div class="tc-eff-lbl">Eficiencia esp.</div>
-      <div class="tc-eff-val" id="tc-dia-eff">—</div>
-      <div class="tc-eff-tgt">target <span id="tc-dia-tgt">—</span> fol/h</div>
-    </div>
-    <div class="tc" id="tc-noche">
-      <div class="tc-lbl"><span class="pill noche">Noche</span></div>
-      <div class="tc-big" id="tc-noche-folios">—</div>
-      <div class="tc-sub" id="tc-noche-sub">— terceros</div>
-      <div class="tc-sep"></div>
-      <div class="tc-eff-lbl">Eficiencia esp.</div>
-      <div class="tc-eff-val" id="tc-noche-eff">—</div>
-      <div class="tc-eff-tgt">target <span id="tc-noche-tgt">—</span> fol/h</div>
-    </div>
-  </div>
+  <!-- MAIN -->
+  <main class="app-main">
 
-  <hr class="divider">
-
-  <!-- Flujos -->
-  <div class="sec-title">Flujos del día <span class="hint">editable</span></div>
-  <table class="tbl">
-    <thead><tr><th>Flujo</th><th>Turno</th><th class="num">Folios</th><th></th></tr></thead>
-    <tbody id="flujos-tbody"></tbody>
-    <tfoot>
-      <tr class="tfoot">
-        <td colspan="2">Total</td>
-        <td class="num" id="flujos-total">0</td>
-        <td></td>
-      </tr>
-    </tfoot>
-  </table>
-  <button class="btn-add" onclick="addFlujoRow()">＋ Agregar flujo</button>
-
-  <hr class="divider">
-
-  <!-- Simulador -->
-  <div class="sec-title">Simulador <span class="hint">¿qué pasa si…?</span></div>
-  <div class="sim-row">
-    <div class="sim-field">
-      <label><span class="pill dia">Día</span> Terceros</label>
-      <div class="stepper">
-        <button onclick="stepSim('dia',-1)">−</button>
-        <input type="number" id="sim-dia" value="0" oninput="renderSim()">
-        <button onclick="stepSim('dia',1)">+</button>
-      </div>
-      <div class="sim-recom" id="sim-dia-recom">recomendado: —</div>
-    </div>
-    <div class="sim-field">
-      <label><span class="pill noche">Noche</span> Terceros</label>
-      <div class="stepper">
-        <button onclick="stepSim('noche',-1)">−</button>
-        <input type="number" id="sim-noche" value="0" oninput="renderSim()">
-        <button onclick="stepSim('noche',1)">+</button>
-      </div>
-      <div class="sim-recom" id="sim-noche-recom">recomendado: —</div>
-    </div>
-  </div>
-  <div class="sim-cards">
-    <div class="sim-card">
-      <div class="sim-card-t"><span class="pill dia">Día</span></div>
-      <div class="sim-eff" id="sim-eff-dia">—</div>
-      <div class="sim-unit">folios / hora</div>
-      <div id="sim-badge-dia"></div>
-    </div>
-    <div class="sim-card">
-      <div class="sim-card-t"><span class="pill noche">Noche</span></div>
-      <div class="sim-eff" id="sim-eff-noche">—</div>
-      <div class="sim-unit">folios / hora</div>
-      <div id="sim-badge-noche"></div>
-    </div>
-  </div>
-
-  <div style="margin-top:20px">
-    <button class="btn-primary" onclick="guardarProyeccion()">Guardar proyección →</button>
-  </div>
-</div>
-
-<!-- ══ VISTA 2: PLANILLA ══ -->
-<div class="view" id="v-planilla">
-  <div class="sec-title" style="margin-bottom:18px">Planilla disponible hoy <span class="hint">ingresa las personas</span></div>
-
-  <div class="plan-card" id="plan-card-dia">
-    <div class="plan-head">
-      <span class="pill dia">Día</span>
-      <div class="plan-title">Turno Día</div>
-    </div>
-    <span class="plan-lbl">Personas de planilla</span>
-    <div class="plan-stepper">
-      <button onclick="stepPlan('dia',-1)">−</button>
-      <input type="number" id="plan-dia" value="0" oninput="renderPlanilla()">
-      <button onclick="stepPlan('dia',1)">+</button>
-    </div>
-    <div class="plan-calc">
-      Jornada: <strong>8h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-dia-hrs">0h</strong>
-    </div>
-  </div>
-
-  <div class="plan-card" id="plan-card-noche">
-    <div class="plan-head">
-      <span class="pill noche">Noche</span>
-      <div class="plan-title">Turno Noche</div>
-    </div>
-    <span class="plan-lbl">Personas de planilla</span>
-    <div class="plan-stepper">
-      <button onclick="stepPlan('noche',-1)">−</button>
-      <input type="number" id="plan-noche" value="0" oninput="renderPlanilla()">
-      <button onclick="stepPlan('noche',1)">+</button>
-    </div>
-    <div class="plan-calc">
-      Jornada: <strong>9.36h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-noche-hrs">0h</strong>
-    </div>
-  </div>
-
-  <div class="plan-total">
-    <span>Total horas planilla hoy</span>
-    <strong id="plan-total-hrs">0h</strong>
-  </div>
-
-  <div style="margin-top:16px">
-    <button class="btn-primary" onclick="guardarPlanilla()">Guardar planilla →</button>
-  </div>
-</div>
-
-<!-- ══ VISTA 3: CIERRE ══ -->
-<div class="view" id="v-cierre">
-  <div class="sec-title" style="margin-bottom:18px">Cierre del día <span class="hint">ingresa los reales</span></div>
-
-  <div class="cierre-card" id="cc-dia">
-    <div class="cc-head"><span class="pill dia">Día</span><div class="cc-title">Turno Día</div></div>
-    <div class="cc-grid">
-      <div class="cc-field">
-        <label>Folios despachados</label>
-        <input type="number" id="cc-folios-dia" placeholder="0" oninput="calcCierre('dia')">
-      </div>
-      <div class="cc-field">
-        <label>Horas trabajadas</label>
-        <input type="number" id="cc-horas-dia" placeholder="0.0" step="0.1" oninput="calcCierre('dia')">
+    <!-- HEADER -->
+    <div class="app-header">
+      <div class="brand-mobile">EO / Eficiencia Operacional</div>
+      <div class="header-controls">
+        <input type="date" id="fecha-picker">
+        <div class="turno-tabs">
+          <button class="active t-noche" data-t="noche" onclick="setTurno('noche',this)">Noche</button>
+          <button class="t-dia" data-t="dia" onclick="setTurno('dia',this)">Día</button>
+          <button class="t-ambos" data-t="ambos" onclick="setTurno('ambos',this)">Ambos</button>
+        </div>
       </div>
     </div>
-    <div class="cc-result">
-      <div><span class="ccr-lbl">Eficiencia real</span><div class="ccr-val neutral" id="ccr-eff-dia">—</div></div>
-      <div><span class="ccr-lbl">Vs proyectado</span><div class="ccr-val neutral" id="ccr-desv-dia">—</div></div>
-    </div>
-  </div>
 
-  <div class="cierre-card" id="cc-noche">
-    <div class="cc-head"><span class="pill noche">Noche</span><div class="cc-title">Turno Noche</div></div>
-    <div class="cc-grid">
-      <div class="cc-field">
-        <label>Folios despachados</label>
-        <input type="number" id="cc-folios-noche" placeholder="0" oninput="calcCierre('noche')">
+    <!-- ══ V1: PROYECCIÓN ══ -->
+    <div class="view active" id="v-proyeccion">
+      <div class="hero">
+        <div class="hero-eye">Recomendación del sistema</div>
+        <div class="hero-main">
+          <span class="hero-num" id="h-terceros">—</span>
+          <span class="hero-text">terceros hoy</span>
+        </div>
+        <div class="hero-foot">
+          <div><span class="lbl">Distribución</span><span class="val" id="h-dist">— día · — noche</span></div>
+          <div><span class="lbl">Eficiencia esp.</span><span class="val eff" id="h-eff">— fol/h</span></div>
+        </div>
       </div>
-      <div class="cc-field">
-        <label>Horas trabajadas</label>
-        <input type="number" id="cc-horas-noche" placeholder="0.0" step="0.1" oninput="calcCierre('noche')">
+
+      <div class="total-input-wrap">
+        <label>Total folios proyectados a recibir hoy</label>
+        <div class="total-input-big">
+          <input type="number" id="total-folios" placeholder="0" min="0" oninput="onTotalChange()">
+          <span class="total-unit">folios</span>
+        </div>
+        <div class="split-pct">
+          <div class="split-pct-card dia-card">
+            <div class="spc-top"><span class="pill dia">Día</span><span class="spc-hint" id="hist-dia-hint">sin histórico</span></div>
+            <div class="spc-pct-row">
+              <input type="number" class="dia-val" id="pct-dia" value="30" min="0" max="100" oninput="onPctChange('dia')">
+              <span class="spc-sym">%</span>
+            </div>
+            <div class="spc-folios">→ <strong id="folios-dia-calc">—</strong> folios</div>
+          </div>
+          <div class="split-pct-card noche-card">
+            <div class="spc-top"><span class="pill noche">Noche</span><span class="spc-hint" id="hist-noche-hint">sin histórico</span></div>
+            <div class="spc-pct-row">
+              <input type="number" class="noche-val" id="pct-noche" value="70" min="0" max="100" oninput="onPctChange('noche')">
+              <span class="spc-sym">%</span>
+            </div>
+            <div class="spc-folios">→ <strong id="folios-noche-calc">—</strong> folios</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-title">Por turno <span class="hint">calculado</span></div>
+      <div class="turn-cards" id="turn-cards">
+        <div class="tc tc-dia" id="tc-dia">
+          <div class="tc-lbl"><span class="pill dia">Día</span></div>
+          <div class="tc-big dia" id="tc-dia-folios">—</div>
+          <div class="tc-sub" id="tc-dia-sub">— terceros</div>
+          <div class="tc-sep"></div>
+          <div class="tc-eff-lbl">Eficiencia esp.</div>
+          <div class="tc-eff-val" id="tc-dia-eff">—</div>
+          <div class="tc-eff-tgt">target <span id="tc-dia-tgt">—</span> fol/h</div>
+        </div>
+        <div class="tc tc-noche" id="tc-noche">
+          <div class="tc-lbl"><span class="pill noche">Noche</span></div>
+          <div class="tc-big noche" id="tc-noche-folios">—</div>
+          <div class="tc-sub" id="tc-noche-sub">— terceros</div>
+          <div class="tc-sep"></div>
+          <div class="tc-eff-lbl">Eficiencia esp.</div>
+          <div class="tc-eff-val" id="tc-noche-eff">—</div>
+          <div class="tc-eff-tgt">target <span id="tc-noche-tgt">—</span> fol/h</div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="sec-title">Simulador <span class="hint">¿qué pasa si…?</span></div>
+      <div class="sim-row">
+        <div class="sim-field">
+          <label><span class="pill dia">Día</span> Terceros</label>
+          <div class="stepper">
+            <button onclick="stepSim('dia',-1)">−</button>
+            <input type="number" id="sim-dia" value="0" min="0" oninput="renderSim()">
+            <button onclick="stepSim('dia',1)">+</button>
+          </div>
+          <div class="sim-recom" id="sim-dia-recom">recomendado: —</div>
+        </div>
+        <div class="sim-field">
+          <label><span class="pill noche">Noche</span> Terceros</label>
+          <div class="stepper">
+            <button onclick="stepSim('noche',-1)">−</button>
+            <input type="number" id="sim-noche" value="0" min="0" oninput="renderSim()">
+            <button onclick="stepSim('noche',1)">+</button>
+          </div>
+          <div class="sim-recom" id="sim-noche-recom">recomendado: —</div>
+        </div>
+      </div>
+      <div class="sim-cards">
+        <div class="sim-card">
+          <div class="sim-card-t"><span class="pill dia">Día</span></div>
+          <div class="sim-eff" id="sim-eff-dia">—</div>
+          <div class="sim-unit">folios / hora</div>
+          <div id="sim-badge-dia"></div>
+        </div>
+        <div class="sim-card">
+          <div class="sim-card-t"><span class="pill noche">Noche</span></div>
+          <div class="sim-eff" id="sim-eff-noche">—</div>
+          <div class="sim-unit">folios / hora</div>
+          <div id="sim-badge-noche"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn-primary" onclick="guardarProyeccion()">Guardar proyección →</button>
       </div>
     </div>
-    <div class="cc-result">
-      <div><span class="ccr-lbl">Eficiencia real</span><div class="ccr-val neutral" id="ccr-eff-noche">—</div></div>
-      <div><span class="ccr-lbl">Vs proyectado</span><div class="ccr-val neutral" id="ccr-desv-noche">—</div></div>
-    </div>
-  </div>
 
-  <button class="btn-primary" onclick="guardarCierre()">Guardar cierre →</button>
+    <!-- ══ V2: PLANILLA ══ -->
+    <div class="view" id="v-planilla">
+      <div class="sec-title" style="margin-bottom:18px">Planilla disponible hoy <span class="hint">ingresa las personas</span></div>
+      <div class="plan-card" id="plan-card-dia">
+        <div class="plan-head"><span class="pill dia">Día</span><div class="plan-title">Turno Día</div></div>
+        <span class="plan-lbl">Personas de planilla</span>
+        <div class="plan-stepper">
+          <button onclick="stepPlan('dia',-1)">−</button>
+          <input type="number" id="plan-dia" value="0" min="0" oninput="renderPlanilla()">
+          <button onclick="stepPlan('dia',1)">+</button>
+        </div>
+        <div class="plan-calc">Jornada: <strong>8h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-dia-hrs">0h</strong></div>
+      </div>
+      <div class="plan-card" id="plan-card-noche">
+        <div class="plan-head"><span class="pill noche">Noche</span><div class="plan-title">Turno Noche</div></div>
+        <span class="plan-lbl">Personas de planilla</span>
+        <div class="plan-stepper">
+          <button onclick="stepPlan('noche',-1)">−</button>
+          <input type="number" id="plan-noche" value="0" min="0" oninput="renderPlanilla()">
+          <button onclick="stepPlan('noche',1)">+</button>
+        </div>
+        <div class="plan-calc">Jornada: <strong>9.36h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-noche-hrs">0h</strong></div>
+      </div>
+      <div class="plan-total">
+        <span>Total horas planilla hoy</span>
+        <strong id="plan-total-hrs">0h</strong>
+      </div>
+      <div style="margin-top:14px"><button class="btn-primary" onclick="guardarPlanilla()">Guardar planilla →</button></div>
+    </div>
+
+    <!-- ══ V3: CIERRE ══ -->
+    <div class="view" id="v-cierre">
+      <div class="sec-title" style="margin-bottom:14px">Cierre del día <span class="hint">selecciona la fecha y registra</span></div>
+
+      <div class="cc-totales" id="cc-totales-box" style="display:none">
+        <div class="cc-totales-row">
+          <span>Total recibido:</span><strong id="cc-total-display">—</strong>
+        </div>
+        <div class="cc-totales-row">
+          <span>Split real:</span><strong id="cc-pct-display">—</strong>
+        </div>
+      </div>
+
+      <div class="cierre-card" id="cc-dia">
+        <div class="cc-head"><span class="pill dia">Día</span><div class="cc-title">Turno Día</div></div>
+        <div class="cc-section-lbl">Recepción real</div>
+        <div class="cc-field">
+          <label>Folios recibidos turno día</label>
+          <input type="number" id="cc-rec-dia" placeholder="0" min="0" oninput="onCierreInput()">
+        </div>
+        <div class="cc-section-lbl">Despacho real</div>
+        <div class="cc-grid">
+          <div class="cc-field"><label>Folios despachados</label><input type="number" id="cc-folios-dia" placeholder="0" min="0" oninput="calcCierre('dia')"></div>
+          <div class="cc-field"><label>Horas trabajadas</label><input type="number" id="cc-horas-dia" placeholder="0.0" step="0.1" min="0" oninput="calcCierre('dia')"></div>
+        </div>
+        <div class="cc-result">
+          <div><span class="ccr-lbl">Eficiencia real</span><div class="ccr-val neutral" id="ccr-eff-dia">—</div></div>
+          <div><span class="ccr-lbl">Vs proyectado</span><div class="ccr-val neutral" id="ccr-desv-dia">—</div></div>
+        </div>
+      </div>
+
+      <div class="cierre-card" id="cc-noche">
+        <div class="cc-head"><span class="pill noche">Noche</span><div class="cc-title">Turno Noche</div></div>
+        <div class="cc-section-lbl">Recepción real</div>
+        <div class="cc-field">
+          <label>Folios recibidos turno noche</label>
+          <input type="number" id="cc-rec-noche" placeholder="0" min="0" oninput="onCierreInput()">
+        </div>
+        <div class="cc-section-lbl">Despacho real</div>
+        <div class="cc-grid">
+          <div class="cc-field"><label>Folios despachados</label><input type="number" id="cc-folios-noche" placeholder="0" min="0" oninput="calcCierre('noche')"></div>
+          <div class="cc-field"><label>Horas trabajadas</label><input type="number" id="cc-horas-noche" placeholder="0.0" step="0.1" min="0" oninput="calcCierre('noche')"></div>
+        </div>
+        <div class="cc-result">
+          <div><span class="ccr-lbl">Eficiencia real</span><div class="ccr-val neutral" id="ccr-eff-noche">—</div></div>
+          <div><span class="ccr-lbl">Vs proyectado</span><div class="ccr-val neutral" id="ccr-desv-noche">—</div></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="guardarCierre()">Guardar cierre →</button>
+    </div>
+
+    <!-- ══ V4: HISTÓRICO ══ -->
+    <div class="view" id="v-historico">
+      <div class="sec-title" style="margin-bottom:14px">Este mes <span class="hint">acumulado</span></div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-lbl">Efic. prom.</div><div class="kpi-val neutral" id="kpi-eff">—</div><div class="kpi-sub" id="kpi-eff-sub">—</div></div>
+        <div class="kpi"><div class="kpi-lbl">Despachado</div><div class="kpi-val neutral" id="kpi-folios">—</div><div class="kpi-sub" id="kpi-folios-sub">—</div></div>
+        <div class="kpi"><div class="kpi-lbl">Terceros prom.</div><div class="kpi-val neutral" id="kpi-terceros">—</div><div class="kpi-sub">por día</div></div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-head">
+          <div class="chart-title">Tendencia de eficiencia (14 días)</div>
+          <div class="chart-legend" id="chart-eff-legend"></div>
+        </div>
+        <div id="chart-eff-container"></div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-head">
+          <div class="chart-title">Proyectado vs Despachado (7 días)</div>
+          <div class="chart-legend">
+            <div class="lg-item"><span class="lg-dot" style="background:var(--soft)"></span>Proy.</div>
+            <div class="lg-item"><span class="lg-dot" style="background:var(--ok)"></span>Real</div>
+          </div>
+        </div>
+        <div id="chart-bar-container"></div>
+      </div>
+
+      <div class="sec-title" style="margin-bottom:14px">Detalle últimos 7 días</div>
+      <table class="hist-tbl">
+        <thead><tr><th>Día</th><th class="num">Proy.</th><th class="num">Desp.</th><th class="num">Efic.</th><th class="num">Desv.</th></tr></thead>
+        <tbody id="hist-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- ══ V5: CONFIG ══ -->
+    <div class="view" id="v-config">
+      <div class="cfg-block">
+        <div class="cfg-block-t">Productividad target (folios/h)</div>
+        <div class="cfg-grid">
+          <div class="cf"><label><span class="pill dia">Día</span> Lun–Vie</label><input type="number" id="cfg-pd-s" value="15"><div class="sub">folios/h</div></div>
+          <div class="cf"><label><span class="pill noche">Noche</span> Lun–Vie</label><input type="number" id="cfg-pn-s" value="25"><div class="sub">folios/h</div></div>
+          <div class="cf"><label><span class="pill dia">Día</span> Sáb–Dom</label><input type="number" id="cfg-pd-f" value="12"><div class="sub">folios/h</div></div>
+          <div class="cf"><label><span class="pill noche">Noche</span> Sáb–Dom</label><input type="number" id="cfg-pn-f" value="20"><div class="sub">folios/h</div></div>
+        </div>
+      </div>
+      <div class="cfg-block">
+        <div class="cfg-block-t">% día / noche por defecto (sin histórico)</div>
+        <div class="cfg-grid">
+          <div class="cf"><label>% Día default</label><input type="number" id="cfg-pct-dia" value="30" min="0" max="100"><div class="sub">del total recibido</div></div>
+          <div class="cf"><label>% Noche default</label><input type="number" id="cfg-pct-noche" value="70" min="0" max="100"><div class="sub">del total recibido</div></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="guardarConfig()">Guardar configuración →</button>
+    </div>
+
+  </main>
 </div>
 
-<!-- ══ VISTA 4: HISTÓRICO ══ -->
-<div class="view" id="v-historico">
-  <div class="sec-title" style="margin-bottom:14px">Este mes <span class="hint">acumulado</span></div>
-  <div class="kpi-row" id="kpi-row">
-    <div class="kpi"><div class="kpi-lbl">Efic. prom.</div><div class="kpi-val" id="kpi-eff">—</div><div class="kpi-sub" id="kpi-eff-sub">—</div></div>
-    <div class="kpi"><div class="kpi-lbl">Folios reales</div><div class="kpi-val" id="kpi-folios">—</div><div class="kpi-sub" id="kpi-folios-sub">—</div></div>
-    <div class="kpi"><div class="kpi-lbl">Terceros prom.</div><div class="kpi-val" id="kpi-terceros">—</div><div class="kpi-sub">por día</div></div>
-  </div>
-  <hr class="divider" style="margin-top:8px">
-  <div class="sec-title" style="margin-bottom:14px">Últimos 7 días</div>
-  <table class="hist-tbl">
-    <thead>
-      <tr>
-        <th>Día</th>
-        <th class="num">Proy.</th>
-        <th class="num">Real</th>
-        <th class="num">Efic.</th>
-        <th class="num">Desv.</th>
-      </tr>
-    </thead>
-    <tbody id="hist-tbody"></tbody>
-  </table>
-</div>
-
-<!-- ══ VISTA 5: CONFIG ══ -->
-<div class="view" id="v-config">
-  <div class="cfg-block">
-    <div class="cfg-block-t">Productividad target (folios/h)</div>
-    <div class="cfg-grid">
-      <div class="cf"><label><span class="pill dia">Día</span> Lun–Vie</label><input type="number" id="cfg-pd-s" value="15"><div class="sub">folios/h</div></div>
-      <div class="cf"><label><span class="pill noche">Noche</span> Lun–Vie</label><input type="number" id="cfg-pn-s" value="25"><div class="sub">folios/h</div></div>
-      <div class="cf"><label><span class="pill dia">Día</span> Sáb–Dom</label><input type="number" id="cfg-pd-f" value="12"><div class="sub">folios/h</div></div>
-      <div class="cf"><label><span class="pill noche">Noche</span> Sáb–Dom</label><input type="number" id="cfg-pn-f" value="20"><div class="sub">folios/h</div></div>
-    </div>
-  </div>
-  <div class="cfg-block">
-    <div class="cfg-block-t">Split Lima / Provincia (default)</div>
-    <div class="split-cfg-row">
-      <span class="slbl"><span class="pill dia">Día</span></span>
-      <div class="split-inp lm"><label>Lima</label><input type="number" id="cfg-sl-d" value="60"><span>%</span></div>
-      <div class="split-inp pr"><label>Prov</label><input type="number" id="cfg-sp-d" value="40"><span>%</span></div>
-    </div>
-    <div class="split-cfg-row">
-      <span class="slbl"><span class="pill noche">Noche</span></span>
-      <div class="split-inp lm"><label>Lima</label><input type="number" id="cfg-sl-n" value="92"><span>%</span></div>
-      <div class="split-inp pr"><label>Prov</label><input type="number" id="cfg-sp-n" value="8"><span>%</span></div>
-    </div>
-  </div>
-  <div class="cfg-block">
-    <div class="cfg-block-t">Catálogo de flujos</div>
-    <table class="tbl">
-      <thead><tr><th>Nombre</th><th>Turno</th><th></th></tr></thead>
-      <tbody id="cfg-flujos-tbody"></tbody>
-    </table>
-    <button class="btn-add" onclick="addCatFlujo()">＋ Agregar flujo</button>
-  </div>
-  <button class="btn-primary" onclick="guardarConfig()">Guardar configuración →</button>
-</div>
-
-<!-- BOTTOM NAV -->
+<!-- BOTTOM NAV (mobile) -->
 <nav class="bottom-nav">
-  <button class="nav-btn active" onclick="showView('proyeccion',this)"><span class="ico">📊</span>Proyección</button>
-  <button class="nav-btn" onclick="showView('planilla',this)"><span class="ico">👥</span>Planilla</button>
-  <button class="nav-btn" onclick="showView('cierre',this)"><span class="ico">✅</span>Cierre</button>
-  <button class="nav-btn" onclick="showView('historico',this)"><span class="ico">📈</span>Histórico</button>
-  <button class="nav-btn" onclick="showView('config',this)"><span class="ico">⚙️</span>Config</button>
+  <button class="nav-btn active" data-view="proyeccion" onclick="showView('proyeccion',this)"><span class="ico">📊</span>Proyec.</button>
+  <button class="nav-btn" data-view="planilla" onclick="showView('planilla',this)"><span class="ico">👥</span>Planilla</button>
+  <button class="nav-btn" data-view="cierre" onclick="showView('cierre',this)"><span class="ico">✅</span>Cierre</button>
+  <button class="nav-btn" data-view="historico" onclick="showView('historico',this)"><span class="ico">📈</span>Histórico</button>
+  <button class="nav-btn" data-view="config" onclick="showView('config',this)"><span class="ico">⚙️</span>Config</button>
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ── INIT ──────────────────────────────────────────────
 const SUPA_URL = 'https://lflenisloinbqyuptxzc.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbGVuaXNsb2luYnF5dXB0eHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MzAxNDQsImV4cCI6MjA5MTEwNjE0NH0.jcjKs2xCgxf4mvGbf9a5eRETWAOKf0SXg_JC0iy4UsI';
 const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-// ── ESTADO ────────────────────────────────────────────
 const S = {
   turno: 'noche',
   fecha: hoy(),
-  config: {},       // { dia_semana, dia_finde, noche_semana, noche_finde }
-  catalogo: [],     // eo_flujos activos
-  proyeccion: null, // fila actual eo_proyecciones
-  flujos_hoy: [],   // { flujo_id, nombre, turno, folios }
-  cierre: null,     // fila actual eo_cierres
-  historico: [],    // últimos 7 días
-  calc: {}          // resultados calculados
+  config: {},
+  proyeccion: null,
+  cierre: null,
+  historico: [],
+  historico14: [], // para gráfico
+  calc: {}
 };
 
-// ── UTILES ────────────────────────────────────────────
-function hoy() {
-  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
-}
-function tipoDia(fecha) {
-  const d = new Date(fecha + 'T12:00:00');
-  return (d.getDay() === 0 || d.getDay() === 6) ? 'finde' : 'semana';
-}
-function getCfg(turno) {
-  const td = tipoDia(S.fecha);
-  return S.config[`${turno}_${td}`] || {};
-}
-function fmt(n, dec = 1) {
-  if (n == null || isNaN(n)) return '—';
-  return Number(n).toFixed(dec);
-}
-function fmtInt(n) {
-  if (n == null || isNaN(n)) return '—';
-  return Math.round(n).toLocaleString('es-PE');
-}
-function loading(on) {
-  document.getElementById('loader').classList.toggle('active', on);
-}
-function toast(msg, err = false) {
+// ── UTILS ──
+function hoy() { return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' }); }
+function tipoDia(f) { const d = new Date(f+'T12:00:00'); return (d.getDay()===0||d.getDay()===6) ? 'finde' : 'semana'; }
+function getCfg(turno) { return S.config[`${turno}_${tipoDia(S.fecha)}`] || {}; }
+function fmt(n,dec=1) { if(n==null||isNaN(n)) return '—'; return Number(n).toFixed(dec); }
+function fmtInt(n) { if(n==null||isNaN(n)||n===0) return '—'; return Math.round(n).toLocaleString('es-PE'); }
+function clamp(v,min,max) { return Math.max(min, Math.min(max, v)); }
+function loading(on) { document.getElementById('loader').classList.toggle('active', on); }
+function toast(msg, type='ok') {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast show' + (err ? ' error' : '');
-  setTimeout(() => t.classList.remove('show'), 2800);
+  t.className = 'toast show ' + type;
+  setTimeout(()=>t.classList.remove('show'), 2800);
 }
+const $ = id => document.getElementById(id);
+const num = id => +($(id)?.value) || 0;
 
-// ── CÁLCULOS ─────────────────────────────────────────
+// ── CÁLCULO ──
 function calcTurno(turno) {
   const cfg = getCfg(turno);
-  const prod = cfg.productividad || (turno === 'dia' ? 15 : 25);
-  const jornada = cfg.jornada_planilla || (turno === 'dia' ? 8 : 9.36);
-  const planilla = turno === 'dia'
-    ? (+document.getElementById('plan-dia').value || 0)
-    : (+document.getElementById('plan-noche').value || 0);
-  const folios = S.flujos_hoy
-    .filter(f => f.turno === turno)
-    .reduce((a, f) => a + (f.folios || 0), 0);
+  const prod = cfg.productividad || (turno==='dia'?15:25);
+  const jornada = cfg.jornada_planilla || (turno==='dia'?8:9.36);
+  const planilla = num('plan-'+turno);
+  const total = num('total-folios');
+  const pct = num('pct-'+turno);
+  const folios = Math.round(total * pct / 100);
   const hrs_plan = planilla * jornada;
-  const hrs_nec = folios > 0 ? folios / prod : 0;
+  const hrs_nec = folios>0 ? folios/prod : 0;
   const gap = Math.max(0, hrs_nec - hrs_plan);
-  const terceros = folios > 0 ? Math.ceil(gap / 8) : 0;
-  const hrs_total = hrs_plan + terceros * 8;
-  const eficiencia = hrs_total > 0 ? folios / hrs_total : 0;
-  return { folios, prod, planilla, hrs_plan, hrs_nec, gap, terceros, eficiencia };
+  const terceros = folios>0 ? Math.ceil(gap/8) : 0;
+  const hrs_total = hrs_plan + terceros*8;
+  const eficiencia = hrs_total>0 ? folios/hrs_total : 0;
+  return {folios,prod,planilla,hrs_plan,hrs_nec,gap,terceros,eficiencia,pct};
 }
 
 function recalc() {
   const dia = calcTurno('dia');
   const noche = calcTurno('noche');
-  S.calc = { dia, noche };
-
-  // Hero
+  S.calc = {dia,noche};
+  const total = dia.folios + noche.folios;
   const total_t = dia.terceros + noche.terceros;
-  const total_f = dia.folios + noche.folios;
-  const eff_gen = (dia.hrs_plan + dia.terceros * 8 + noche.hrs_plan + noche.terceros * 8) > 0
-    ? total_f / (dia.hrs_plan + dia.terceros * 8 + noche.hrs_plan + noche.terceros * 8)
-    : 0;
+  const hrs_tot = dia.hrs_plan + dia.terceros*8 + noche.hrs_plan + noche.terceros*8;
+  const eff_gen = hrs_tot>0 ? total/hrs_tot : 0;
 
-  document.getElementById('h-terceros').textContent = total_f > 0 ? total_t : '—';
-  document.getElementById('h-dist').textContent = `${dia.terceros} día · ${noche.terceros} noche`;
-  document.getElementById('h-eff').textContent = total_f > 0 ? fmt(eff_gen) + ' fol/h' : '— fol/h';
+  $('h-terceros').textContent = total>0 ? total_t : '—';
+  $('h-dist').textContent = `${dia.terceros} día · ${noche.terceros} noche`;
+  $('h-eff').textContent = total>0 ? fmt(eff_gen)+' fol/h' : '— fol/h';
+  $('folios-dia-calc').textContent = fmtInt(dia.folios);
+  $('folios-noche-calc').textContent = fmtInt(noche.folios);
+  $('tc-dia-folios').textContent = fmtInt(dia.folios);
+  $('tc-dia-sub').textContent = `folios · ${dia.terceros} terceros`;
+  $('tc-dia-eff').textContent = fmt(dia.eficiencia);
+  $('tc-dia-tgt').textContent = fmt(dia.prod,0);
+  $('tc-noche-folios').textContent = fmtInt(noche.folios);
+  $('tc-noche-sub').textContent = `folios · ${noche.terceros} terceros`;
+  $('tc-noche-eff').textContent = fmt(noche.eficiencia);
+  $('tc-noche-tgt').textContent = fmt(noche.prod,0);
+  $('sim-dia').value = dia.terceros;
+  $('sim-noche').value = noche.terceros;
+  $('sim-dia-recom').textContent = `recomendado: ${dia.terceros}`;
+  $('sim-noche-recom').textContent = `recomendado: ${noche.terceros}`;
 
-  // Cards
-  document.getElementById('tc-dia-folios').textContent = fmtInt(dia.folios);
-  document.getElementById('tc-dia-sub').textContent = `folios · ${dia.terceros} terceros`;
-  document.getElementById('tc-dia-eff').textContent = fmt(dia.eficiencia);
-  document.getElementById('tc-dia-tgt').textContent = fmt(dia.prod, 0);
-  document.getElementById('tc-noche-folios').textContent = fmtInt(noche.folios);
-  document.getElementById('tc-noche-sub').textContent = `folios · ${noche.terceros} terceros`;
-  document.getElementById('tc-noche-eff').textContent = fmt(noche.eficiencia);
-  document.getElementById('tc-noche-tgt').textContent = fmt(noche.prod, 0);
-
-  // Simulador default values
-  document.getElementById('sim-dia').value = dia.terceros;
-  document.getElementById('sim-noche').value = noche.terceros;
-  document.getElementById('sim-dia-recom').textContent = `recomendado: ${dia.terceros}`;
-  document.getElementById('sim-noche-recom').textContent = `recomendado: ${noche.terceros}`;
-
-  // Filtro de turno en cards
   applyTurnoFilter();
-  renderFlujosTotals();
   renderSim();
 }
 
-// ── FILTRO TURNO ─────────────────────────────────────
+// ── INPUTS ──
+function onTotalChange() {
+  const total = num('total-folios');
+  if(total<0) $('total-folios').value=0;
+  recalc();
+}
+function onPctChange(t) {
+  let val = clamp(num('pct-'+t), 0, 100);
+  $('pct-'+t).value = val;
+  const other = t==='dia' ? 'noche' : 'dia';
+  $('pct-'+other).value = 100 - val;
+  recalc();
+}
+
+// ── FILTRO TURNO ──
 function applyTurnoFilter() {
   const t = S.turno;
-  document.getElementById('tc-dia').style.display = (t === 'noche') ? 'none' : 'block';
-  document.getElementById('tc-noche').style.display = (t === 'dia') ? 'none' : 'block';
-  document.getElementById('plan-card-dia').style.display = (t === 'noche') ? 'none' : 'block';
-  document.getElementById('plan-card-noche').style.display = (t === 'dia') ? 'none' : 'block';
-  document.getElementById('cc-dia').style.display = (t === 'noche') ? 'none' : 'block';
-  document.getElementById('cc-noche').style.display = (t === 'dia') ? 'none' : 'block';
-  // Flujos: show/hide rows
-  document.querySelectorAll('.flujo-row').forEach(row => {
-    const rt = row.dataset.turno;
-    row.style.display = (t === 'ambos' || t === rt) ? '' : 'none';
-  });
+  $('tc-dia').style.display = t==='noche' ? 'none' : 'block';
+  $('tc-noche').style.display = t==='dia' ? 'none' : 'block';
+  $('plan-card-dia').style.display = t==='noche' ? 'none' : 'block';
+  $('plan-card-noche').style.display = t==='dia' ? 'none' : 'block';
+  $('cc-dia').style.display = t==='noche' ? 'none' : 'block';
+  $('cc-noche').style.display = t==='dia' ? 'none' : 'block';
 }
-
 function setTurno(t, btn) {
   S.turno = t;
-  document.querySelectorAll('.turno-tabs button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.turno-tabs button').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   applyTurnoFilter();
-  if (document.getElementById('v-historico').classList.contains('active')) renderHistorico();
+  if($('v-historico').classList.contains('active')) renderHistorico();
 }
 
-// ── FLUJOS ────────────────────────────────────────────
-function renderFlujos() {
-  const tbody = document.getElementById('flujos-tbody');
-  tbody.innerHTML = '';
-  S.flujos_hoy.forEach((f, i) => {
-    const tr = document.createElement('tr');
-    tr.className = 'flujo-row';
-    tr.dataset.turno = f.turno;
-    tr.innerHTML = `
-      <td class="tag">${f.nombre}</td>
-      <td><span class="pill ${f.turno}">${f.turno === 'dia' ? 'Día' : 'Noche'}</span></td>
-      <td class="num"><input class="inline-num" type="number" value="${f.folios||0}"
-        oninput="S.flujos_hoy[${i}].folios=+this.value;renderFlujosTotals();recalc()" min="0"></td>
-      <td><button class="btn-del" onclick="removeFlujoRow(${i})">×</button></td>`;
-    tbody.appendChild(tr);
-  });
-  applyTurnoFilter();
-  renderFlujosTotals();
-}
-
-function renderFlujosTotals() {
-  const visible = S.turno === 'ambos'
-    ? S.flujos_hoy
-    : S.flujos_hoy.filter(f => f.turno === S.turno);
-  const total = visible.reduce((a, f) => a + (f.folios || 0), 0);
-  document.getElementById('flujos-total').textContent = fmtInt(total);
-}
-
-function addFlujoRow() {
-  if (!S.catalogo.length) { toast('Sin flujos en catálogo', true); return; }
-  const f = S.catalogo[0];
-  S.flujos_hoy.push({ flujo_id: f.id, nombre: f.nombre, turno: f.turno, folios: 0 });
-  renderFlujos();
-  recalc();
-}
-
-function removeFlujoRow(i) {
-  S.flujos_hoy.splice(i, 1);
-  renderFlujos();
-  recalc();
-}
-
-// ── PLANILLA ─────────────────────────────────────────
+// ── PLANILLA ──
 function renderPlanilla() {
-  const pd = +document.getElementById('plan-dia').value || 0;
-  const pn = +document.getElementById('plan-noche').value || 0;
-  document.getElementById('plan-dia-hrs').textContent = fmt(pd * 8, 1) + 'h';
-  document.getElementById('plan-noche-hrs').textContent = fmt(pn * 9.36, 1) + 'h';
-  document.getElementById('plan-total-hrs').textContent = fmt(pd * 8 + pn * 9.36, 1) + 'h';
+  const pd = clamp(num('plan-dia'),0,999);
+  const pn = clamp(num('plan-noche'),0,999);
+  $('plan-dia').value = pd;
+  $('plan-noche').value = pn;
+  $('plan-dia-hrs').textContent = fmt(pd*8,1)+'h';
+  $('plan-noche-hrs').textContent = fmt(pn*9.36,1)+'h';
+  $('plan-total-hrs').textContent = fmt(pd*8+pn*9.36,1)+'h';
   recalc();
 }
-function stepPlan(t, d) {
-  const el = document.getElementById('plan-' + t);
-  el.value = Math.max(0, (+el.value || 0) + d);
+function stepPlan(t,d) {
+  const el = $('plan-'+t);
+  el.value = Math.max(0,(+el.value||0)+d);
   renderPlanilla();
 }
 
-// ── SIMULADOR ────────────────────────────────────────
+// ── SIMULADOR ──
 function renderSim() {
-  ['dia', 'noche'].forEach(t => {
-    const c = S.calc[t] || {};
-    const n3 = +document.getElementById('sim-' + t).value || 0;
-    const hrs = (c.hrs_plan || 0) + n3 * 8;
-    const eff = hrs > 0 ? (c.folios || 0) / hrs : 0;
-    const cob = c.hrs_nec > 0 ? hrs / c.hrs_nec : 1;
-    const el_eff = document.getElementById('sim-eff-' + t);
-    const el_b = document.getElementById('sim-badge-' + t);
+  ['dia','noche'].forEach(t=>{
+    const c = S.calc[t]||{};
+    const n3 = Math.max(0, num('sim-'+t));
+    const hrs = (c.hrs_plan||0) + n3*8;
+    const eff = hrs>0 ? (c.folios||0)/hrs : 0;
+    const cob = c.hrs_nec>0 ? hrs/c.hrs_nec : (c.folios>0?1:1);
+    const el_eff = $('sim-eff-'+t);
+    const el_b = $('sim-badge-'+t);
     el_eff.textContent = fmt(eff);
-    el_eff.className = 'sim-eff ' + (cob >= 1 ? 'ok' : cob >= 0.9 ? 'warn' : 'bad');
-    const falta = Math.max(0, (c.hrs_nec || 0) - hrs);
-    if (cob >= 1) {
+    el_eff.className = 'sim-eff '+(cob>=1?'ok':cob>=0.9?'warn':'bad');
+    const falta = Math.max(0,(c.hrs_nec||0)-hrs);
+    if(c.folios===0) {
+      el_b.innerHTML = '';
+    } else if(cob>=1) {
       el_b.innerHTML = '<div class="sim-badge ok">✓ alcanza</div>';
     } else {
-      const cl = cob >= 0.9 ? 'warn' : 'bad';
-      const ic = cob >= 0.9 ? '⚠' : '✕';
-      el_b.innerHTML = `<div class="sim-badge ${cl}">${ic} faltan ${fmt(falta, 1)}h</div>`;
+      const cl = cob>=0.9 ? 'warn' : 'bad';
+      const ic = cob>=0.9 ? '⚠' : '✕';
+      el_b.innerHTML = `<div class="sim-badge ${cl}">${ic} faltan ${fmt(falta,1)}h</div>`;
     }
   });
 }
-function stepSim(t, d) {
-  const el = document.getElementById('sim-' + t);
-  el.value = Math.max(0, (+el.value || 0) + d);
+function stepSim(t,d) {
+  const el = $('sim-'+t);
+  el.value = Math.max(0,(+el.value||0)+d);
   renderSim();
 }
 
-// ── CIERRE ───────────────────────────────────────────
+// ── CIERRE ──
 function calcCierre(t) {
-  const f = +document.getElementById(`cc-folios-${t}`).value || 0;
-  const h = +document.getElementById(`cc-horas-${t}`).value || 0;
-  const eff = h > 0 ? f / h : 0;
-  const proy_eff = S.calc[t]?.eficiencia || 0;
-  const desv = proy_eff > 0 ? ((eff - proy_eff) / proy_eff) * 100 : 0;
-  const el_eff = document.getElementById(`ccr-eff-${t}`);
-  const el_desv = document.getElementById(`ccr-desv-${t}`);
-  el_eff.textContent = h > 0 ? fmt(eff) : '—';
-  el_eff.className = 'ccr-val ' + (eff === 0 ? 'neutral' : eff >= proy_eff ? 'ok' : 'bad');
-  el_desv.textContent = h > 0 ? (desv >= 0 ? '+' : '') + fmt(desv) + '%' : '—';
-  el_desv.className = 'ccr-val ' + (desv >= 0 ? 'ok' : 'bad');
+  const f = num(`cc-folios-${t}`);
+  const h = num(`cc-horas-${t}`);
+  const eff = h>0 ? f/h : 0;
+  const proy_eff = S.calc[t]?.eficiencia || S.proyeccion?.[`eficiencia_esp_${t}`] || 0;
+  const desv = proy_eff>0 && h>0 ? ((eff-proy_eff)/proy_eff)*100 : 0;
+  const el_eff = $(`ccr-eff-${t}`);
+  const el_desv = $(`ccr-desv-${t}`);
+  el_eff.textContent = h>0 ? fmt(eff) : '—';
+  el_eff.className = 'ccr-val ' + (h===0?'neutral':eff>=proy_eff?'ok':'bad');
+  el_desv.textContent = h>0 && proy_eff>0 ? (desv>=0?'+':'')+fmt(desv)+'%' : '—';
+  el_desv.className = 'ccr-val ' + (h===0||proy_eff===0?'neutral':desv>=0?'ok':'bad');
+}
+function onCierreInput() {
+  const rd = num('cc-rec-dia');
+  const rn = num('cc-rec-noche');
+  const tot = rd + rn;
+  const box = $('cc-totales-box');
+  if(tot>0) {
+    box.style.display = 'block';
+    $('cc-total-display').textContent = fmtInt(tot);
+    const pd = (rd/tot*100).toFixed(1);
+    const pn = (rn/tot*100).toFixed(1);
+    $('cc-pct-display').textContent = `${pd}% día · ${pn}% noche`;
+  } else {
+    box.style.display = 'none';
+  }
 }
 
-// ── HISTÓRICO RENDER ─────────────────────────────────
+// ── HISTÓRICO RENDER ──
 function renderHistorico() {
   const t = S.turno;
-  const tbody = document.getElementById('hist-tbody');
+  const tbody = $('hist-tbody');
   tbody.innerHTML = '';
   const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  let tot_desp=0, tot_proy=0, tot_eff=0, cnt_eff=0, tot_3ros=0, cnt_3ros=0;
 
-  let tot_real = 0, tot_proy = 0, tot_eff = 0, cnt_eff = 0, tot_3ros = 0, cnt_3ros = 0;
-
-  S.historico.forEach(row => {
+  S.historico.forEach(row=>{
     const esHoy = row.fecha === S.fecha;
-    const d = new Date(row.fecha + 'T12:00:00');
+    const d = new Date(row.fecha+'T12:00:00');
     const dow = dias[d.getDay()];
-    const fmtDate = d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+    const fmtDate = d.toLocaleDateString('es-PE',{day:'2-digit',month:'short'});
+    let proy=0, desp=0, eff=null, t3=0;
+    if(t==='dia'||t==='ambos') { proy+=(row.folios_dia||0); desp+=(row.folios_real_dia||0); }
+    if(t==='noche'||t==='ambos') { proy+=(row.folios_noche||0); desp+=(row.folios_real_noche||0); }
+    if(t==='dia') { eff = row.eficiencia_real_dia; t3 = row.terceros_dia||0; }
+    else if(t==='noche') { eff = row.eficiencia_real_noche; t3 = row.terceros_noche||0; }
+    else { eff = row.eff_gen; t3 = (row.terceros_dia||0)+(row.terceros_noche||0); }
 
-    let proy = 0, real = 0, eff = null, t3 = 0;
-    if (t === 'dia' || t === 'ambos') { proy += row.folios_dia || 0; real += row.folios_real_dia || 0; }
-    if (t === 'noche' || t === 'ambos') { proy += row.folios_noche || 0; real += row.folios_real_noche || 0; }
-    if (t === 'dia') { eff = row.eficiencia_real_dia; t3 = row.terceros_dia || 0; }
-    else if (t === 'noche') { eff = row.eficiencia_real_noche; t3 = row.terceros_noche || 0; }
-    else {
-      eff = row.eff_real_gen;
-      t3 = (row.terceros_dia || 0) + (row.terceros_noche || 0);
-    }
+    const desv = proy>0 && desp>0 ? ((desp-proy)/proy)*100 : null;
+    const dc = desv==null ? 'fl' : desv>=0 ? 'up' : 'dn';
+    const dt = desv==null ? '—' : (desv>=0?'+':'')+fmt(Math.abs(desv))+'%';
+    if(desp>0) tot_desp+=desp;
+    tot_proy+=proy;
+    if(eff) {tot_eff+=eff; cnt_eff++;}
+    if(t3>0) {tot_3ros+=t3; cnt_3ros++;}
 
-    const desv = proy > 0 && real > 0 ? ((real - proy) / proy) * 100 : null;
-    const dclass = desv == null ? 'fl' : desv >= 0 ? 'up' : 'dn';
-    const dtext = desv == null ? '—' : (desv >= 0 ? '+' : '') + fmt(Math.abs(desv)) + '%';
-
-    if (real > 0) { tot_real += real; }
-    tot_proy += proy;
-    if (eff) { tot_eff += eff; cnt_eff++; }
-    if (t3 > 0) { tot_3ros += t3; cnt_3ros++; }
-
-    tbody.innerHTML += `<tr class="${esHoy ? 'today-row' : ''}">
-      <td><span class="dname">${dow}${esHoy ? ' · hoy' : ''}</span><span class="ddate">${fmtDate}</span></td>
-      <td class="num">${proy > 0 ? fmtInt(proy) : '—'}</td>
-      <td class="num">${real > 0 ? fmtInt(real) : '—'}</td>
+    tbody.innerHTML += `<tr class="${esHoy?'today-row':''}">
+      <td><span class="dname">${dow}${esHoy?' · hoy':''}</span><span class="ddate">${fmtDate}</span></td>
+      <td class="num">${fmtInt(proy)}</td>
+      <td class="num">${fmtInt(desp)}</td>
       <td class="num">${eff ? fmt(eff) : '—'}</td>
-      <td class="num"><span class="desv ${dclass}">${dtext}</span></td>
+      <td class="num"><span class="desv ${dc}">${dt}</span></td>
     </tr>`;
   });
 
   // KPIs
-  const eff_prom = cnt_eff > 0 ? tot_eff / cnt_eff : null;
-  const tgt = t === 'dia' ? 15 : t === 'noche' ? 25 : 20;
-  const el_eff = document.getElementById('kpi-eff');
-  el_eff.textContent = eff_prom ? fmt(eff_prom) : '—';
-  el_eff.className = 'kpi-val ' + (eff_prom ? (eff_prom >= tgt ? 'ok' : 'bad') : '');
-  document.getElementById('kpi-eff-sub').textContent = `target ${tgt}`;
-  document.getElementById('kpi-folios').textContent = tot_real > 0 ? fmtInt(tot_real) : '—';
-  document.getElementById('kpi-folios-sub').textContent = `proy ${fmtInt(tot_proy)}`;
-  document.getElementById('kpi-terceros').textContent = cnt_3ros > 0 ? fmt(tot_3ros / cnt_3ros, 1) : '—';
+  const tgt = t==='dia' ? 15 : t==='noche' ? 25 : 20;
+  const eff_p = cnt_eff>0 ? tot_eff/cnt_eff : null;
+  const el_eff = $('kpi-eff');
+  el_eff.textContent = eff_p ? fmt(eff_p) : '—';
+  el_eff.className = 'kpi-val ' + (eff_p ? (eff_p>=tgt?'ok':'bad') : 'neutral');
+  $('kpi-eff-sub').textContent = `target ${tgt}`;
+  $('kpi-folios').textContent = tot_desp>0 ? fmtInt(tot_desp) : '—';
+  $('kpi-folios-sub').textContent = `proy ${fmtInt(tot_proy)}`;
+  $('kpi-terceros').textContent = cnt_3ros>0 ? fmt(tot_3ros/cnt_3ros,1) : '—';
+
+  // Charts
+  renderChartEficiencia();
+  renderChartBarras();
 }
 
-// ── CONFIG RENDER ─────────────────────────────────────
-function renderConfig() {
-  const c = S.config;
-  const set = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
-  set('cfg-pd-s', c.dia_semana?.productividad);
-  set('cfg-pn-s', c.noche_semana?.productividad);
-  set('cfg-pd-f', c.dia_finde?.productividad);
-  set('cfg-pn-f', c.noche_finde?.productividad);
-  set('cfg-sl-d', c.dia_semana?.split_lima);
-  set('cfg-sp-d', c.dia_semana?.split_provincia);
-  set('cfg-sl-n', c.noche_semana?.split_lima);
-  set('cfg-sp-n', c.noche_semana?.split_provincia);
+// ── CHARTS ──
+function renderChartEficiencia() {
+  const container = $('chart-eff-container');
+  const data = S.historico14;
+  const t = S.turno;
+  const showDia = t==='dia' || t==='ambos';
+  const showNoche = t==='noche' || t==='ambos';
 
-  const tbody = document.getElementById('cfg-flujos-tbody');
-  tbody.innerHTML = '';
-  S.catalogo.forEach(f => {
-    tbody.innerHTML += `<tr>
-      <td class="tag">${f.nombre}</td>
-      <td><span class="pill ${f.turno}">${f.turno === 'dia' ? 'Día' : 'Noche'}</span></td>
-      <td><button class="btn-del" onclick="delCatFlujo(${f.id})">×</button></td>
-    </tr>`;
+  // Legend
+  let leg = '';
+  if(showDia) leg += `<div class="lg-item"><span class="lg-dot dia"></span>Día · target 15</div>`;
+  if(showNoche) leg += `<div class="lg-item"><span class="lg-dot noche"></span>Noche · target 25</div>`;
+  $('chart-eff-legend').innerHTML = leg;
+
+  if(!data || data.length===0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--soft);font-size:.8rem">Sin datos suficientes aún</div>';
+    return;
+  }
+
+  const W = 600, H = 220;
+  const M = {top:20,right:14,bottom:30,left:36};
+  const w = W - M.left - M.right;
+  const h = H - M.top - M.bottom;
+  const n = data.length;
+
+  // Recoger valores para escala Y
+  let vals = [];
+  data.forEach(d=>{
+    if(showDia && d.eficiencia_real_dia) vals.push(d.eficiencia_real_dia);
+    if(showNoche && d.eficiencia_real_noche) vals.push(d.eficiencia_real_noche);
   });
+  if(showDia) vals.push(15);
+  if(showNoche) vals.push(25);
+  const maxY = vals.length ? Math.max(...vals) * 1.2 : 30;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="chart-svg" preserveAspectRatio="xMidYMid meet">`;
+
+  // Grid + Y labels
+  for(let i=0; i<=4; i++) {
+    const y = M.top + (h * i / 4);
+    const val = maxY * (1 - i/4);
+    svg += `<line x1="${M.left}" y1="${y}" x2="${M.left+w}" y2="${y}" stroke="#1e1e1e" stroke-width="1"/>`;
+    svg += `<text x="${M.left-6}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#666">${val.toFixed(0)}</text>`;
+  }
+
+  // Target lines
+  if(showDia) {
+    const yT = M.top + h - (h * 15 / maxY);
+    svg += `<line x1="${M.left}" y1="${yT}" x2="${M.left+w}" y2="${yT}" stroke="#fbbf24" stroke-dasharray="4,3" stroke-width="1" opacity="0.5"/>`;
+  }
+  if(showNoche) {
+    const yT = M.top + h - (h * 25 / maxY);
+    svg += `<line x1="${M.left}" y1="${yT}" x2="${M.left+w}" y2="${yT}" stroke="#818cf8" stroke-dasharray="4,3" stroke-width="1" opacity="0.5"/>`;
+  }
+
+  // Draw lines for each turno
+  const drawLine = (key, color) => {
+    let pts = [];
+    data.forEach((d,i)=>{
+      if(d[key]) {
+        const x = n>1 ? M.left + (w*i/(n-1)) : M.left + w/2;
+        const y = M.top + h - (h * d[key] / maxY);
+        pts.push({x,y,v:d[key]});
+      }
+    });
+    if(pts.length===0) return;
+    // Path
+    let path = '';
+    pts.forEach((p,i)=>{ path += (i===0?'M ':' L ') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); });
+    svg += `<path d="${path}" stroke="${color}" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>`;
+    // Dots
+    pts.forEach(p=>{
+      svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#0f0f0f" stroke="${color}" stroke-width="2"/>`;
+    });
+  };
+  if(showDia) drawLine('eficiencia_real_dia','#fbbf24');
+  if(showNoche) drawLine('eficiencia_real_noche','#818cf8');
+
+  // X axis labels
+  data.forEach((d,i)=>{
+    if(i % Math.ceil(n/7) === 0 || i === n-1) {
+      const x = n>1 ? M.left + (w*i/(n-1)) : M.left + w/2;
+      const fd = new Date(d.fecha+'T12:00:00');
+      const lbl = fd.getDate();
+      svg += `<text x="${x.toFixed(1)}" y="${M.top+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#666">${lbl}</text>`;
+    }
+  });
+
+  svg += '</svg>';
+  container.innerHTML = svg;
 }
 
-// ── DB: CARGAR ────────────────────────────────────────
+function renderChartBarras() {
+  const container = $('chart-bar-container');
+  const data = S.historico;
+  const t = S.turno;
+
+  if(!data || data.length===0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--soft);font-size:.8rem">Sin datos suficientes</div>';
+    return;
+  }
+
+  const W = 600, H = 200;
+  const M = {top:20,right:14,bottom:30,left:42};
+  const w = W - M.left - M.right;
+  const h = H - M.top - M.bottom;
+  const n = data.length;
+
+  // Para cada día, calcular proy y real según turno
+  const items = data.map(d=>{
+    let proy=0, real=0;
+    if(t==='dia'||t==='ambos') { proy+=(d.folios_dia||0); real+=(d.folios_real_dia||0); }
+    if(t==='noche'||t==='ambos') { proy+=(d.folios_noche||0); real+=(d.folios_real_noche||0); }
+    return {fecha:d.fecha, proy, real};
+  });
+
+  const maxY = Math.max(...items.flatMap(i=>[i.proy,i.real]), 1) * 1.15;
+  const barGroupW = w / n;
+  const barW = (barGroupW - 8) / 2;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="chart-svg" preserveAspectRatio="xMidYMid meet">`;
+
+  // Grid
+  for(let i=0; i<=3; i++) {
+    const y = M.top + (h * i / 3);
+    const val = maxY * (1 - i/3);
+    svg += `<line x1="${M.left}" y1="${y}" x2="${M.left+w}" y2="${y}" stroke="#1e1e1e"/>`;
+    svg += `<text x="${M.left-6}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#666">${val>=1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0)}</text>`;
+  }
+
+  // Bars
+  items.forEach((it,i)=>{
+    const groupX = M.left + barGroupW*i + 4;
+    if(it.proy>0) {
+      const bh = h * it.proy / maxY;
+      svg += `<rect x="${groupX.toFixed(1)}" y="${(M.top+h-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="#3a3a3a"/>`;
+    }
+    if(it.real>0) {
+      const bh = h * it.real / maxY;
+      svg += `<rect x="${(groupX+barW).toFixed(1)}" y="${(M.top+h-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="#4ade80"/>`;
+    }
+    // X label
+    const fd = new Date(it.fecha+'T12:00:00');
+    const lblX = groupX + barW;
+    svg += `<text x="${lblX.toFixed(1)}" y="${M.top+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#666">${fd.getDate()}</text>`;
+  });
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+// ── DB: CARGAR ──
 async function cargarTodo() {
   loading(true);
   try {
-    // Config
-    const { data: cfgData } = await db.from('eo_configuracion').select('*');
-    if (cfgData) {
-      cfgData.forEach(r => {
-        S.config[`${r.turno}_${r.tipo_dia}`] = r;
-      });
-    }
-
-    // Catálogo flujos
-    const { data: catData } = await db.from('eo_flujos').select('*').eq('activo', true).order('nombre');
-    S.catalogo = catData || [];
-
+    const {data:cfgData} = await db.from('eo_configuracion').select('*');
+    if(cfgData) cfgData.forEach(r=>{ S.config[`${r.turno}_${r.tipo_dia}`]=r; });
+    const set=(id,v)=>{const el=$(id);if(el&&v!=null)el.value=v;};
+    set('cfg-pd-s', S.config.dia_semana?.productividad);
+    set('cfg-pn-s', S.config.noche_semana?.productividad);
+    set('cfg-pd-f', S.config.dia_finde?.productividad);
+    set('cfg-pn-f', S.config.noche_finde?.productividad);
     await cargarFecha();
-    renderConfig();
-  } catch (e) {
-    toast('Error cargando datos', true);
-    console.error(e);
-  } finally {
-    loading(false);
-  }
+  } catch(e) { toast('Error cargando','error'); console.error(e); }
+  finally { loading(false); }
 }
 
 async function cargarFecha() {
   loading(true);
   try {
-    // Proyección del día
-    const { data: proy } = await db.from('eo_proyecciones')
-      .select('*, eo_proyeccion_flujos(*, eo_flujos(nombre,turno))')
-      .eq('fecha', S.fecha).maybeSingle();
-
+    // Proyección
+    const {data:proy} = await db.from('eo_proyecciones').select('*').eq('fecha',S.fecha).maybeSingle();
     S.proyeccion = proy;
-    if (proy) {
-      document.getElementById('plan-dia').value = proy.planilla_dia || 0;
-      document.getElementById('plan-noche').value = proy.planilla_noche || 0;
-      S.flujos_hoy = (proy.eo_proyeccion_flujos || []).map(pf => ({
-        id: pf.id, flujo_id: pf.flujo_id,
-        nombre: pf.eo_flujos?.nombre || '—',
-        turno: pf.eo_flujos?.turno || 'noche',
-        folios: pf.folios
-      }));
+    if(proy) {
+      $('plan-dia').value = proy.planilla_dia||0;
+      $('plan-noche').value = proy.planilla_noche||0;
+      $('total-folios').value = proy.total_folios||'';
+      $('pct-dia').value = proy.pct_dia||30;
+      $('pct-noche').value = proy.pct_noche||70;
     } else {
-      document.getElementById('plan-dia').value = 0;
-      document.getElementById('plan-noche').value = 0;
-      // Default: todos los flujos del catálogo con 0
-      S.flujos_hoy = S.catalogo.map(f => ({
-        flujo_id: f.id, nombre: f.nombre, turno: f.turno, folios: 0
-      }));
+      ['plan-dia','plan-noche'].forEach(id=>$(id).value=0);
+      $('total-folios').value = '';
+      $('pct-dia').value = 30;
+      $('pct-noche').value = 70;
+      await cargarHistPct();
     }
 
     // Cierre
-    const { data: cierre } = await db.from('eo_cierres')
-      .select('*').eq('fecha', S.fecha).maybeSingle();
+    const {data:cierre} = await db.from('eo_cierres').select('*').eq('fecha',S.fecha).maybeSingle();
     S.cierre = cierre;
-    if (cierre) {
-      document.getElementById('cc-folios-dia').value = cierre.folios_real_dia || '';
-      document.getElementById('cc-horas-dia').value = cierre.horas_real_dia || '';
-      document.getElementById('cc-folios-noche').value = cierre.folios_real_noche || '';
-      document.getElementById('cc-horas-noche').value = cierre.horas_real_noche || '';
+    const setC=(id,v)=>{const el=$(id);if(el)el.value=v!=null?v:'';};
+    if(cierre) {
+      setC('cc-rec-dia', cierre.recibido_real_dia);
+      setC('cc-rec-noche', cierre.recibido_real_noche);
+      setC('cc-folios-dia', cierre.folios_real_dia);
+      setC('cc-horas-dia', cierre.horas_real_dia);
+      setC('cc-folios-noche', cierre.folios_real_noche);
+      setC('cc-horas-noche', cierre.horas_real_noche);
+      onCierreInput();
       calcCierre('dia'); calcCierre('noche');
     } else {
-      ['cc-folios-dia','cc-horas-dia','cc-folios-noche','cc-horas-noche']
-        .forEach(id => document.getElementById(id).value = '');
-      ['ccr-eff-dia','ccr-desv-dia','ccr-eff-noche','ccr-desv-noche']
-        .forEach(id => { const el=document.getElementById(id); el.textContent='—'; el.className='ccr-val neutral'; });
+      ['cc-rec-dia','cc-rec-noche','cc-folios-dia','cc-horas-dia','cc-folios-noche','cc-horas-noche'].forEach(id=>$(id).value='');
+      ['ccr-eff-dia','ccr-desv-dia','ccr-eff-noche','ccr-desv-noche'].forEach(id=>{const e=$(id);e.textContent='—';e.className='ccr-val neutral';});
+      $('cc-totales-box').style.display='none';
     }
 
-    // Histórico (últimos 7 días)
-    const desde = new Date(S.fecha);
-    desde.setDate(desde.getDate() - 6);
-    const { data: hData } = await db.from('eo_proyecciones')
-      .select('fecha,folios_dia,folios_noche,terceros_dia,terceros_noche,eficiencia_esp_dia,eficiencia_esp_noche')
-      .gte('fecha', desde.toLocaleDateString('en-CA'))
-      .lte('fecha', S.fecha)
-      .order('fecha', { ascending: true });
-    const { data: cData } = await db.from('eo_cierres')
-      .select('fecha,folios_real_dia,horas_real_dia,eficiencia_real_dia,folios_real_noche,horas_real_noche,eficiencia_real_noche')
-      .gte('fecha', desde.toLocaleDateString('en-CA'))
-      .lte('fecha', S.fecha);
-
-    const cierresMap = {};
-    (cData || []).forEach(c => { cierresMap[c.fecha] = c; });
-
-    S.historico = (hData || []).map(p => {
-      const c = cierresMap[p.fecha] || {};
-      const tot_hrs = (p.folios_dia||0)+(p.folios_noche||0) > 0
-        ? (p.eficiencia_esp_dia||0)*8 + (p.eficiencia_esp_noche||0)*9.36 : 0;
-      return { ...p, ...c,
-        eff_real_gen: c.horas_real_dia && c.horas_real_noche
-          ? ((c.folios_real_dia||0)+(c.folios_real_noche||0)) / ((c.horas_real_dia||0)+(c.horas_real_noche||0))
-          : null
-      };
+    // Histórico 7 días (tabla)
+    const desde7 = new Date(S.fecha);
+    desde7.setDate(desde7.getDate()-6);
+    const hasta = S.fecha;
+    const [hRes7, cRes7] = await Promise.all([
+      db.from('eo_proyecciones')
+        .select('fecha,folios_dia,folios_noche,terceros_dia,terceros_noche,eficiencia_esp_dia,eficiencia_esp_noche')
+        .gte('fecha',desde7.toLocaleDateString('en-CA')).lte('fecha',hasta).order('fecha',{ascending:true}),
+      db.from('eo_cierres')
+        .select('fecha,folios_real_dia,horas_real_dia,eficiencia_real_dia,folios_real_noche,horas_real_noche,eficiencia_real_noche')
+        .gte('fecha',desde7.toLocaleDateString('en-CA')).lte('fecha',hasta)
+    ]);
+    const cm7={};
+    (cRes7.data||[]).forEach(c=>cm7[c.fecha]=c);
+    S.historico = (hRes7.data||[]).map(p=>{
+      const c = cm7[p.fecha]||{};
+      const hg = (c.horas_real_dia||0) + (c.horas_real_noche||0);
+      const fg = (c.folios_real_dia||0) + (c.folios_real_noche||0);
+      return {...p, ...c, eff_gen: hg>0 ? fg/hg : null};
     });
 
-    renderFlujos();
+    // Histórico 14 días (gráfico)
+    const desde14 = new Date(S.fecha);
+    desde14.setDate(desde14.getDate()-13);
+    const {data:cData14} = await db.from('eo_cierres')
+      .select('fecha,eficiencia_real_dia,eficiencia_real_noche,folios_real_dia,folios_real_noche')
+      .gte('fecha',desde14.toLocaleDateString('en-CA')).lte('fecha',hasta).order('fecha',{ascending:true});
+    S.historico14 = cData14 || [];
+
     renderPlanilla();
     renderHistorico();
     recalc();
-  } catch (e) {
-    toast('Error cargando fecha', true);
-    console.error(e);
-  } finally {
-    loading(false);
-  }
+  } catch(e) { toast('Error cargando fecha','error'); console.error(e); }
+  finally { loading(false); }
 }
 
-// ── DB: GUARDAR ───────────────────────────────────────
+async function cargarHistPct() {
+  try {
+    const dow = new Date(S.fecha+'T12:00:00').getDay();
+    const {data} = await db.from('eo_cierres')
+      .select('fecha,recibido_real_dia,recibido_real_noche')
+      .not('recibido_real_dia','is',null)
+      .not('recibido_real_noche','is',null)
+      .order('fecha',{ascending:false}).limit(60);
+    if(!data||!data.length) return;
+    const mismos = data.filter(r=>{
+      return new Date(r.fecha+'T12:00:00').getDay()===dow;
+    }).slice(0,4);
+    if(!mismos.length) return;
+    let sum=0, cnt=0;
+    mismos.forEach(r=>{
+      const t=(r.recibido_real_dia||0)+(r.recibido_real_noche||0);
+      if(t>0) { sum += (r.recibido_real_dia/t)*100; cnt++; }
+    });
+    if(cnt===0) return;
+    const avg_d = sum/cnt;
+    const avg_n = 100 - avg_d;
+    $('pct-dia').value = Math.round(avg_d);
+    $('pct-noche').value = Math.round(avg_n);
+    $('hist-dia-hint').textContent = `hist. ${avg_d.toFixed(1)}% (${cnt}d)`;
+    $('hist-noche-hint').textContent = `hist. ${avg_n.toFixed(1)}% (${cnt}d)`;
+  } catch(e) { console.warn('cargarHistPct',e); }
+}
+
+// ── DB: GUARDAR ──
 async function guardarPlanilla() {
   loading(true);
   try {
-    const pd = +document.getElementById('plan-dia').value || 0;
-    const pn = +document.getElementById('plan-noche').value || 0;
     await db.from('eo_proyecciones').upsert({
-      fecha: S.fecha, planilla_dia: pd, planilla_noche: pn,
+      fecha:S.fecha,
+      planilla_dia: num('plan-dia'),
+      planilla_noche: num('plan-noche'),
       updated_at: new Date().toISOString()
-    }, { onConflict: 'fecha' });
-    toast('Planilla guardada ✓');
+    },{onConflict:'fecha'});
+    toast('Planilla guardada ✓','ok');
     recalc();
-  } catch (e) { toast('Error al guardar', true); } finally { loading(false); }
+  } catch(e) { toast('Error al guardar','error'); console.error(e); }
+  finally { loading(false); }
 }
 
 async function guardarProyeccion() {
   loading(true);
   try {
-    const { dia, noche } = S.calc;
-    const pd = +document.getElementById('plan-dia').value || 0;
-    const pn = +document.getElementById('plan-noche').value || 0;
-    const cfg_d = getCfg('dia');
-    const cfg_n = getCfg('noche');
-
-    const { data: pRow, error } = await db.from('eo_proyecciones').upsert({
+    const {dia,noche} = S.calc;
+    await db.from('eo_proyecciones').upsert({
       fecha: S.fecha,
-      planilla_dia: pd, planilla_noche: pn,
+      planilla_dia: num('plan-dia'),
+      planilla_noche: num('plan-noche'),
+      total_folios: num('total-folios'),
+      pct_dia: num('pct-dia'),
+      pct_noche: num('pct-noche'),
       folios_dia: dia.folios, folios_noche: noche.folios,
-      split_lima_dia: cfg_d.split_lima, split_lima_noche: cfg_n.split_lima,
       prod_dia: dia.prod, prod_noche: noche.prod,
       terceros_dia: dia.terceros, terceros_noche: noche.terceros,
       eficiencia_esp_dia: dia.eficiencia, eficiencia_esp_noche: noche.eficiencia,
       updated_at: new Date().toISOString()
-    }, { onConflict: 'fecha' }).select().single();
-
-    if (error) throw error;
-
-    // Flujos detalle
-    await db.from('eo_proyeccion_flujos').delete().eq('proyeccion_id', pRow.id);
-    if (S.flujos_hoy.length) {
-      await db.from('eo_proyeccion_flujos').insert(
-        S.flujos_hoy.map(f => ({ proyeccion_id: pRow.id, flujo_id: f.flujo_id, folios: f.folios || 0 }))
-      );
-    }
-    S.proyeccion = pRow;
-    toast('Proyección guardada ✓');
-  } catch (e) { toast('Error al guardar', true); console.error(e); } finally { loading(false); }
+    },{onConflict:'fecha'});
+    toast('Proyección guardada ✓','ok');
+  } catch(e) { toast('Error al guardar','error'); console.error(e); }
+  finally { loading(false); }
 }
 
 async function guardarCierre() {
   loading(true);
   try {
-    const fd = +document.getElementById('cc-folios-dia').value || 0;
-    const hd = +document.getElementById('cc-horas-dia').value || 0;
-    const fn = +document.getElementById('cc-folios-noche').value || 0;
-    const hn = +document.getElementById('cc-horas-noche').value || 0;
-    const eff_d = hd > 0 ? fd / hd : null;
-    const eff_n = hn > 0 ? fn / hn : null;
-    const proy_d = S.proyeccion?.eficiencia_esp_dia;
-    const proy_n = S.proyeccion?.eficiencia_esp_noche;
-
+    const fd = num('cc-folios-dia');
+    const hd = num('cc-horas-dia');
+    const fn = num('cc-folios-noche');
+    const hn = num('cc-horas-noche');
+    const rd = num('cc-rec-dia');
+    const rn = num('cc-rec-noche');
+    const tot_rec = rd + rn;
+    const eff_d = hd>0 ? fd/hd : null;
+    const eff_n = hn>0 ? fn/hn : null;
+    const p = S.proyeccion;
     await db.from('eo_cierres').upsert({
       fecha: S.fecha,
+      total_recibido_real: tot_rec || null,
+      recibido_real_dia: rd || null, recibido_real_noche: rn || null,
       folios_real_dia: fd || null, horas_real_dia: hd || null, eficiencia_real_dia: eff_d,
       folios_real_noche: fn || null, horas_real_noche: hn || null, eficiencia_real_noche: eff_n,
-      desviacion_dia: proy_d && eff_d ? ((eff_d - proy_d) / proy_d) * 100 : null,
-      desviacion_noche: proy_n && eff_n ? ((eff_n - proy_n) / proy_n) * 100 : null,
+      desviacion_dia: p?.eficiencia_esp_dia && eff_d ? ((eff_d - p.eficiencia_esp_dia) / p.eficiencia_esp_dia) * 100 : null,
+      desviacion_noche: p?.eficiencia_esp_noche && eff_n ? ((eff_n - p.eficiencia_esp_noche) / p.eficiencia_esp_noche) * 100 : null,
       updated_at: new Date().toISOString()
-    }, { onConflict: 'fecha' });
-    toast('Cierre guardado ✓');
-  } catch (e) { toast('Error al guardar', true); } finally { loading(false); }
+    },{onConflict:'fecha'});
+    toast('Cierre guardado ✓','ok');
+  } catch(e) { toast('Error al guardar','error'); console.error(e); }
+  finally { loading(false); }
 }
 
 async function guardarConfig() {
   loading(true);
   try {
     const vals = [
-      { turno:'dia',   tipo_dia:'semana', productividad:+document.getElementById('cfg-pd-s').value, split_lima:+document.getElementById('cfg-sl-d').value, split_provincia:+document.getElementById('cfg-sp-d').value },
-      { turno:'noche', tipo_dia:'semana', productividad:+document.getElementById('cfg-pn-s').value, split_lima:+document.getElementById('cfg-sl-n').value, split_provincia:+document.getElementById('cfg-sp-n').value },
-      { turno:'dia',   tipo_dia:'finde',  productividad:+document.getElementById('cfg-pd-f').value, split_lima:+document.getElementById('cfg-sl-d').value, split_provincia:+document.getElementById('cfg-sp-d').value },
-      { turno:'noche', tipo_dia:'finde',  productividad:+document.getElementById('cfg-pn-f').value, split_lima:+document.getElementById('cfg-sl-n').value, split_provincia:+document.getElementById('cfg-sp-n').value },
+      {turno:'dia',tipo_dia:'semana',productividad:num('cfg-pd-s')},
+      {turno:'noche',tipo_dia:'semana',productividad:num('cfg-pn-s')},
+      {turno:'dia',tipo_dia:'finde',productividad:num('cfg-pd-f')},
+      {turno:'noche',tipo_dia:'finde',productividad:num('cfg-pn-f')},
     ];
-    for (const v of vals) {
+    for(const v of vals) {
       await db.from('eo_configuracion')
-        .update({ productividad: v.productividad, split_lima: v.split_lima, split_provincia: v.split_provincia, updated_at: new Date().toISOString() })
+        .update({productividad: v.productividad, updated_at: new Date().toISOString()})
         .eq('turno', v.turno).eq('tipo_dia', v.tipo_dia);
-      S.config[`${v.turno}_${v.tipo_dia}`] = { ...S.config[`${v.turno}_${v.tipo_dia}`], ...v };
+      S.config[`${v.turno}_${v.tipo_dia}`] = {...S.config[`${v.turno}_${v.tipo_dia}`], ...v};
     }
-    toast('Configuración guardada ✓');
+    toast('Configuración guardada ✓','ok');
     recalc();
-  } catch (e) { toast('Error al guardar', true); } finally { loading(false); }
+  } catch(e) { toast('Error al guardar','error'); console.error(e); }
+  finally { loading(false); }
 }
 
-async function addCatFlujo() {
-  const nombre = prompt('Nombre del flujo (ej: FLUJO_E):');
-  if (!nombre) return;
-  const turno = confirm('¿Es turno noche? (Cancelar = día)') ? 'noche' : 'dia';
-  loading(true);
-  try {
-    const { data } = await db.from('eo_flujos').insert({ nombre: nombre.toUpperCase(), turno, activo: true }).select().single();
-    S.catalogo.push(data);
-    renderConfig();
-    toast('Flujo agregado ✓');
-  } catch (e) { toast('Error al agregar', true); } finally { loading(false); }
-}
-
-async function delCatFlujo(id) {
-  if (!confirm('¿Eliminar este flujo del catálogo?')) return;
-  loading(true);
-  try {
-    await db.from('eo_flujos').update({ activo: false }).eq('id', id);
-    S.catalogo = S.catalogo.filter(f => f.id !== id);
-    renderConfig();
-    toast('Flujo eliminado ✓');
-  } catch (e) { toast('Error al eliminar', true); } finally { loading(false); }
-}
-
-// ── NAVEGACIÓN ────────────────────────────────────────
+// ── NAVEGACIÓN ──
 function showView(id, btn) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('v-' + id).classList.add('active');
-  btn.classList.add('active');
-  window.scrollTo(0, 0);
-  if (id === 'historico') renderHistorico();
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn, .nav-link').forEach(b=>b.classList.remove('active'));
+  $('v-'+id).classList.add('active');
+  document.querySelectorAll(`[data-view="${id}"]`).forEach(b=>b.classList.add('active'));
+  window.scrollTo(0,0);
+  if(id==='historico') renderHistorico();
 }
 
-// ── ARRANQUE ──────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  const fp = document.getElementById('fecha-picker');
+// ── ARRANQUE ──
+document.addEventListener('DOMContentLoaded',()=>{
+  const fp = $('fecha-picker');
   fp.value = S.fecha;
-  fp.addEventListener('change', () => {
-    S.fecha = fp.value;
-    cargarFecha();
-  });
+  fp.addEventListener('change',()=>{ S.fecha=fp.value; cargarFecha(); });
   cargarTodo();
 });
 </script>
