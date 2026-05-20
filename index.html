@@ -6,7 +6,7 @@
 <title>EO · Eficiencia Operacional</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Geist:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,800&family=Geist:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -21,177 +21,82 @@
 html,body{background:var(--bg);color:var(--text);font-family:'Geist',sans-serif;min-height:100vh}
 body{font-size:15px}
 
-/* ── LAYOUT RESPONSIVE ── */
 .app{display:flex;max-width:1100px;margin:0 auto;min-height:100vh}
 .side-nav{display:none}
 .app-main{flex:1;max-width:560px;margin:0 auto;width:100%;padding-bottom:calc(var(--nav) + 10px)}
 
 @media (min-width:900px){
   .app{gap:24px;padding:0 20px}
-  .side-nav{
-    display:flex;flex-direction:column;width:200px;
-    border-right:1px solid var(--border);padding:20px 12px;
-    position:sticky;top:0;height:100vh;
-  }
+  .side-nav{display:flex;flex-direction:column;width:200px;border-right:1px solid var(--border);padding:20px 12px;position:sticky;top:0;height:100vh}
   .bottom-nav{display:none !important}
   .app-main{margin:0;max-width:none;padding-bottom:20px}
 }
 
-/* ── SIDE NAV (desktop) ── */
-.side-brand{
-  font-family:'Fraunces',serif;font-weight:800;font-size:1.05rem;
-  letter-spacing:-0.02em;margin-bottom:24px;padding:8px;
-  background:linear-gradient(90deg,var(--noche),var(--hero-num));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-}
-.side-nav .nav-link{
-  display:flex;align-items:center;gap:12px;padding:11px 14px;
-  background:transparent;border:0;color:var(--soft);cursor:pointer;
-  font-family:'Geist',sans-serif;font-size:0.85rem;font-weight:500;
-  text-align:left;border-radius:6px;margin-bottom:3px;transition:all .15s;
-}
+.side-brand{font-family:'Fraunces',serif;font-weight:800;font-size:1.05rem;letter-spacing:-0.02em;margin-bottom:24px;padding:8px;background:linear-gradient(90deg,var(--noche),var(--hero-num));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.side-nav .nav-link{display:flex;align-items:center;gap:12px;padding:11px 14px;background:transparent;border:0;color:var(--soft);cursor:pointer;font-family:'Geist',sans-serif;font-size:0.85rem;font-weight:500;text-align:left;border-radius:6px;margin-bottom:3px;transition:all .15s}
 .side-nav .nav-link:hover{background:var(--card)}
 .side-nav .nav-link.active{background:rgba(129,140,248,0.12);color:var(--noche)}
 .side-nav .nav-link .ico{font-size:1.15rem}
 
-/* ── HEADER ── */
-.app-header{
-  padding:16px 16px 0;background:var(--bg);
-  position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);
-}
+.app-header{padding:16px 16px 0;background:var(--bg);position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border)}
 @media(min-width:900px){.app-header{padding:24px 0 0;border-bottom:1px solid var(--border)}}
-.brand-mobile{
-  font-family:'Fraunces',serif;font-weight:800;font-size:1.1rem;
-  letter-spacing:-0.02em;margin-bottom:10px;
-  background:linear-gradient(90deg,var(--noche),var(--hero-num));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-}
+.brand-mobile{font-family:'Fraunces',serif;font-weight:800;font-size:1.1rem;letter-spacing:-0.02em;margin-bottom:10px;background:linear-gradient(90deg,var(--noche),var(--hero-num));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 @media(min-width:900px){.brand-mobile{display:none}}
 .header-controls{display:flex;gap:8px;align-items:center;padding-bottom:12px;flex-wrap:wrap}
-.header-controls input[type="date"]{
-  background:var(--card);border:1px solid var(--border2);
-  padding:7px 10px;font-family:'JetBrains Mono',monospace;
-  font-size:0.8rem;color:var(--text);flex:1;color-scheme:dark;
-}
+.header-controls input[type="date"]{background:var(--card);border:1px solid var(--border2);padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--text);flex:1;color-scheme:dark}
 .turno-tabs{display:flex;border:1px solid var(--border2);overflow:hidden}
-.turno-tabs button{
-  border:0;background:var(--card);padding:7px 11px;
-  font-family:'JetBrains Mono',monospace;font-size:0.68rem;
-  text-transform:uppercase;letter-spacing:0.06em;
-  cursor:pointer;color:var(--soft);
-  border-right:1px solid var(--border2);transition:all .15s;
-}
+.turno-tabs button{border:0;background:var(--card);padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;color:var(--soft);border-right:1px solid var(--border2);transition:all .15s}
 .turno-tabs button:last-child{border-right:0}
 .turno-tabs button.active.t-noche{background:var(--noche);color:#000;font-weight:700}
 .turno-tabs button.active.t-dia{background:var(--dia);color:#000;font-weight:700}
 .turno-tabs button.active.t-ambos{background:var(--border2);color:var(--text);font-weight:700}
 
-/* ── VIEWS ── */
 .view{display:none;padding:18px 16px 24px}
 @media(min-width:900px){.view{padding:24px 0}}
 .view.active{display:block}
 
-/* ── BOTTOM NAV ── */
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;height:var(--nav);
-  background:var(--card);border-top:1px solid var(--border2);
-  display:flex;max-width:560px;margin:0 auto;z-index:20;
-}
-.nav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;cursor:pointer;border:0;background:transparent;color:var(--soft);
-  font-size:0.58rem;text-transform:uppercase;letter-spacing:0.08em;
-  font-family:'Geist',sans-serif;font-weight:500;transition:all .15s;
-}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:var(--card);border-top:1px solid var(--border2);display:flex;max-width:560px;margin:0 auto;z-index:20}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:0;background:transparent;color:var(--soft);font-size:0.58rem;text-transform:uppercase;letter-spacing:0.08em;font-family:'Geist',sans-serif;font-weight:500;transition:all .15s}
 .nav-btn .ico{font-size:1.2rem;line-height:1}
 .nav-btn.active{color:var(--noche);background:rgba(129,140,248,0.08)}
 
-/* ── UTILS ── */
-.sec-title{
-  font-family:'Fraunces',serif;font-weight:600;font-size:1rem;
-  margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline;
-}
+.sec-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem;margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline}
 .sec-title .hint{font-size:0.68rem;color:var(--soft);font-weight:400;font-style:italic}
 .divider{border:0;height:1px;background:var(--border);margin:22px 0}
-.pill{
-  display:inline-block;padding:2px 8px;font-size:0.65rem;
-  font-family:'JetBrains Mono',monospace;text-transform:uppercase;
-  letter-spacing:0.05em;font-weight:700;border-radius:2px;
-}
+.pill{display:inline-block;padding:2px 8px;font-size:0.65rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;border-radius:2px}
 .pill.dia{background:rgba(251,191,36,0.15);color:var(--dia);border:1px solid rgba(251,191,36,0.3)}
 .pill.noche{background:rgba(129,140,248,0.15);color:var(--noche);border:1px solid rgba(129,140,248,0.3)}
-.btn-primary{
-  width:100%;background:linear-gradient(135deg,var(--noche),#6366f1);color:#fff;
-  border:0;padding:14px;font-family:'Fraunces',serif;font-size:1rem;
-  font-weight:600;cursor:pointer;letter-spacing:-0.01em;transition:opacity .15s;
-}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--noche),#6366f1);color:#fff;border:0;padding:14px;font-family:'Fraunces',serif;font-size:1rem;font-weight:600;cursor:pointer;letter-spacing:-0.01em;transition:opacity .15s}
 .btn-primary:hover{opacity:.85}
 .btn-primary:disabled{opacity:.4;cursor:not-allowed}
 
-/* ── TOAST / LOADING ── */
-.toast{
-  position:fixed;top:16px;left:50%;transform:translateX(-50%);
-  background:var(--card2);color:var(--text);padding:10px 20px;
-  font-family:'JetBrains Mono',monospace;font-size:0.78rem;z-index:999;
-  opacity:0;transition:opacity .3s;pointer-events:none;
-  border:1px solid var(--border2);white-space:nowrap;
-}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--card2);color:var(--text);padding:10px 20px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--border2);white-space:nowrap}
 .toast.show{opacity:1}
 .toast.ok{border-color:var(--ok);color:var(--ok)}
 .toast.error{border-color:var(--alert);color:var(--alert)}
-.loading-overlay{
-  display:none;position:fixed;inset:0;background:rgba(5,5,5,0.85);
-  align-items:center;justify-content:center;z-index:50;
-  font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;color:var(--noche);
-}
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,5,0.85);align-items:center;justify-content:center;z-index:50;font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600;color:var(--noche)}
 .loading-overlay.active{display:flex}
 
-/* ══ HERO ══ */
-.hero{
-  background:var(--card);border:1px solid var(--border2);
-  padding:22px 20px;margin-bottom:20px;position:relative;overflow:hidden;
-}
-.hero::before{
-  content:'';position:absolute;top:-40px;right:-40px;
-  width:160px;height:160px;border-radius:50%;
-  background:radial-gradient(circle,rgba(129,140,248,0.12),transparent 70%);
-  pointer-events:none;
-}
-.hero-eye{
-  font-family:'JetBrains Mono',monospace;font-size:0.62rem;
-  text-transform:uppercase;letter-spacing:0.14em;color:var(--soft);margin-bottom:12px;
-}
+/* HERO */
+.hero{background:var(--card);border:1px solid var(--border2);padding:22px 20px;margin-bottom:20px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(129,140,248,0.12),transparent 70%);pointer-events:none}
+.hero-eye{font-family:'JetBrains Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.14em;color:var(--soft);margin-bottom:12px}
 .hero-main{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.hero-num{
-  font-family:'Fraunces',serif;font-weight:800;font-size:4.2rem;
-  line-height:0.9;color:var(--hero-num);letter-spacing:-0.04em;
-}
+.hero-num{font-family:'Fraunces',serif;font-weight:800;font-size:4.2rem;line-height:0.9;color:var(--hero-num);letter-spacing:-0.04em}
 .hero-text{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:400;color:var(--mid)}
-.hero-foot{
-  border-top:1px solid var(--border);margin-top:16px;padding-top:14px;
-  display:grid;grid-template-columns:1fr 1fr;gap:10px;
-  font-family:'JetBrains Mono',monospace;font-size:0.72rem;
-}
+.hero-foot{border-top:1px solid var(--border);margin-top:16px;padding-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-family:'JetBrains Mono',monospace;font-size:0.72rem}
 .hero-foot .lbl{color:var(--soft);display:block;margin-bottom:3px}
 .hero-foot .val{font-weight:700;font-size:0.9rem;color:var(--text)}
 .hero-foot .eff{color:var(--ok)}
 
-/* ── INPUT TOTAL ── */
+/* INPUT TOTAL */
 .total-input-wrap{background:var(--card);border:1px solid var(--border2);padding:20px;margin-bottom:20px}
-.total-input-wrap label{
-  display:block;font-family:'JetBrains Mono',monospace;font-size:0.65rem;
-  text-transform:uppercase;letter-spacing:0.12em;color:var(--soft);margin-bottom:10px;
-}
+.total-input-wrap label{display:block;font-family:'JetBrains Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--soft);margin-bottom:10px}
 .total-input-big{display:flex;align-items:center;gap:10px}
-.total-input-big input{
-  flex:1;background:var(--card2);border:1px solid var(--border2);padding:14px 16px;
-  font-family:'Fraunces',serif;font-size:2.4rem;font-weight:800;color:var(--text);
-  text-align:center;letter-spacing:-0.03em;transition:border-color .2s;
-}
+.total-input-big input{flex:1;background:var(--card2);border:1px solid var(--border2);padding:14px 16px;font-family:'Fraunces',serif;font-size:2.4rem;font-weight:800;color:var(--text);text-align:center;letter-spacing:-0.03em;transition:border-color .2s}
 .total-input-big input:focus{outline:0;border-color:var(--noche)}
 .total-unit{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--soft);white-space:nowrap}
 
-/* ── SPLIT PCT ── */
 .split-pct{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .split-pct-card{background:var(--card2);border:1px solid var(--border);padding:12px}
 .split-pct-card.dia-card{border-color:rgba(251,191,36,0.4)}
@@ -199,11 +104,7 @@ body{font-size:15px}
 .spc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .spc-hint{font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--soft);font-style:italic}
 .spc-pct-row{display:flex;align-items:center;gap:6px}
-.spc-pct-row input{
-  flex:1;background:transparent;border:0;border-bottom:1px solid var(--border2);
-  font-family:'Fraunces',serif;font-size:1.8rem;font-weight:800;
-  color:var(--text);text-align:right;padding:2px 0;
-}
+.spc-pct-row input{flex:1;background:transparent;border:0;border-bottom:1px solid var(--border2);font-family:'Fraunces',serif;font-size:1.8rem;font-weight:800;color:var(--text);text-align:right;padding:2px 0}
 .spc-pct-row input.dia-val{color:var(--dia)}
 .spc-pct-row input.noche-val{color:var(--noche)}
 .spc-pct-row input:focus{outline:0;border-bottom-color:var(--noche)}
@@ -211,7 +112,7 @@ body{font-size:15px}
 .spc-folios{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--mid);margin-top:6px}
 .spc-folios strong{color:var(--text)}
 
-/* ── TURN CARDS ── */
+/* TURN CARDS */
 .turn-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
 .tc{background:var(--card);border:1px solid var(--border2);padding:14px 12px;transition:border-color .2s}
 .tc.tc-dia:hover{border-color:rgba(251,191,36,0.3)}
@@ -225,7 +126,7 @@ body{font-size:15px}
 .tc-eff-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.2rem;letter-spacing:-0.02em;color:var(--ok)}
 .tc-eff-tgt{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--soft)}
 
-/* ── SIMULADOR ── */
+/* SIMULADOR */
 .sim-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .sim-field label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:6px}
 .stepper{display:flex;border:1px solid var(--border2);background:var(--card)}
@@ -244,7 +145,7 @@ body{font-size:15px}
 .sim-badge.warn{background:rgba(251,146,60,.1);color:var(--warn);border-color:rgba(251,146,60,.3)}
 .sim-badge.bad{background:rgba(248,113,113,.1);color:var(--alert);border-color:rgba(248,113,113,.3)}
 
-/* ── PLANILLA ── */
+/* PLANILLA */
 .plan-card{background:var(--card);border:1px solid var(--border2);padding:18px;margin-bottom:14px}
 .plan-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .plan-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem}
@@ -258,16 +159,28 @@ body{font-size:15px}
 .plan-total{background:linear-gradient(135deg,rgba(129,140,248,.15),rgba(167,139,250,.1));border:1px solid rgba(129,140,248,.3);padding:14px 16px;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:.82rem;display:flex;justify-content:space-between;align-items:center;color:var(--mid)}
 .plan-total strong{font-family:'Fraunces',serif;font-size:1.2rem;color:var(--noche)}
 
-/* ── CIERRE ── */
+/* CIERRE */
 .cierre-card{background:var(--card);border:1px solid var(--border2);padding:18px;margin-bottom:14px}
 .cc-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .cc-title{font-family:'Fraunces',serif;font-weight:600;font-size:1rem}
 .cc-section-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .cc-section-lbl:first-of-type{margin-top:0}
 .cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cc-field{margin-bottom:10px}
+.cc-field:last-child{margin-bottom:0}
 .cc-field label{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:5px}
 .cc-field input{width:100%;background:var(--card2);border:1px solid var(--border2);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;color:var(--text);transition:border-color .2s}
 .cc-field input:focus{outline:0;border-color:var(--noche)}
+/* Bloque personal/horas */
+.cc-pblock{margin-bottom:12px;padding:12px;background:var(--card2);border-left:3px solid var(--soft)}
+.cc-pblock.plan{border-left-color:var(--noche)}
+.cc-pblock.ter{border-left-color:var(--ok)}
+.cc-pblock-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.cc-pblock-title{font-family:'Fraunces',serif;font-size:.92rem;font-weight:600}
+.cc-pblock-hint{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--soft);font-style:italic}
+.cc-pblock input{background:var(--card)}
+.cc-hrs-total{background:linear-gradient(135deg,rgba(129,140,248,.08),rgba(167,139,250,.05));border:1px solid rgba(129,140,248,.2);padding:10px 14px;margin:6px 0 14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;display:flex;justify-content:space-between;color:var(--mid)}
+.cc-hrs-total strong{font-family:'Fraunces',serif;font-size:1.05rem;color:var(--noche)}
 .cc-result{background:var(--card2);padding:12px;margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;border:1px solid var(--border)}
 .ccr-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);display:block;margin-bottom:3px}
 .ccr-val{font-family:'Fraunces',serif;font-weight:700;font-size:1.4rem;letter-spacing:-0.02em}
@@ -276,8 +189,12 @@ body{font-size:15px}
 .cc-totales-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
 .cc-totales-row:last-child{margin-bottom:0}
 .cc-totales-row strong{font-family:'Fraunces',serif;font-size:1.05rem;color:var(--noche)}
+.cc-proy-box{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);padding:10px 12px;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mid)}
+.cc-proy-row{display:flex;justify-content:space-between;align-items:baseline}
+.cc-proy-row .lbl{color:var(--soft)}
+.cc-proy-row .val{font-weight:700;color:var(--hero-num)}
 
-/* ── HISTÓRICO ── */
+/* HISTÓRICO */
 .kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
 .kpi{background:var(--card);border:1px solid var(--border2);padding:12px}
 .kpi-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:4px}
@@ -285,7 +202,6 @@ body{font-size:15px}
 .kpi-val.ok{color:var(--ok)}.kpi-val.bad{color:var(--alert)}.kpi-val.neutral{color:var(--text)}
 .kpi-sub{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--soft);margin-top:3px}
 
-/* CHARTS */
 .chart-wrap{background:var(--card);border:1px solid var(--border2);padding:14px;margin-bottom:16px}
 .chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
 .chart-title{font-family:'Fraunces',serif;font-weight:600;font-size:.95rem}
@@ -294,10 +210,31 @@ body{font-size:15px}
 .lg-dot{width:9px;height:9px;border-radius:2px}
 .lg-dot.dia{background:var(--dia)}
 .lg-dot.noche{background:var(--noche)}
-.lg-line{width:14px;height:2px;background:currentColor;opacity:.6}
 .chart-svg{width:100%;height:auto;display:block}
 
-/* TABLA HIST */
+/* ANÁLISIS PERSONAL */
+.an-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px}
+@media (min-width:600px){.an-grid{grid-template-columns:1fr 1fr;gap:12px}}
+.an-card{background:var(--card);border:1px solid var(--border2);padding:14px}
+.an-head{margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.an-pill{display:inline-block;padding:3px 10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;border:1px solid}
+.an-pill.plan{background:rgba(129,140,248,.15);color:var(--noche);border-color:rgba(129,140,248,.3)}
+.an-pill.ter{background:rgba(74,222,128,.1);color:var(--ok);border-color:rgba(74,222,128,.3)}
+.an-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.an-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:4px}
+.an-big{font-family:'Fraunces',serif;font-weight:700;font-size:1.5rem;line-height:1;letter-spacing:-0.03em;color:var(--text)}
+.an-big.ok{color:var(--ok)}.an-big.warn{color:var(--warn)}.an-big.bad{color:var(--alert)}
+.an-sub{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--soft);margin-top:3px}
+.an-foot{padding-top:10px;border-top:1px dashed var(--border);font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.an-foot strong{color:var(--text)}
+.an-summary{background:var(--card2);border:1px solid var(--border);padding:12px 14px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--mid)}
+.an-summary-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.an-summary-row:last-child{margin-bottom:0}
+.an-summary-row strong{font-family:'Fraunces',serif;font-size:1rem;color:var(--text)}
+.an-summary-row strong.ok{color:var(--ok)}
+.an-summary-row strong.bad{color:var(--alert)}
+.an-empty{text-align:center;padding:30px 20px;color:var(--soft);font-size:.78rem;background:var(--card);border:1px solid var(--border2);margin-bottom:16px}
+
 .hist-tbl{width:100%;border-collapse:collapse}
 .hist-tbl th{text-align:left;padding:0 6px 8px;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);border-bottom:1px solid var(--border)}
 .hist-tbl th.num,.hist-tbl td.num{text-align:right;font-family:'JetBrains Mono',monospace}
@@ -309,21 +246,17 @@ body{font-size:15px}
 .desv{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.75rem}
 .desv.up{color:var(--ok)}.desv.dn{color:var(--alert)}.desv.fl{color:var(--soft)}
 
-/* ── CONFIG ── */
+/* CONFIG */
 .cfg-block{margin-bottom:26px}
 .cfg-block-t{font-family:'Fraunces',serif;font-weight:600;font-size:.88rem;color:var(--mid);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cf{margin-bottom:4px}
 .cf label{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);margin-bottom:5px}
 .cf input{width:100%;background:var(--card2);border:1px solid var(--border2);padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600;color:var(--text)}
 .cf input:focus{outline:0;border-color:var(--noche)}
 .cf .sub{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--soft);margin-top:3px}
 
-/* Desktop adjustments */
-@media (min-width:900px) {
-  .turn-cards{grid-template-columns:1fr 1fr 1fr;gap:14px}
-  .turn-cards .third-col{display:block}
-  .chart-svg{max-height:280px}
-}
+@media (min-width:900px){.turn-cards{grid-template-columns:1fr 1fr;gap:14px}.chart-svg{max-height:280px}}
 </style>
 </head>
 <body>
@@ -333,7 +266,6 @@ body{font-size:15px}
 
 <div class="app">
 
-  <!-- SIDE NAV (desktop only) -->
   <aside class="side-nav">
     <div class="side-brand">EO / Eficiencia Operacional</div>
     <button class="nav-link active" data-view="proyeccion" onclick="showView('proyeccion',this)"><span class="ico">📊</span>Proyección</button>
@@ -343,10 +275,8 @@ body{font-size:15px}
     <button class="nav-link" data-view="config" onclick="showView('config',this)"><span class="ico">⚙️</span>Config</button>
   </aside>
 
-  <!-- MAIN -->
   <main class="app-main">
 
-    <!-- HEADER -->
     <div class="app-header">
       <div class="brand-mobile">EO / Eficiencia Operacional</div>
       <div class="header-controls">
@@ -400,7 +330,7 @@ body{font-size:15px}
       </div>
 
       <div class="sec-title">Por turno <span class="hint">calculado</span></div>
-      <div class="turn-cards" id="turn-cards">
+      <div class="turn-cards">
         <div class="tc tc-dia" id="tc-dia">
           <div class="tc-lbl"><span class="pill dia">Día</span></div>
           <div class="tc-big dia" id="tc-dia-folios">—</div>
@@ -475,7 +405,7 @@ body{font-size:15px}
           <input type="number" id="plan-dia" value="0" min="0" oninput="renderPlanilla()">
           <button onclick="stepPlan('dia',1)">+</button>
         </div>
-        <div class="plan-calc">Jornada: <strong>8h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-dia-hrs">0h</strong></div>
+        <div class="plan-calc">Jornada: <strong id="plan-dia-jornada">8h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-dia-hrs">0h</strong></div>
       </div>
       <div class="plan-card" id="plan-card-noche">
         <div class="plan-head"><span class="pill noche">Noche</span><div class="plan-title">Turno Noche</div></div>
@@ -485,12 +415,9 @@ body{font-size:15px}
           <input type="number" id="plan-noche" value="0" min="0" oninput="renderPlanilla()">
           <button onclick="stepPlan('noche',1)">+</button>
         </div>
-        <div class="plan-calc">Jornada: <strong>9.36h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-noche-hrs">0h</strong></div>
+        <div class="plan-calc">Jornada: <strong id="plan-noche-jornada">9.36h</strong> &nbsp;·&nbsp; Horas disponibles: <strong id="plan-noche-hrs">0h</strong></div>
       </div>
-      <div class="plan-total">
-        <span>Total horas planilla hoy</span>
-        <strong id="plan-total-hrs">0h</strong>
-      </div>
+      <div class="plan-total"><span>Total horas planilla hoy</span><strong id="plan-total-hrs">0h</strong></div>
       <div style="margin-top:14px"><button class="btn-primary" onclick="guardarPlanilla()">Guardar planilla →</button></div>
     </div>
 
@@ -499,47 +426,111 @@ body{font-size:15px}
       <div class="sec-title" style="margin-bottom:14px">Cierre del día <span class="hint">selecciona la fecha y registra</span></div>
 
       <div class="cc-totales" id="cc-totales-box" style="display:none">
-        <div class="cc-totales-row">
-          <span>Total recibido:</span><strong id="cc-total-display">—</strong>
-        </div>
-        <div class="cc-totales-row">
-          <span>Split real:</span><strong id="cc-pct-display">—</strong>
-        </div>
+        <div class="cc-totales-row"><span>Total recibido:</span><strong id="cc-total-display">—</strong></div>
+        <div class="cc-totales-row"><span>Split real:</span><strong id="cc-pct-display">—</strong></div>
       </div>
 
+      <!-- TURNO DÍA -->
       <div class="cierre-card" id="cc-dia">
         <div class="cc-head"><span class="pill dia">Día</span><div class="cc-title">Turno Día</div></div>
+
         <div class="cc-section-lbl">Recepción real</div>
         <div class="cc-field">
           <label>Folios recibidos turno día</label>
           <input type="number" id="cc-rec-dia" placeholder="0" min="0" oninput="onCierreInput()">
         </div>
-        <div class="cc-section-lbl">Despacho real</div>
-        <div class="cc-grid">
-          <div class="cc-field"><label>Folios despachados</label><input type="number" id="cc-folios-dia" placeholder="0" min="0" oninput="calcCierre('dia')"></div>
-          <div class="cc-field"><label>Horas trabajadas</label><input type="number" id="cc-horas-dia" placeholder="0.0" step="0.1" min="0" oninput="calcCierre('dia')"></div>
+
+        <div class="cc-section-lbl">Personal y horas reales</div>
+        <div class="cc-pblock plan">
+          <div class="cc-pblock-head">
+            <span class="cc-pblock-title">Planilla</span>
+            <span class="cc-pblock-hint" id="cc-plan-teor-dia">—</span>
+          </div>
+          <div class="cc-grid">
+            <div class="cc-field"><label>Personas</label><input type="number" id="cc-plan-real-dia" placeholder="0" min="0" oninput="calcCierre('dia')"></div>
+            <div class="cc-field"><label>Horas reales</label><input type="number" id="cc-hrs-plan-dia" placeholder="0.0" step="0.1" min="0" oninput="calcCierre('dia')"></div>
+          </div>
         </div>
+        <div class="cc-pblock ter">
+          <div class="cc-pblock-head">
+            <span class="cc-pblock-title">Terceros</span>
+            <span class="cc-pblock-hint" id="cc-ter-teor-dia">—</span>
+          </div>
+          <div class="cc-grid">
+            <div class="cc-field"><label>Personas</label><input type="number" id="cc-ter-real-dia" placeholder="0" min="0" oninput="calcCierre('dia')"></div>
+            <div class="cc-field"><label>Horas reales</label><input type="number" id="cc-hrs-ter-dia" placeholder="0.0" step="0.1" min="0" oninput="calcCierre('dia')"></div>
+          </div>
+        </div>
+        <div class="cc-hrs-total"><span>Total horas reales</span><strong id="cc-hrs-tot-dia">—</strong></div>
+
+        <div class="cc-section-lbl">Despacho real</div>
+        <div class="cc-field">
+          <label>Folios despachados</label>
+          <input type="number" id="cc-folios-dia" placeholder="0" min="0" oninput="calcCierre('dia')">
+        </div>
+
         <div class="cc-result">
           <div><span class="ccr-lbl">Eficiencia real</span><div class="ccr-val neutral" id="ccr-eff-dia">—</div></div>
           <div><span class="ccr-lbl">Vs proyectado</span><div class="ccr-val neutral" id="ccr-desv-dia">—</div></div>
         </div>
+
+        <div class="cc-proy-box" id="cc-proy-dia" style="display:none">
+          <div class="cc-proy-row">
+            <span class="lbl">Proyectado:</span>
+            <span class="val"><span id="ccp-ter-dia">—</span> terceros · <span id="ccp-eff-dia">—</span> fol/h</span>
+          </div>
+        </div>
       </div>
 
+      <!-- TURNO NOCHE -->
       <div class="cierre-card" id="cc-noche">
         <div class="cc-head"><span class="pill noche">Noche</span><div class="cc-title">Turno Noche</div></div>
+
         <div class="cc-section-lbl">Recepción real</div>
         <div class="cc-field">
           <label>Folios recibidos turno noche</label>
           <input type="number" id="cc-rec-noche" placeholder="0" min="0" oninput="onCierreInput()">
         </div>
-        <div class="cc-section-lbl">Despacho real</div>
-        <div class="cc-grid">
-          <div class="cc-field"><label>Folios despachados</label><input type="number" id="cc-folios-noche" placeholder="0" min="0" oninput="calcCierre('noche')"></div>
-          <div class="cc-field"><label>Horas trabajadas</label><input type="number" id="cc-horas-noche" placeholder="0.0" step="0.1" min="0" oninput="calcCierre('noche')"></div>
+
+        <div class="cc-section-lbl">Personal y horas reales</div>
+        <div class="cc-pblock plan">
+          <div class="cc-pblock-head">
+            <span class="cc-pblock-title">Planilla</span>
+            <span class="cc-pblock-hint" id="cc-plan-teor-noche">—</span>
+          </div>
+          <div class="cc-grid">
+            <div class="cc-field"><label>Personas</label><input type="number" id="cc-plan-real-noche" placeholder="0" min="0" oninput="calcCierre('noche')"></div>
+            <div class="cc-field"><label>Horas reales</label><input type="number" id="cc-hrs-plan-noche" placeholder="0.0" step="0.1" min="0" oninput="calcCierre('noche')"></div>
+          </div>
         </div>
+        <div class="cc-pblock ter">
+          <div class="cc-pblock-head">
+            <span class="cc-pblock-title">Terceros</span>
+            <span class="cc-pblock-hint" id="cc-ter-teor-noche">—</span>
+          </div>
+          <div class="cc-grid">
+            <div class="cc-field"><label>Personas</label><input type="number" id="cc-ter-real-noche" placeholder="0" min="0" oninput="calcCierre('noche')"></div>
+            <div class="cc-field"><label>Horas reales</label><input type="number" id="cc-hrs-ter-noche" placeholder="0.0" step="0.1" min="0" oninput="calcCierre('noche')"></div>
+          </div>
+        </div>
+        <div class="cc-hrs-total"><span>Total horas reales</span><strong id="cc-hrs-tot-noche">—</strong></div>
+
+        <div class="cc-section-lbl">Despacho real</div>
+        <div class="cc-field">
+          <label>Folios despachados</label>
+          <input type="number" id="cc-folios-noche" placeholder="0" min="0" oninput="calcCierre('noche')">
+        </div>
+
         <div class="cc-result">
           <div><span class="ccr-lbl">Eficiencia real</span><div class="ccr-val neutral" id="ccr-eff-noche">—</div></div>
           <div><span class="ccr-lbl">Vs proyectado</span><div class="ccr-val neutral" id="ccr-desv-noche">—</div></div>
+        </div>
+
+        <div class="cc-proy-box" id="cc-proy-noche" style="display:none">
+          <div class="cc-proy-row">
+            <span class="lbl">Proyectado:</span>
+            <span class="val"><span id="ccp-ter-noche">—</span> terceros · <span id="ccp-eff-noche">—</span> fol/h</span>
+          </div>
         </div>
       </div>
 
@@ -556,10 +547,7 @@ body{font-size:15px}
       </div>
 
       <div class="chart-wrap">
-        <div class="chart-head">
-          <div class="chart-title">Tendencia de eficiencia (14 días)</div>
-          <div class="chart-legend" id="chart-eff-legend"></div>
-        </div>
+        <div class="chart-head"><div class="chart-title">Tendencia de eficiencia (14 días)</div><div class="chart-legend" id="chart-eff-legend"></div></div>
         <div id="chart-eff-container"></div>
       </div>
 
@@ -567,11 +555,62 @@ body{font-size:15px}
         <div class="chart-head">
           <div class="chart-title">Proyectado vs Despachado (7 días)</div>
           <div class="chart-legend">
-            <div class="lg-item"><span class="lg-dot" style="background:var(--soft)"></span>Proy.</div>
+            <div class="lg-item"><span class="lg-dot" style="background:#3a3a3a"></span>Proy.</div>
             <div class="lg-item"><span class="lg-dot" style="background:var(--ok)"></span>Real</div>
           </div>
         </div>
         <div id="chart-bar-container"></div>
+      </div>
+
+      <!-- NUEVO: ANÁLISIS DE PERSONAL -->
+      <div class="sec-title" style="margin-bottom:14px">Análisis de personal <span class="hint">cumplimiento y aporte</span></div>
+      <div id="an-empty" class="an-empty" style="display:none">Sin datos suficientes — ingresa cierres con personas y horas reales</div>
+      <div id="an-content">
+        <div class="an-grid">
+          <div class="an-card">
+            <div class="an-head"><span class="an-pill plan">Planilla</span></div>
+            <div class="an-stats">
+              <div>
+                <div class="an-lbl">Cumplimiento jornada</div>
+                <div class="an-big" id="an-cump-plan">—</div>
+                <div class="an-sub" id="an-cump-plan-sub">—</div>
+              </div>
+              <div>
+                <div class="an-lbl">Aporte de horas</div>
+                <div class="an-big" id="an-aporte-plan">—</div>
+                <div class="an-sub">del total trabajado</div>
+              </div>
+            </div>
+            <div class="an-foot">
+              <span>Reales: <strong id="an-hrs-plan">—</strong></span>
+              <span>Teóricas: <strong id="an-hrs-plan-teor">—</strong></span>
+            </div>
+          </div>
+          <div class="an-card">
+            <div class="an-head"><span class="an-pill ter">Terceros</span></div>
+            <div class="an-stats">
+              <div>
+                <div class="an-lbl">Cumplimiento jornada</div>
+                <div class="an-big" id="an-cump-ter">—</div>
+                <div class="an-sub" id="an-cump-ter-sub">—</div>
+              </div>
+              <div>
+                <div class="an-lbl">Aporte de horas</div>
+                <div class="an-big" id="an-aporte-ter">—</div>
+                <div class="an-sub">del total trabajado</div>
+              </div>
+            </div>
+            <div class="an-foot">
+              <span>Reales: <strong id="an-hrs-ter">—</strong></span>
+              <span>Teóricas: <strong id="an-hrs-ter-teor">—</strong></span>
+            </div>
+          </div>
+        </div>
+        <div class="an-summary">
+          <div class="an-summary-row"><span>Productividad real consolidada</span><strong id="an-prod-real">—</strong></div>
+          <div class="an-summary-row"><span>Target del turno</span><strong id="an-prod-tgt">—</strong></div>
+          <div class="an-summary-row"><span>Desviación vs target</span><strong id="an-prod-desv">—</strong></div>
+        </div>
       </div>
 
       <div class="sec-title" style="margin-bottom:14px">Detalle últimos 7 días</div>
@@ -593,7 +632,16 @@ body{font-size:15px}
         </div>
       </div>
       <div class="cfg-block">
-        <div class="cfg-block-t">% día / noche por defecto (sin histórico)</div>
+        <div class="cfg-block-t">Jornada laboral (horas/persona)</div>
+        <div class="cfg-grid">
+          <div class="cf"><label><span class="pill dia">Día</span> Planilla</label><input type="number" id="cfg-jp-d" value="8" step="0.01"><div class="sub">horas</div></div>
+          <div class="cf"><label><span class="pill noche">Noche</span> Planilla</label><input type="number" id="cfg-jp-n" value="9.36" step="0.01"><div class="sub">horas</div></div>
+          <div class="cf"><label><span class="pill dia">Día</span> Terceros</label><input type="number" id="cfg-jt-d" value="8" step="0.01"><div class="sub">horas</div></div>
+          <div class="cf"><label><span class="pill noche">Noche</span> Terceros</label><input type="number" id="cfg-jt-n" value="8" step="0.01"><div class="sub">horas</div></div>
+        </div>
+      </div>
+      <div class="cfg-block">
+        <div class="cfg-block-t">% día / noche default (sin histórico)</div>
         <div class="cfg-grid">
           <div class="cf"><label>% Día default</label><input type="number" id="cfg-pct-dia" value="30" min="0" max="100"><div class="sub">del total recibido</div></div>
           <div class="cf"><label>% Noche default</label><input type="number" id="cfg-pct-noche" value="70" min="0" max="100"><div class="sub">del total recibido</div></div>
@@ -605,7 +653,6 @@ body{font-size:15px}
   </main>
 </div>
 
-<!-- BOTTOM NAV (mobile) -->
 <nav class="bottom-nav">
   <button class="nav-btn active" data-view="proyeccion" onclick="showView('proyeccion',this)"><span class="ico">📊</span>Proyec.</button>
   <button class="nav-btn" data-view="planilla" onclick="showView('planilla',this)"><span class="ico">👥</span>Planilla</button>
@@ -627,11 +674,10 @@ const S = {
   proyeccion: null,
   cierre: null,
   historico: [],
-  historico14: [], // para gráfico
+  historico14: [],
   calc: {}
 };
 
-// ── UTILS ──
 function hoy() { return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' }); }
 function tipoDia(f) { const d = new Date(f+'T12:00:00'); return (d.getDay()===0||d.getDay()===6) ? 'finde' : 'semana'; }
 function getCfg(turno) { return S.config[`${turno}_${tipoDia(S.fecha)}`] || {}; }
@@ -648,11 +694,12 @@ function toast(msg, type='ok') {
 const $ = id => document.getElementById(id);
 const num = id => +($(id)?.value) || 0;
 
-// ── CÁLCULO ──
+// ── CÁLCULO PROYECCIÓN ──
 function calcTurno(turno) {
   const cfg = getCfg(turno);
   const prod = cfg.productividad || (turno==='dia'?15:25);
   const jornada = cfg.jornada_planilla || (turno==='dia'?8:9.36);
+  const jornadaT = cfg.jornada_tercero || 8;
   const planilla = num('plan-'+turno);
   const total = num('total-folios');
   const pct = num('pct-'+turno);
@@ -660,10 +707,10 @@ function calcTurno(turno) {
   const hrs_plan = planilla * jornada;
   const hrs_nec = folios>0 ? folios/prod : 0;
   const gap = Math.max(0, hrs_nec - hrs_plan);
-  const terceros = folios>0 ? Math.ceil(gap/8) : 0;
-  const hrs_total = hrs_plan + terceros*8;
+  const terceros = folios>0 ? Math.ceil(gap/jornadaT) : 0;
+  const hrs_total = hrs_plan + terceros*jornadaT;
   const eficiencia = hrs_total>0 ? folios/hrs_total : 0;
-  return {folios,prod,planilla,hrs_plan,hrs_nec,gap,terceros,eficiencia,pct};
+  return {folios,prod,planilla,hrs_plan,hrs_nec,gap,terceros,eficiencia,pct,jornada,jornadaT};
 }
 
 function recalc() {
@@ -672,7 +719,7 @@ function recalc() {
   S.calc = {dia,noche};
   const total = dia.folios + noche.folios;
   const total_t = dia.terceros + noche.terceros;
-  const hrs_tot = dia.hrs_plan + dia.terceros*8 + noche.hrs_plan + noche.terceros*8;
+  const hrs_tot = dia.hrs_plan + dia.terceros*dia.jornadaT + noche.hrs_plan + noche.terceros*noche.jornadaT;
   const eff_gen = hrs_tot>0 ? total/hrs_tot : 0;
 
   $('h-terceros').textContent = total>0 ? total_t : '—';
@@ -697,21 +744,17 @@ function recalc() {
   renderSim();
 }
 
-// ── INPUTS ──
 function onTotalChange() {
-  const total = num('total-folios');
-  if(total<0) $('total-folios').value=0;
+  if(num('total-folios')<0) $('total-folios').value=0;
   recalc();
 }
 function onPctChange(t) {
   let val = clamp(num('pct-'+t), 0, 100);
   $('pct-'+t).value = val;
-  const other = t==='dia' ? 'noche' : 'dia';
-  $('pct-'+other).value = 100 - val;
+  $('pct-'+(t==='dia'?'noche':'dia')).value = 100 - val;
   recalc();
 }
 
-// ── FILTRO TURNO ──
 function applyTurnoFilter() {
   const t = S.turno;
   $('tc-dia').style.display = t==='noche' ? 'none' : 'block';
@@ -731,13 +774,19 @@ function setTurno(t, btn) {
 
 // ── PLANILLA ──
 function renderPlanilla() {
+  const cfg_d = getCfg('dia');
+  const cfg_n = getCfg('noche');
+  const jp_d = cfg_d.jornada_planilla || 8;
+  const jp_n = cfg_n.jornada_planilla || 9.36;
   const pd = clamp(num('plan-dia'),0,999);
   const pn = clamp(num('plan-noche'),0,999);
   $('plan-dia').value = pd;
   $('plan-noche').value = pn;
-  $('plan-dia-hrs').textContent = fmt(pd*8,1)+'h';
-  $('plan-noche-hrs').textContent = fmt(pn*9.36,1)+'h';
-  $('plan-total-hrs').textContent = fmt(pd*8+pn*9.36,1)+'h';
+  $('plan-dia-jornada').textContent = jp_d+'h';
+  $('plan-noche-jornada').textContent = jp_n+'h';
+  $('plan-dia-hrs').textContent = fmt(pd*jp_d,1)+'h';
+  $('plan-noche-hrs').textContent = fmt(pn*jp_n,1)+'h';
+  $('plan-total-hrs').textContent = fmt(pd*jp_d+pn*jp_n,1)+'h';
   recalc();
 }
 function stepPlan(t,d) {
@@ -750,20 +799,19 @@ function stepPlan(t,d) {
 function renderSim() {
   ['dia','noche'].forEach(t=>{
     const c = S.calc[t]||{};
+    const jT = c.jornadaT || 8;
     const n3 = Math.max(0, num('sim-'+t));
-    const hrs = (c.hrs_plan||0) + n3*8;
+    const hrs = (c.hrs_plan||0) + n3*jT;
     const eff = hrs>0 ? (c.folios||0)/hrs : 0;
-    const cob = c.hrs_nec>0 ? hrs/c.hrs_nec : (c.folios>0?1:1);
+    const cob = c.hrs_nec>0 ? hrs/c.hrs_nec : 1;
     const el_eff = $('sim-eff-'+t);
     const el_b = $('sim-badge-'+t);
     el_eff.textContent = fmt(eff);
-    el_eff.className = 'sim-eff '+(cob>=1?'ok':cob>=0.9?'warn':'bad');
+    el_eff.className = 'sim-eff '+(c.folios===0?'':cob>=1?'ok':cob>=0.9?'warn':'bad');
+    if(!c.folios) { el_b.innerHTML=''; return; }
     const falta = Math.max(0,(c.hrs_nec||0)-hrs);
-    if(c.folios===0) {
-      el_b.innerHTML = '';
-    } else if(cob>=1) {
-      el_b.innerHTML = '<div class="sim-badge ok">✓ alcanza</div>';
-    } else {
+    if(cob>=1) el_b.innerHTML = '<div class="sim-badge ok">✓ alcanza</div>';
+    else {
       const cl = cob>=0.9 ? 'warn' : 'bad';
       const ic = cob>=0.9 ? '⚠' : '✕';
       el_b.innerHTML = `<div class="sim-badge ${cl}">${ic} faltan ${fmt(falta,1)}h</div>`;
@@ -778,17 +826,45 @@ function stepSim(t,d) {
 
 // ── CIERRE ──
 function calcCierre(t) {
+  const cfg = getCfg(t);
+  const jp = cfg.jornada_planilla || (t==='dia'?8:9.36);
+  const jt = cfg.jornada_tercero || 8;
+
+  const plan_real = num(`cc-plan-real-${t}`);
+  const ter_real = num(`cc-ter-real-${t}`);
+  const h_plan = num(`cc-hrs-plan-${t}`);
+  const h_ter = num(`cc-hrs-ter-${t}`);
+  const h_total = h_plan + h_ter;
   const f = num(`cc-folios-${t}`);
-  const h = num(`cc-horas-${t}`);
-  const eff = h>0 ? f/h : 0;
-  const proy_eff = S.calc[t]?.eficiencia || S.proyeccion?.[`eficiencia_esp_${t}`] || 0;
-  const desv = proy_eff>0 && h>0 ? ((eff-proy_eff)/proy_eff)*100 : 0;
+  const eff = h_total>0 ? f/h_total : 0;
+
+  // Hints teóricos
+  $(`cc-plan-teor-${t}`).textContent = plan_real>0 ? `teórico: ${plan_real} × ${jp}h = ${fmt(plan_real*jp,1)}h` : `jornada ${jp}h`;
+  $(`cc-ter-teor-${t}`).textContent = ter_real>0 ? `teórico: ${ter_real} × ${jt}h = ${fmt(ter_real*jt,1)}h` : `jornada ${jt}h`;
+
+  // Total horas
+  $(`cc-hrs-tot-${t}`).textContent = h_total>0 ? fmt(h_total,1)+'h' : '—';
+
+  // Eficiencia + desviación
+  const proy_eff = S.proyeccion?.[`eficiencia_esp_${t}`] || S.calc[t]?.eficiencia || 0;
+  const proy_ter = S.proyeccion?.[`terceros_${t}`];
+  const desv = proy_eff>0 && h_total>0 ? ((eff-proy_eff)/proy_eff)*100 : 0;
+
   const el_eff = $(`ccr-eff-${t}`);
   const el_desv = $(`ccr-desv-${t}`);
-  el_eff.textContent = h>0 ? fmt(eff) : '—';
-  el_eff.className = 'ccr-val ' + (h===0?'neutral':eff>=proy_eff?'ok':'bad');
-  el_desv.textContent = h>0 && proy_eff>0 ? (desv>=0?'+':'')+fmt(desv)+'%' : '—';
-  el_desv.className = 'ccr-val ' + (h===0||proy_eff===0?'neutral':desv>=0?'ok':'bad');
+  el_eff.textContent = h_total>0 ? fmt(eff) : '—';
+  el_eff.className = 'ccr-val '+(h_total===0?'neutral':eff>=proy_eff?'ok':'bad');
+  el_desv.textContent = h_total>0 && proy_eff>0 ? (desv>=0?'+':'')+fmt(desv)+'%' : '—';
+  el_desv.className = 'ccr-val '+(h_total===0||proy_eff===0?'neutral':desv>=0?'ok':'bad');
+
+  // Bloque proyectado
+  if(S.proyeccion && proy_eff>0) {
+    $(`cc-proy-${t}`).style.display = 'block';
+    $(`ccp-ter-${t}`).textContent = proy_ter != null ? proy_ter : '—';
+    $(`ccp-eff-${t}`).textContent = fmt(proy_eff);
+  } else {
+    $(`cc-proy-${t}`).style.display = 'none';
+  }
 }
 function onCierreInput() {
   const rd = num('cc-rec-dia');
@@ -798,15 +874,11 @@ function onCierreInput() {
   if(tot>0) {
     box.style.display = 'block';
     $('cc-total-display').textContent = fmtInt(tot);
-    const pd = (rd/tot*100).toFixed(1);
-    const pn = (rn/tot*100).toFixed(1);
-    $('cc-pct-display').textContent = `${pd}% día · ${pn}% noche`;
-  } else {
-    box.style.display = 'none';
-  }
+    $('cc-pct-display').textContent = `${(rd/tot*100).toFixed(1)}% día · ${(rn/tot*100).toFixed(1)}% noche`;
+  } else box.style.display = 'none';
 }
 
-// ── HISTÓRICO RENDER ──
+// ── HISTÓRICO ──
 function renderHistorico() {
   const t = S.turno;
   const tbody = $('hist-tbody');
@@ -825,7 +897,6 @@ function renderHistorico() {
     if(t==='dia') { eff = row.eficiencia_real_dia; t3 = row.terceros_dia||0; }
     else if(t==='noche') { eff = row.eficiencia_real_noche; t3 = row.terceros_noche||0; }
     else { eff = row.eff_gen; t3 = (row.terceros_dia||0)+(row.terceros_noche||0); }
-
     const desv = proy>0 && desp>0 ? ((desp-proy)/proy)*100 : null;
     const dc = desv==null ? 'fl' : desv>=0 ? 'up' : 'dn';
     const dt = desv==null ? '—' : (desv>=0?'+':'')+fmt(Math.abs(desv))+'%';
@@ -833,7 +904,6 @@ function renderHistorico() {
     tot_proy+=proy;
     if(eff) {tot_eff+=eff; cnt_eff++;}
     if(t3>0) {tot_3ros+=t3; cnt_3ros++;}
-
     tbody.innerHTML += `<tr class="${esHoy?'today-row':''}">
       <td><span class="dname">${dow}${esHoy?' · hoy':''}</span><span class="ddate">${fmtDate}</span></td>
       <td class="num">${fmtInt(proy)}</td>
@@ -843,171 +913,201 @@ function renderHistorico() {
     </tr>`;
   });
 
-  // KPIs
   const tgt = t==='dia' ? 15 : t==='noche' ? 25 : 20;
   const eff_p = cnt_eff>0 ? tot_eff/cnt_eff : null;
   const el_eff = $('kpi-eff');
   el_eff.textContent = eff_p ? fmt(eff_p) : '—';
-  el_eff.className = 'kpi-val ' + (eff_p ? (eff_p>=tgt?'ok':'bad') : 'neutral');
+  el_eff.className = 'kpi-val '+(eff_p ? (eff_p>=tgt?'ok':'bad') : 'neutral');
   $('kpi-eff-sub').textContent = `target ${tgt}`;
   $('kpi-folios').textContent = tot_desp>0 ? fmtInt(tot_desp) : '—';
   $('kpi-folios-sub').textContent = `proy ${fmtInt(tot_proy)}`;
   $('kpi-terceros').textContent = cnt_3ros>0 ? fmt(tot_3ros/cnt_3ros,1) : '—';
 
-  // Charts
   renderChartEficiencia();
   renderChartBarras();
+  renderAnalisis();
 }
 
-// ── CHARTS ──
+// ── ANÁLISIS DE PERSONAL ──
+function renderAnalisis() {
+  const t = S.turno;
+  const cfg_d = getCfg('dia'), cfg_n = getCfg('noche');
+  const jp_d = cfg_d.jornada_planilla || 8, jp_n = cfg_n.jornada_planilla || 9.36;
+  const jt_d = cfg_d.jornada_tercero || 8, jt_n = cfg_n.jornada_tercero || 8;
+
+  let p_horas_teor=0, p_horas_real=0;
+  let t_horas_teor=0, t_horas_real=0;
+  let folios=0;
+
+  S.historico.forEach(row=>{
+    if(t==='dia'||t==='ambos') {
+      if(row.planilla_asistio_dia) p_horas_teor += row.planilla_asistio_dia * jp_d;
+      if(row.horas_real_planilla_dia) p_horas_real += +row.horas_real_planilla_dia;
+      if(row.terceros_asistio_dia) t_horas_teor += row.terceros_asistio_dia * jt_d;
+      if(row.horas_real_terceros_dia) t_horas_real += +row.horas_real_terceros_dia;
+      folios += row.folios_real_dia || 0;
+    }
+    if(t==='noche'||t==='ambos') {
+      if(row.planilla_asistio_noche) p_horas_teor += row.planilla_asistio_noche * jp_n;
+      if(row.horas_real_planilla_noche) p_horas_real += +row.horas_real_planilla_noche;
+      if(row.terceros_asistio_noche) t_horas_teor += row.terceros_asistio_noche * jt_n;
+      if(row.horas_real_terceros_noche) t_horas_real += +row.horas_real_terceros_noche;
+      folios += row.folios_real_noche || 0;
+    }
+  });
+
+  const total_horas = p_horas_real + t_horas_real;
+  const hayData = p_horas_real>0 || t_horas_real>0;
+
+  if(!hayData) {
+    $('an-empty').style.display = 'block';
+    $('an-content').style.display = 'none';
+    return;
+  }
+  $('an-empty').style.display = 'none';
+  $('an-content').style.display = 'block';
+
+  // Cumplimiento
+  const cump_p = p_horas_teor>0 ? p_horas_real/p_horas_teor*100 : null;
+  const cump_t = t_horas_teor>0 ? t_horas_real/t_horas_teor*100 : null;
+  const aporte_p = total_horas>0 ? p_horas_real/total_horas*100 : null;
+  const aporte_t = total_horas>0 ? t_horas_real/total_horas*100 : null;
+
+  // PLANILLA
+  const elCP = $('an-cump-plan');
+  if(cump_p != null) {
+    elCP.textContent = fmt(cump_p,0)+'%';
+    elCP.className = 'an-big ' + (cump_p>=95?'ok':cump_p>=85?'warn':'bad');
+    const diff = p_horas_real - p_horas_teor;
+    $('an-cump-plan-sub').textContent = (diff>=0?'+':'') + fmt(diff,1) + 'h vs teórico';
+  } else {
+    elCP.textContent = '—'; elCP.className = 'an-big';
+    $('an-cump-plan-sub').textContent = 'sin datos';
+  }
+  $('an-aporte-plan').textContent = aporte_p != null ? fmt(aporte_p,0)+'%' : '—';
+  $('an-hrs-plan').textContent = fmt(p_horas_real,1)+'h';
+  $('an-hrs-plan-teor').textContent = fmt(p_horas_teor,1)+'h';
+
+  // TERCEROS
+  const elCT = $('an-cump-ter');
+  if(cump_t != null) {
+    elCT.textContent = fmt(cump_t,0)+'%';
+    elCT.className = 'an-big ' + (cump_t>=95?'ok':cump_t>=85?'warn':'bad');
+    const diff = t_horas_real - t_horas_teor;
+    $('an-cump-ter-sub').textContent = (diff>=0?'+':'') + fmt(diff,1) + 'h vs teórico';
+  } else {
+    elCT.textContent = '—'; elCT.className = 'an-big';
+    $('an-cump-ter-sub').textContent = 'sin datos';
+  }
+  $('an-aporte-ter').textContent = aporte_t != null ? fmt(aporte_t,0)+'%' : '—';
+  $('an-hrs-ter').textContent = fmt(t_horas_real,1)+'h';
+  $('an-hrs-ter-teor').textContent = fmt(t_horas_teor,1)+'h';
+
+  // Productividad consolidada
+  const prod_real = total_horas>0 ? folios/total_horas : null;
+  const tgt = t==='dia' ? 15 : t==='noche' ? 25 : 20;
+  $('an-prod-real').textContent = prod_real != null ? fmt(prod_real)+' fol/h' : '—';
+  const elTgt = $('an-prod-tgt');
+  elTgt.textContent = tgt + ' fol/h';
+  const elDesv = $('an-prod-desv');
+  if(prod_real != null) {
+    const desv = ((prod_real-tgt)/tgt)*100;
+    elDesv.textContent = (desv>=0?'+':'') + fmt(desv) + '%';
+    elDesv.className = desv>=0 ? 'ok' : 'bad';
+  } else {
+    elDesv.textContent = '—'; elDesv.className = '';
+  }
+}
+
 function renderChartEficiencia() {
-  const container = $('chart-eff-container');
+  const c = $('chart-eff-container');
   const data = S.historico14;
   const t = S.turno;
   const showDia = t==='dia' || t==='ambos';
   const showNoche = t==='noche' || t==='ambos';
-
-  // Legend
   let leg = '';
   if(showDia) leg += `<div class="lg-item"><span class="lg-dot dia"></span>Día · target 15</div>`;
   if(showNoche) leg += `<div class="lg-item"><span class="lg-dot noche"></span>Noche · target 25</div>`;
   $('chart-eff-legend').innerHTML = leg;
 
   if(!data || data.length===0) {
-    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--soft);font-size:.8rem">Sin datos suficientes aún</div>';
+    c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--soft);font-size:.8rem">Sin datos suficientes aún</div>';
     return;
   }
-
-  const W = 600, H = 220;
-  const M = {top:20,right:14,bottom:30,left:36};
-  const w = W - M.left - M.right;
-  const h = H - M.top - M.bottom;
-  const n = data.length;
-
-  // Recoger valores para escala Y
+  const W=600,H=220,M={top:20,right:14,bottom:30,left:36};
+  const w=W-M.left-M.right, h=H-M.top-M.bottom, n=data.length;
   let vals = [];
   data.forEach(d=>{
-    if(showDia && d.eficiencia_real_dia) vals.push(d.eficiencia_real_dia);
-    if(showNoche && d.eficiencia_real_noche) vals.push(d.eficiencia_real_noche);
+    if(showDia && d.eficiencia_real_dia) vals.push(+d.eficiencia_real_dia);
+    if(showNoche && d.eficiencia_real_noche) vals.push(+d.eficiencia_real_noche);
   });
   if(showDia) vals.push(15);
   if(showNoche) vals.push(25);
-  const maxY = vals.length ? Math.max(...vals) * 1.2 : 30;
-
+  const maxY = vals.length ? Math.max(...vals)*1.2 : 30;
   let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="chart-svg" preserveAspectRatio="xMidYMid meet">`;
-
-  // Grid + Y labels
-  for(let i=0; i<=4; i++) {
-    const y = M.top + (h * i / 4);
-    const val = maxY * (1 - i/4);
-    svg += `<line x1="${M.left}" y1="${y}" x2="${M.left+w}" y2="${y}" stroke="#1e1e1e" stroke-width="1"/>`;
-    svg += `<text x="${M.left-6}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#666">${val.toFixed(0)}</text>`;
+  for(let i=0;i<=4;i++){
+    const y = M.top+(h*i/4); const v = maxY*(1-i/4);
+    svg += `<line x1="${M.left}" y1="${y}" x2="${M.left+w}" y2="${y}" stroke="#1e1e1e"/>`;
+    svg += `<text x="${M.left-6}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#666">${v.toFixed(0)}</text>`;
   }
-
-  // Target lines
-  if(showDia) {
-    const yT = M.top + h - (h * 15 / maxY);
-    svg += `<line x1="${M.left}" y1="${yT}" x2="${M.left+w}" y2="${yT}" stroke="#fbbf24" stroke-dasharray="4,3" stroke-width="1" opacity="0.5"/>`;
-  }
-  if(showNoche) {
-    const yT = M.top + h - (h * 25 / maxY);
-    svg += `<line x1="${M.left}" y1="${yT}" x2="${M.left+w}" y2="${yT}" stroke="#818cf8" stroke-dasharray="4,3" stroke-width="1" opacity="0.5"/>`;
-  }
-
-  // Draw lines for each turno
-  const drawLine = (key, color) => {
-    let pts = [];
-    data.forEach((d,i)=>{
-      if(d[key]) {
-        const x = n>1 ? M.left + (w*i/(n-1)) : M.left + w/2;
-        const y = M.top + h - (h * d[key] / maxY);
-        pts.push({x,y,v:d[key]});
-      }
-    });
-    if(pts.length===0) return;
-    // Path
-    let path = '';
-    pts.forEach((p,i)=>{ path += (i===0?'M ':' L ') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); });
+  if(showDia){const yT=M.top+h-(h*15/maxY);svg+=`<line x1="${M.left}" y1="${yT}" x2="${M.left+w}" y2="${yT}" stroke="#fbbf24" stroke-dasharray="4,3" stroke-width="1" opacity="0.5"/>`;}
+  if(showNoche){const yT=M.top+h-(h*25/maxY);svg+=`<line x1="${M.left}" y1="${yT}" x2="${M.left+w}" y2="${yT}" stroke="#818cf8" stroke-dasharray="4,3" stroke-width="1" opacity="0.5"/>`;}
+  const drawLine = (key,color)=>{
+    let pts=[];
+    data.forEach((d,i)=>{if(d[key]){const x=n>1?M.left+(w*i/(n-1)):M.left+w/2;const y=M.top+h-(h*(+d[key])/maxY);pts.push({x,y});}});
+    if(!pts.length) return;
+    let path='';
+    pts.forEach((p,i)=>{path+=(i===0?'M ':' L ')+p.x.toFixed(1)+' '+p.y.toFixed(1);});
     svg += `<path d="${path}" stroke="${color}" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>`;
-    // Dots
-    pts.forEach(p=>{
-      svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#0f0f0f" stroke="${color}" stroke-width="2"/>`;
-    });
+    pts.forEach(p=>{svg+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#0f0f0f" stroke="${color}" stroke-width="2"/>`;});
   };
   if(showDia) drawLine('eficiencia_real_dia','#fbbf24');
   if(showNoche) drawLine('eficiencia_real_noche','#818cf8');
-
-  // X axis labels
   data.forEach((d,i)=>{
-    if(i % Math.ceil(n/7) === 0 || i === n-1) {
-      const x = n>1 ? M.left + (w*i/(n-1)) : M.left + w/2;
-      const fd = new Date(d.fecha+'T12:00:00');
-      const lbl = fd.getDate();
+    if(i % Math.ceil(n/7)===0 || i===n-1){
+      const x = n>1?M.left+(w*i/(n-1)):M.left+w/2;
+      const lbl = new Date(d.fecha+'T12:00:00').getDate();
       svg += `<text x="${x.toFixed(1)}" y="${M.top+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#666">${lbl}</text>`;
     }
   });
-
   svg += '</svg>';
-  container.innerHTML = svg;
+  c.innerHTML = svg;
 }
 
 function renderChartBarras() {
-  const container = $('chart-bar-container');
+  const c = $('chart-bar-container');
   const data = S.historico;
   const t = S.turno;
-
   if(!data || data.length===0) {
-    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--soft);font-size:.8rem">Sin datos suficientes</div>';
+    c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--soft);font-size:.8rem">Sin datos suficientes</div>';
     return;
   }
-
-  const W = 600, H = 200;
-  const M = {top:20,right:14,bottom:30,left:42};
-  const w = W - M.left - M.right;
-  const h = H - M.top - M.bottom;
-  const n = data.length;
-
-  // Para cada día, calcular proy y real según turno
+  const W=600,H=200,M={top:20,right:14,bottom:30,left:42};
+  const w=W-M.left-M.right, h=H-M.top-M.bottom, n=data.length;
   const items = data.map(d=>{
     let proy=0, real=0;
-    if(t==='dia'||t==='ambos') { proy+=(d.folios_dia||0); real+=(d.folios_real_dia||0); }
-    if(t==='noche'||t==='ambos') { proy+=(d.folios_noche||0); real+=(d.folios_real_noche||0); }
-    return {fecha:d.fecha, proy, real};
+    if(t==='dia'||t==='ambos'){proy+=(d.folios_dia||0);real+=(d.folios_real_dia||0);}
+    if(t==='noche'||t==='ambos'){proy+=(d.folios_noche||0);real+=(d.folios_real_noche||0);}
+    return {fecha:d.fecha,proy,real};
   });
-
-  const maxY = Math.max(...items.flatMap(i=>[i.proy,i.real]), 1) * 1.15;
-  const barGroupW = w / n;
-  const barW = (barGroupW - 8) / 2;
-
+  const maxY = Math.max(...items.flatMap(i=>[i.proy,i.real]),1)*1.15;
+  const barGroupW = w/n;
+  const barW = (barGroupW-8)/2;
   let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="chart-svg" preserveAspectRatio="xMidYMid meet">`;
-
-  // Grid
-  for(let i=0; i<=3; i++) {
-    const y = M.top + (h * i / 3);
-    const val = maxY * (1 - i/3);
+  for(let i=0;i<=3;i++){
+    const y = M.top+(h*i/3); const v = maxY*(1-i/3);
     svg += `<line x1="${M.left}" y1="${y}" x2="${M.left+w}" y2="${y}" stroke="#1e1e1e"/>`;
-    svg += `<text x="${M.left-6}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#666">${val>=1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0)}</text>`;
+    svg += `<text x="${M.left-6}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#666">${v>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0)}</text>`;
   }
-
-  // Bars
   items.forEach((it,i)=>{
-    const groupX = M.left + barGroupW*i + 4;
-    if(it.proy>0) {
-      const bh = h * it.proy / maxY;
-      svg += `<rect x="${groupX.toFixed(1)}" y="${(M.top+h-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="#3a3a3a"/>`;
-    }
-    if(it.real>0) {
-      const bh = h * it.real / maxY;
-      svg += `<rect x="${(groupX+barW).toFixed(1)}" y="${(M.top+h-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="#4ade80"/>`;
-    }
-    // X label
-    const fd = new Date(it.fecha+'T12:00:00');
-    const lblX = groupX + barW;
-    svg += `<text x="${lblX.toFixed(1)}" y="${M.top+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#666">${fd.getDate()}</text>`;
+    const gx = M.left+barGroupW*i+4;
+    if(it.proy>0){const bh=h*it.proy/maxY;svg+=`<rect x="${gx.toFixed(1)}" y="${(M.top+h-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="#3a3a3a"/>`;}
+    if(it.real>0){const bh=h*it.real/maxY;svg+=`<rect x="${(gx+barW).toFixed(1)}" y="${(M.top+h-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="#4ade80"/>`;}
+    const lx = gx+barW;
+    svg += `<text x="${lx.toFixed(1)}" y="${M.top+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#666">${new Date(it.fecha+'T12:00:00').getDate()}</text>`;
   });
-
   svg += '</svg>';
-  container.innerHTML = svg;
+  c.innerHTML = svg;
 }
 
 // ── DB: CARGAR ──
@@ -1021,10 +1121,16 @@ async function cargarTodo() {
     set('cfg-pn-s', S.config.noche_semana?.productividad);
     set('cfg-pd-f', S.config.dia_finde?.productividad);
     set('cfg-pn-f', S.config.noche_finde?.productividad);
+    set('cfg-jp-d', S.config.dia_semana?.jornada_planilla);
+    set('cfg-jp-n', S.config.noche_semana?.jornada_planilla);
+    set('cfg-jt-d', S.config.dia_semana?.jornada_tercero);
+    set('cfg-jt-n', S.config.noche_semana?.jornada_tercero);
     await cargarFecha();
   } catch(e) { toast('Error cargando','error'); console.error(e); }
   finally { loading(false); }
 }
+
+const CIERRE_FIELDS = ['cc-rec-dia','cc-rec-noche','cc-plan-real-dia','cc-ter-real-dia','cc-hrs-plan-dia','cc-hrs-ter-dia','cc-plan-real-noche','cc-ter-real-noche','cc-hrs-plan-noche','cc-hrs-ter-noche','cc-folios-dia','cc-folios-noche'];
 
 async function cargarFecha() {
   loading(true);
@@ -1053,45 +1159,52 @@ async function cargarFecha() {
     if(cierre) {
       setC('cc-rec-dia', cierre.recibido_real_dia);
       setC('cc-rec-noche', cierre.recibido_real_noche);
+      setC('cc-plan-real-dia', cierre.planilla_asistio_dia);
+      setC('cc-ter-real-dia', cierre.terceros_asistio_dia);
+      setC('cc-hrs-plan-dia', cierre.horas_real_planilla_dia);
+      setC('cc-hrs-ter-dia', cierre.horas_real_terceros_dia);
+      setC('cc-plan-real-noche', cierre.planilla_asistio_noche);
+      setC('cc-ter-real-noche', cierre.terceros_asistio_noche);
+      setC('cc-hrs-plan-noche', cierre.horas_real_planilla_noche);
+      setC('cc-hrs-ter-noche', cierre.horas_real_terceros_noche);
       setC('cc-folios-dia', cierre.folios_real_dia);
-      setC('cc-horas-dia', cierre.horas_real_dia);
       setC('cc-folios-noche', cierre.folios_real_noche);
-      setC('cc-horas-noche', cierre.horas_real_noche);
       onCierreInput();
       calcCierre('dia'); calcCierre('noche');
     } else {
-      ['cc-rec-dia','cc-rec-noche','cc-folios-dia','cc-horas-dia','cc-folios-noche','cc-horas-noche'].forEach(id=>$(id).value='');
-      ['ccr-eff-dia','ccr-desv-dia','ccr-eff-noche','ccr-desv-noche'].forEach(id=>{const e=$(id);e.textContent='—';e.className='ccr-val neutral';});
+      CIERRE_FIELDS.forEach(id=>{const e=$(id);if(e)e.value='';});
+      ['ccr-eff-dia','ccr-desv-dia','ccr-eff-noche','ccr-desv-noche'].forEach(id=>{const e=$(id);if(e){e.textContent='—';e.className='ccr-val neutral';}});
+      ['cc-hrs-tot-dia','cc-hrs-tot-noche'].forEach(id=>{const e=$(id);if(e)e.textContent='—';});
       $('cc-totales-box').style.display='none';
+      $('cc-proy-dia').style.display='none';
+      $('cc-proy-noche').style.display='none';
+      // Reset hints
+      const cfg_d = getCfg('dia'), cfg_n = getCfg('noche');
+      $('cc-plan-teor-dia').textContent = `jornada ${cfg_d.jornada_planilla||8}h`;
+      $('cc-ter-teor-dia').textContent = `jornada ${cfg_d.jornada_tercero||8}h`;
+      $('cc-plan-teor-noche').textContent = `jornada ${cfg_n.jornada_planilla||9.36}h`;
+      $('cc-ter-teor-noche').textContent = `jornada ${cfg_n.jornada_tercero||8}h`;
     }
 
-    // Histórico 7 días (tabla)
-    const desde7 = new Date(S.fecha);
-    desde7.setDate(desde7.getDate()-6);
+    // Histórico 7 días
+    const desde7 = new Date(S.fecha); desde7.setDate(desde7.getDate()-6);
     const hasta = S.fecha;
     const [hRes7, cRes7] = await Promise.all([
-      db.from('eo_proyecciones')
-        .select('fecha,folios_dia,folios_noche,terceros_dia,terceros_noche,eficiencia_esp_dia,eficiencia_esp_noche')
-        .gte('fecha',desde7.toLocaleDateString('en-CA')).lte('fecha',hasta).order('fecha',{ascending:true}),
-      db.from('eo_cierres')
-        .select('fecha,folios_real_dia,horas_real_dia,eficiencia_real_dia,folios_real_noche,horas_real_noche,eficiencia_real_noche')
-        .gte('fecha',desde7.toLocaleDateString('en-CA')).lte('fecha',hasta)
+      db.from('eo_proyecciones').select('fecha,folios_dia,folios_noche,terceros_dia,terceros_noche,eficiencia_esp_dia,eficiencia_esp_noche').gte('fecha',desde7.toLocaleDateString('en-CA')).lte('fecha',hasta).order('fecha',{ascending:true}),
+      db.from('eo_cierres').select('*').gte('fecha',desde7.toLocaleDateString('en-CA')).lte('fecha',hasta)
     ]);
     const cm7={};
     (cRes7.data||[]).forEach(c=>cm7[c.fecha]=c);
     S.historico = (hRes7.data||[]).map(p=>{
       const c = cm7[p.fecha]||{};
-      const hg = (c.horas_real_dia||0) + (c.horas_real_noche||0);
-      const fg = (c.folios_real_dia||0) + (c.folios_real_noche||0);
-      return {...p, ...c, eff_gen: hg>0 ? fg/hg : null};
+      const hg=(+c.horas_real_dia||0)+(+c.horas_real_noche||0);
+      const fg=(c.folios_real_dia||0)+(c.folios_real_noche||0);
+      return {...p,...c, eff_gen: hg>0?fg/hg:null};
     });
 
-    // Histórico 14 días (gráfico)
-    const desde14 = new Date(S.fecha);
-    desde14.setDate(desde14.getDate()-13);
-    const {data:cData14} = await db.from('eo_cierres')
-      .select('fecha,eficiencia_real_dia,eficiencia_real_noche,folios_real_dia,folios_real_noche')
-      .gte('fecha',desde14.toLocaleDateString('en-CA')).lte('fecha',hasta).order('fecha',{ascending:true});
+    // Histórico 14 días para gráfico
+    const desde14 = new Date(S.fecha); desde14.setDate(desde14.getDate()-13);
+    const {data:cData14} = await db.from('eo_cierres').select('fecha,eficiencia_real_dia,eficiencia_real_noche,folios_real_dia,folios_real_noche').gte('fecha',desde14.toLocaleDateString('en-CA')).lte('fecha',hasta).order('fecha',{ascending:true});
     S.historico14 = cData14 || [];
 
     renderPlanilla();
@@ -1104,28 +1217,21 @@ async function cargarFecha() {
 async function cargarHistPct() {
   try {
     const dow = new Date(S.fecha+'T12:00:00').getDay();
-    const {data} = await db.from('eo_cierres')
-      .select('fecha,recibido_real_dia,recibido_real_noche')
-      .not('recibido_real_dia','is',null)
-      .not('recibido_real_noche','is',null)
-      .order('fecha',{ascending:false}).limit(60);
+    const {data} = await db.from('eo_cierres').select('fecha,recibido_real_dia,recibido_real_noche').not('recibido_real_dia','is',null).not('recibido_real_noche','is',null).order('fecha',{ascending:false}).limit(60);
     if(!data||!data.length) return;
-    const mismos = data.filter(r=>{
-      return new Date(r.fecha+'T12:00:00').getDay()===dow;
-    }).slice(0,4);
+    const mismos = data.filter(r=>new Date(r.fecha+'T12:00:00').getDay()===dow).slice(0,4);
     if(!mismos.length) return;
     let sum=0, cnt=0;
     mismos.forEach(r=>{
       const t=(r.recibido_real_dia||0)+(r.recibido_real_noche||0);
-      if(t>0) { sum += (r.recibido_real_dia/t)*100; cnt++; }
+      if(t>0){sum+=(r.recibido_real_dia/t)*100;cnt++;}
     });
     if(cnt===0) return;
-    const avg_d = sum/cnt;
-    const avg_n = 100 - avg_d;
-    $('pct-dia').value = Math.round(avg_d);
-    $('pct-noche').value = Math.round(avg_n);
-    $('hist-dia-hint').textContent = `hist. ${avg_d.toFixed(1)}% (${cnt}d)`;
-    $('hist-noche-hint').textContent = `hist. ${avg_n.toFixed(1)}% (${cnt}d)`;
+    const avg_d=sum/cnt, avg_n=100-avg_d;
+    $('pct-dia').value=Math.round(avg_d);
+    $('pct-noche').value=Math.round(avg_n);
+    $('hist-dia-hint').textContent=`hist. ${avg_d.toFixed(1)}% (${cnt}d)`;
+    $('hist-noche-hint').textContent=`hist. ${avg_n.toFixed(1)}% (${cnt}d)`;
   } catch(e) { console.warn('cargarHistPct',e); }
 }
 
@@ -1135,55 +1241,63 @@ async function guardarPlanilla() {
   try {
     await db.from('eo_proyecciones').upsert({
       fecha:S.fecha,
-      planilla_dia: num('plan-dia'),
-      planilla_noche: num('plan-noche'),
-      updated_at: new Date().toISOString()
+      planilla_dia:num('plan-dia'),
+      planilla_noche:num('plan-noche'),
+      updated_at:new Date().toISOString()
     },{onConflict:'fecha'});
     toast('Planilla guardada ✓','ok');
     recalc();
-  } catch(e) { toast('Error al guardar','error'); console.error(e); }
-  finally { loading(false); }
+  } catch(e){toast('Error al guardar','error');console.error(e);}
+  finally{loading(false);}
 }
 
 async function guardarProyeccion() {
   loading(true);
   try {
-    const {dia,noche} = S.calc;
+    const {dia,noche}=S.calc;
     await db.from('eo_proyecciones').upsert({
-      fecha: S.fecha,
-      planilla_dia: num('plan-dia'),
-      planilla_noche: num('plan-noche'),
-      total_folios: num('total-folios'),
-      pct_dia: num('pct-dia'),
-      pct_noche: num('pct-noche'),
-      folios_dia: dia.folios, folios_noche: noche.folios,
-      prod_dia: dia.prod, prod_noche: noche.prod,
-      terceros_dia: dia.terceros, terceros_noche: noche.terceros,
-      eficiencia_esp_dia: dia.eficiencia, eficiencia_esp_noche: noche.eficiencia,
-      updated_at: new Date().toISOString()
+      fecha:S.fecha,
+      planilla_dia:num('plan-dia'), planilla_noche:num('plan-noche'),
+      total_folios:num('total-folios'),
+      pct_dia:num('pct-dia'), pct_noche:num('pct-noche'),
+      folios_dia:dia.folios, folios_noche:noche.folios,
+      prod_dia:dia.prod, prod_noche:noche.prod,
+      terceros_dia:dia.terceros, terceros_noche:noche.terceros,
+      eficiencia_esp_dia:dia.eficiencia, eficiencia_esp_noche:noche.eficiencia,
+      updated_at:new Date().toISOString()
     },{onConflict:'fecha'});
     toast('Proyección guardada ✓','ok');
-  } catch(e) { toast('Error al guardar','error'); console.error(e); }
-  finally { loading(false); }
+  } catch(e){toast('Error al guardar','error');console.error(e);}
+  finally{loading(false);}
 }
 
 async function guardarCierre() {
   loading(true);
   try {
+    // Día
     const fd = num('cc-folios-dia');
-    const hd = num('cc-horas-dia');
+    const hpd = num('cc-hrs-plan-dia'), htd = num('cc-hrs-ter-dia');
+    const hd = hpd + htd;
+    // Noche
     const fn = num('cc-folios-noche');
-    const hn = num('cc-horas-noche');
-    const rd = num('cc-rec-dia');
-    const rn = num('cc-rec-noche');
+    const hpn = num('cc-hrs-plan-noche'), htn = num('cc-hrs-ter-noche');
+    const hn = hpn + htn;
+    const rd = num('cc-rec-dia'), rn = num('cc-rec-noche');
     const tot_rec = rd + rn;
-    const eff_d = hd>0 ? fd/hd : null;
-    const eff_n = hn>0 ? fn/hn : null;
+    const eff_d = hd>0?fd/hd:null, eff_n = hn>0?fn/hn:null;
     const p = S.proyeccion;
     await db.from('eo_cierres').upsert({
-      fecha: S.fecha,
+      fecha:S.fecha,
       total_recibido_real: tot_rec || null,
       recibido_real_dia: rd || null, recibido_real_noche: rn || null,
+      planilla_asistio_dia: num('cc-plan-real-dia') || null,
+      terceros_asistio_dia: num('cc-ter-real-dia') || null,
+      planilla_asistio_noche: num('cc-plan-real-noche') || null,
+      terceros_asistio_noche: num('cc-ter-real-noche') || null,
+      horas_real_planilla_dia: hpd || null,
+      horas_real_terceros_dia: htd || null,
+      horas_real_planilla_noche: hpn || null,
+      horas_real_terceros_noche: htn || null,
       folios_real_dia: fd || null, horas_real_dia: hd || null, eficiencia_real_dia: eff_d,
       folios_real_noche: fn || null, horas_real_noche: hn || null, eficiencia_real_noche: eff_n,
       desviacion_dia: p?.eficiencia_esp_dia && eff_d ? ((eff_d - p.eficiencia_esp_dia) / p.eficiencia_esp_dia) * 100 : null,
@@ -1191,32 +1305,37 @@ async function guardarCierre() {
       updated_at: new Date().toISOString()
     },{onConflict:'fecha'});
     toast('Cierre guardado ✓','ok');
-  } catch(e) { toast('Error al guardar','error'); console.error(e); }
-  finally { loading(false); }
+  } catch(e){toast('Error al guardar','error');console.error(e);}
+  finally{loading(false);}
 }
 
 async function guardarConfig() {
   loading(true);
   try {
+    const jp_d=num('cfg-jp-d'), jp_n=num('cfg-jp-n');
+    const jt_d=num('cfg-jt-d'), jt_n=num('cfg-jt-n');
     const vals = [
-      {turno:'dia',tipo_dia:'semana',productividad:num('cfg-pd-s')},
-      {turno:'noche',tipo_dia:'semana',productividad:num('cfg-pn-s')},
-      {turno:'dia',tipo_dia:'finde',productividad:num('cfg-pd-f')},
-      {turno:'noche',tipo_dia:'finde',productividad:num('cfg-pn-f')},
+      {turno:'dia',tipo_dia:'semana',productividad:num('cfg-pd-s'),jornada_planilla:jp_d,jornada_tercero:jt_d},
+      {turno:'noche',tipo_dia:'semana',productividad:num('cfg-pn-s'),jornada_planilla:jp_n,jornada_tercero:jt_n},
+      {turno:'dia',tipo_dia:'finde',productividad:num('cfg-pd-f'),jornada_planilla:jp_d,jornada_tercero:jt_d},
+      {turno:'noche',tipo_dia:'finde',productividad:num('cfg-pn-f'),jornada_planilla:jp_n,jornada_tercero:jt_n},
     ];
     for(const v of vals) {
-      await db.from('eo_configuracion')
-        .update({productividad: v.productividad, updated_at: new Date().toISOString()})
-        .eq('turno', v.turno).eq('tipo_dia', v.tipo_dia);
+      await db.from('eo_configuracion').update({
+        productividad:v.productividad,
+        jornada_planilla:v.jornada_planilla,
+        jornada_tercero:v.jornada_tercero,
+        updated_at:new Date().toISOString()
+      }).eq('turno',v.turno).eq('tipo_dia',v.tipo_dia);
       S.config[`${v.turno}_${v.tipo_dia}`] = {...S.config[`${v.turno}_${v.tipo_dia}`], ...v};
     }
     toast('Configuración guardada ✓','ok');
+    renderPlanilla();
     recalc();
-  } catch(e) { toast('Error al guardar','error'); console.error(e); }
-  finally { loading(false); }
+  } catch(e){toast('Error al guardar','error');console.error(e);}
+  finally{loading(false);}
 }
 
-// ── NAVEGACIÓN ──
 function showView(id, btn) {
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-btn, .nav-link').forEach(b=>b.classList.remove('active'));
@@ -1226,11 +1345,10 @@ function showView(id, btn) {
   if(id==='historico') renderHistorico();
 }
 
-// ── ARRANQUE ──
 document.addEventListener('DOMContentLoaded',()=>{
-  const fp = $('fecha-picker');
-  fp.value = S.fecha;
-  fp.addEventListener('change',()=>{ S.fecha=fp.value; cargarFecha(); });
+  const fp=$('fecha-picker');
+  fp.value=S.fecha;
+  fp.addEventListener('change',()=>{S.fecha=fp.value;cargarFecha();});
   cargarTodo();
 });
 </script>
