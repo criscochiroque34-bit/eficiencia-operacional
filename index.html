@@ -95,7 +95,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <aside class="sb">
     <div class="sb-logo">EO<em>/</em>Cross</div>
     <div class="sb-sec">Operación</div>
-    <button class="sb-btn a" onclick="showView('hoy',this)"><span class="ico">📊</span>Hoy</button>
+    <button class="sb-btn a" onclick="showView('hoy',this)"><span class="ico">📊</span>Proyección</button>
     <button class="sb-btn" onclick="showView('mes',this)"><span class="ico">📅</span>Cierre de mes</button>
     <button class="sb-btn" onclick="showView('hist',this)"><span class="ico">📈</span>Histórico</button>
     <div style="height:1px;background:var(--b1);margin:10px 0"></div>
@@ -106,7 +106,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       <div class="ml-badge">
         <div class="ml-t">Modelo ML · Precisión</div>
         <div class="ml-v">—</div>
-        <div class="ml-s">Calculando...</div>
+        <div class="ml-s">Calculando…</div>
         <div class="ml-bar"><div class="ml-bar-fill" style="width:0%"></div></div>
       </div>
     </div>
@@ -122,84 +122,151 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       <button class="fp fall" onclick="setTurno('all',this)">Ambos</button>
     </div>
   </div>
-  <!-- HERO -->
-  <div style="background:linear-gradient(135deg,rgba(124,111,255,.1),rgba(0,200,150,.05));border:1px solid rgba(124,111,255,.22);border-radius:14px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden">
-    <div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(124,111,255,.12),transparent 70%);pointer-events:none"></div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--ts);margin-bottom:12px" id="hero-eye">Recomendación del sistema</div>
-    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:16px">
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:5rem;line-height:.9;letter-spacing:-.05em;color:var(--t1)" id="hero-n">—</div>
-      <div style="font-family:'Syne',sans-serif;font-size:1.1rem;color:var(--tm)">terceros para hoy</div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding-top:16px;border-top:1px solid rgba(124,111,255,.18)">
-      <div><span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);display:block;margin-bottom:3px">Distribución</span><span style="font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--tx)" id="hero-dist">—</span></div>
-      <div><span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);display:block;margin-bottom:3px">Efic. esperada</span><span style="font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--ok)" id="hero-efic">—</span></div>
-      <div><span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);display:block;margin-bottom:3px">Horas necesarias</span><span style="font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--tx)" id="hero-hrs">—</span></div>
-      <div><span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);display:block;margin-bottom:3px">Precisión modelo</span><span style="font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--ok)" id="hero-prec">—</span><div style="height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:5px"><div style="height:100%;border-radius:2px;background:linear-gradient(90deg,var(--t1),var(--t3))" id="hero-prec-bar"></div></div></div>
-    </div>
+
+  <!-- SELECTOR FECHA -->
+  <div style="margin-bottom:16px">
+    <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Fecha a proyectar</label>
+    <input type="date" id="proy-fecha" onchange="cambiarFecha()" style="background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 12px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.85rem;color-scheme:dark;width:100%;max-width:200px">
   </div>
-  <!-- PRED MODELO -->
-  <div style="background:rgba(124,111,255,.06);border:1px solid rgba(124,111,255,.15);border-radius:10px;padding:14px 16px;margin-bottom:14px">
-    <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ts);margin-bottom:10px">Predicción del modelo · basada en histórico</div>
+
+  <!-- PREDICCIÓN MODELO -->
+  <div style="background:linear-gradient(135deg,rgba(124,111,255,.1),rgba(0,200,150,.04));border:1px solid rgba(124,111,255,.22);border-radius:12px;padding:18px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--ts)">Proyección del modelo ML</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--t1)" id="pred-conf">—</div>
+    </div>
     <div class="g3">
-      <div><div style="font-size:.62rem;color:var(--ts);margin-bottom:3px"><span class="pill t3">T3 Día</span></div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--t3)" id="pred-t3">—</div><div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:2px" id="pred-t3-int">—</div></div>
-      <div><div style="font-size:.62rem;color:var(--ts);margin-bottom:3px"><span class="pill t1">T1 Noche</span></div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--t1)" id="pred-t1">—</div><div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:2px" id="pred-t1-int">—</div></div>
-      <div><div style="font-size:.62rem;color:var(--ts);margin-bottom:3px">Total</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--tx)" id="pred-tot">—</div><div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:2px" id="pred-conf">—</div></div>
+      <div style="background:var(--s3);border:1px solid rgba(0,200,150,.2);border-radius:8px;padding:12px">
+        <div style="margin-bottom:6px"><span class="pill t3">T3 Día</span></div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;color:var(--t3);line-height:1" id="pred-t3">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px" id="pred-t3-int">—</div>
+      </div>
+      <div style="background:var(--s3);border:1px solid rgba(124,111,255,.25);border-radius:8px;padding:12px">
+        <div style="margin-bottom:6px"><span class="pill t1">T1 Noche</span></div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;color:var(--t1);line-height:1" id="pred-t1">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px" id="pred-t1-int">—</div>
+      </div>
+      <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px">
+        <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:6px">Total día</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;color:var(--tx);line-height:1" id="pred-tot">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px" id="pred-base">—</div>
+      </div>
     </div>
   </div>
-  <!-- INPUT TOTAL -->
+
+  <!-- PLANILLA PROGRAMADA -->
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:18px;margin-bottom:16px">
-    <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ts);margin-bottom:10px;display:block">Tú ingresas · Total folios a recibir hoy</span>
-    <div style="display:flex;align-items:center;gap:10px">
-      <input type="number" id="inp-total" placeholder="0" min="0" oninput="onTotalChange()" style="flex:1;background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:13px 16px;font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:var(--tx);text-align:center;letter-spacing:-.03em;transition:border-color .2s">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tm)">folios</span>
-    </div>
-    <div class="g2" style="margin-top:12px">
-      <div style="background:var(--s3);border:1px solid rgba(0,200,150,.25);border-radius:8px;padding:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="pill t3">T3 Día</span><span style="font-family:'JetBrains Mono',monospace;font-size:.57rem;color:var(--ts);font-style:italic" id="pct-t3-hint">sin histórico</span></div>
-        <div style="display:flex;align-items:center;gap:5px"><input type="number" id="pct-t3" value="30" min="0" max="100" oninput="onPctChange('t3')" style="flex:1;background:transparent;border:0;border-bottom:1px solid var(--b2);font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--t3);text-align:right;padding:2px 0"><span style="font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--ts)">%</span></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tm);margin-top:5px">→ <strong id="fol-t3">—</strong> folios</div>
+    <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ts);margin-bottom:4px;font-weight:600">Personal planilla programado</div>
+    <div style="font-size:.68rem;color:var(--tm);margin-bottom:14px">Varía por rotación, descansos y vacaciones — ingrésalo cada día</div>
+    <div class="g2" id="planilla-inputs">
+      <div style="background:var(--s3);border:1px solid rgba(0,200,150,.2);border-radius:8px;padding:12px" id="plan-box-t3">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="pill t3">T3 Día</span><span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts)" id="plan-jor-t3">jornada —</span></div>
+        <div style="display:flex;border:1px solid var(--b2);border-radius:6px;overflow:hidden;background:var(--s2);margin-bottom:8px">
+          <button onclick="stepPlan('t3',-1)" style="width:36px;border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;cursor:pointer;color:var(--tm)">−</button>
+          <input type="number" id="plan-t3" value="0" min="0" oninput="recalc()" style="flex:1;border:0;border-left:1px solid var(--b1);border-right:1px solid var(--b1);background:var(--s3);font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;text-align:center;padding:8px 4px;color:var(--t3);width:0">
+          <button onclick="stepPlan('t3',1)" style="width:36px;border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;cursor:pointer;color:var(--tm)">+</button>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm)">HH disponibles: <strong style="color:var(--t3)" id="plan-hh-t3">0h</strong></div>
       </div>
-      <div style="background:var(--s3);border:1px solid rgba(124,111,255,.3);border-radius:8px;padding:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="pill t1">T1 Noche</span><span style="font-family:'JetBrains Mono',monospace;font-size:.57rem;color:var(--ts);font-style:italic" id="pct-t1-hint">sin histórico</span></div>
-        <div style="display:flex;align-items:center;gap:5px"><input type="number" id="pct-t1" value="70" min="0" max="100" oninput="onPctChange('t1')" style="flex:1;background:transparent;border:0;border-bottom:1px solid var(--b2);font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--t1);text-align:right;padding:2px 0"><span style="font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--ts)">%</span></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tm);margin-top:5px">→ <strong id="fol-t1">—</strong> folios</div>
+      <div style="background:var(--s3);border:1px solid rgba(124,111,255,.25);border-radius:8px;padding:12px" id="plan-box-t1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="pill t1">T1 Noche</span><span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts)" id="plan-jor-t1">jornada —</span></div>
+        <div style="display:flex;border:1px solid var(--b2);border-radius:6px;overflow:hidden;background:var(--s2);margin-bottom:8px">
+          <button onclick="stepPlan('t1',-1)" style="width:36px;border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;cursor:pointer;color:var(--tm)">−</button>
+          <input type="number" id="plan-t1" value="0" min="0" oninput="recalc()" style="flex:1;border:0;border-left:1px solid var(--b1);border-right:1px solid var(--b1);background:var(--s3);font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;text-align:center;padding:8px 4px;color:var(--t1);width:0">
+          <button onclick="stepPlan('t1',1)" style="width:36px;border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;cursor:pointer;color:var(--tm)">+</button>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm)">HH disponibles: <strong style="color:var(--t1)" id="plan-hh-t1">0h</strong></div>
+      </div>
+    </div>
+    <div style="background:linear-gradient(135deg,rgba(124,111,255,.08),transparent);border:1px solid rgba(124,111,255,.15);border-radius:8px;padding:11px 14px;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.75rem;display:flex;justify-content:space-between;align-items:center;color:var(--tm)">
+      <span>Total HH planilla del día</span><strong style="font-family:'Syne',sans-serif;font-size:1.1rem;color:var(--t1)" id="plan-hh-total">0h</strong>
+    </div>
+  </div>
+
+  <!-- CALCULADORA HH -->
+  <div class="sl">Calculadora de Horas Hombre</div>
+  <div class="g2" style="margin-bottom:16px">
+    <!-- T3 -->
+    <div style="background:var(--s2);border:1px solid rgba(0,200,150,.22);border-radius:10px;padding:16px" id="calc-t3">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span class="pill t3">T3 · Día</span>
+        <div style="display:flex;align-items:center;gap:5px"><span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ts)">obj</span><input type="number" id="obj-t3" step="0.1" oninput="recalc()" style="width:52px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;padding:3px 6px;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;color:var(--t3);text-align:center"></div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Despachos proyectados <span style="text-transform:none;font-style:italic">(editable)</span></label>
+        <input type="number" id="fol-t3" min="0" oninput="recalc()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--tx)">
+      </div>
+      <div style="height:1px;background:var(--b1);margin:12px 0"></div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:6px"><span>HH requeridas</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)" id="hh-nec-t3">—</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:6px"><span>HH planilla</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)" id="hh-plan-t3">—</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed var(--b1)"><span id="lbl-gap-t3">Déficit</span><strong style="font-family:'JetBrains Mono',monospace" id="hh-gap-t3">—</strong></div>
+      <div style="text-align:center;padding:8px 0">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.4rem;line-height:1;color:var(--t3)" id="ter-t3">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">terceros necesarios</div>
+      </div>
+      <div style="background:var(--s3);border-radius:6px;padding:9px 11px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tm)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Efic. resultante</span><strong id="ef-res-t3" style="color:var(--t3)">—</strong></div>
+        <div style="display:flex;justify-content:space-between"><span>Capacidad máx.</span><strong id="cap-t3" style="color:var(--tx)">—</strong></div>
+      </div>
+    </div>
+    <!-- T1 -->
+    <div style="background:var(--s2);border:1px solid rgba(124,111,255,.28);border-radius:10px;padding:16px" id="calc-t1">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span class="pill t1">T1 · Noche</span>
+        <div style="display:flex;align-items:center;gap:5px"><span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--ts)">obj</span><input type="number" id="obj-t1" step="0.1" oninput="recalc()" style="width:52px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;padding:3px 6px;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;color:var(--t1);text-align:center"></div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Despachos proyectados <span style="text-transform:none;font-style:italic">(editable)</span></label>
+        <input type="number" id="fol-t1" min="0" oninput="recalc()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--tx)">
+      </div>
+      <div style="height:1px;background:var(--b1);margin:12px 0"></div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:6px"><span>HH requeridas</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)" id="hh-nec-t1">—</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:6px"><span>HH planilla</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)" id="hh-plan-t1">—</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed var(--b1)"><span id="lbl-gap-t1">Déficit</span><strong style="font-family:'JetBrains Mono',monospace" id="hh-gap-t1">—</strong></div>
+      <div style="text-align:center;padding:8px 0">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.4rem;line-height:1;color:var(--t1)" id="ter-t1">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">terceros necesarios</div>
+      </div>
+      <div style="background:var(--s3);border-radius:6px;padding:9px 11px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tm)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Efic. resultante</span><strong id="ef-res-t1" style="color:var(--t1)">—</strong></div>
+        <div style="display:flex;justify-content:space-between"><span>Capacidad máx.</span><strong id="cap-t1" style="color:var(--tx)">—</strong></div>
       </div>
     </div>
   </div>
-  <!-- TURNO CARDS -->
-  <div class="sl">Detalle por turno</div>
-  <div class="g2" style="margin-bottom:20px" id="turno-cards">
-    <div style="background:var(--s2);border:1px solid rgba(0,200,150,.22);border-radius:10px;padding:16px" id="card-t3">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span class="pill t3">T3 · Día</span><span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--ts)" id="ct3-fol">—</span></div>
-      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:2.2rem;line-height:1;letter-spacing:-.03em;color:var(--t3)" id="ct3-ter">—</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:2px">terceros recomendados</div>
-      <div style="height:1px;background:var(--b1);margin:12px 0"></div>
-      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:5px"><span>Efic. esperada</span><strong style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)" id="ct3-efic">—</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:5px"><span>Horas necesarias</span><strong style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)" id="ct3-hrs">—</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm)"><span>Target</span><strong style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)" id="ct3-tgt">—</strong></div>
+
+  <!-- JORNADA TERCERO -->
+  <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div><div style="font-size:.7rem;color:var(--tx);font-weight:500">Jornada por tercero</div><div style="font-size:.62rem;color:var(--tm)">Horas que cubre cada persona externa</div></div>
+    <div style="display:flex;align-items:center;gap:6px"><input type="number" id="jor-ter" value="8" step="0.5" min="1" oninput="recalc()" style="width:70px;background:var(--s2);border:1px solid var(--b2);border-radius:6px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;color:var(--tx);text-align:center"><span style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tm)">horas</span></div>
+  </div>
+
+  <!-- RESUMEN GENERAL -->
+  <div class="sl">Resumen general del día</div>
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div class="g2" style="margin-bottom:14px">
+      <div style="background:var(--s3);border-radius:8px;padding:12px">
+        <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Objetivo diario general</div>
+        <div style="display:flex;align-items:baseline;gap:6px"><input type="number" id="obj-gen" step="0.1" oninput="recalc()" style="width:70px;background:var(--s2);border:1px solid var(--b2);border-radius:5px;padding:5px 8px;font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--ora);text-align:center"><span style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ts)">fol/h</span></div>
+      </div>
+      <div style="background:var(--s3);border-radius:8px;padding:12px">
+        <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Efic. esperada del día</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.55rem;line-height:1" id="res-ef-gen">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px" id="res-ef-sub">—</div>
+      </div>
     </div>
-    <div style="background:var(--s2);border:1px solid rgba(124,111,255,.28);border-radius:10px;padding:16px" id="card-t1">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span class="pill t1">T1 · Noche</span><span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--ts)" id="ct1-fol">—</span></div>
-      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:2.2rem;line-height:1;letter-spacing:-.03em;color:var(--t1)" id="ct1-ter">—</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:2px">terceros recomendados</div>
-      <div style="height:1px;background:var(--b1);margin:12px 0"></div>
-      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:5px"><span>Efic. esperada</span><strong style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)" id="ct1-efic">—</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm);margin-bottom:5px"><span>Horas necesarias</span><strong style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)" id="ct1-hrs">—</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--tm)"><span>Target</span><strong style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)" id="ct1-tgt">—</strong></div>
+    <div id="res-veredicto" style="border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;background:var(--s3);border:1px solid var(--b1)">
+      <div style="font-size:1.3rem" id="res-ico">—</div>
+      <div><div style="font-size:.8rem;font-weight:600" id="res-txt">Ingresa datos para calcular</div><div style="font-size:.68rem;color:var(--tm)" id="res-sub">—</div></div>
+    </div>
+    <div style="background:var(--s3);border-radius:8px;padding:11px 14px;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Total despachos proyectados</span><strong style="color:var(--tx)" id="res-fol-tot">—</strong></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Total HH (planilla + terceros)</span><strong style="color:var(--tx)" id="res-hh-tot">—</strong></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Total terceros a solicitar</span><strong style="color:var(--t1)" id="res-ter-tot">—</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>Aporte al acumulado del mes</span><strong id="res-aporte" style="color:var(--tx)">—</strong></div>
     </div>
   </div>
-  <hr>
-  <!-- SIMULADOR -->
-  <div class="sl">Simulador · ¿qué pasa si…?</div>
-  <div class="g2" style="margin-bottom:12px">
-    <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:6px"><span class="pill t3">T3</span> Terceros</label><div style="display:flex;border:1px solid var(--b2);border-radius:8px;overflow:hidden;background:var(--s2)"><button onclick="stepSim('t3',-1)" style="width:38px;border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;cursor:pointer;color:var(--tm)">−</button><input type="number" id="sim-t3" value="0" min="0" oninput="renderSim()" style="flex:1;border:0;border-left:1px solid var(--b1);border-right:1px solid var(--b1);background:var(--s3);font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;text-align:center;padding:8px 4px;color:var(--tx);width:0"><button onclick="stepSim('t3',1)" style="width:38px;border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;cursor:pointer;color:var(--tm)">+</button></div><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:4px" id="sim-t3-rec">recomendado: —</div></div>
-    <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:6px"><span class="pill t1">T1</span> Terceros</label><div style="display:flex;border:1px solid var(--b2);border-radius:8px;overflow:hidden;background:var(--s2)"><button onclick="stepSim('t1',-1)" style="width:38px;border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;cursor:pointer;color:var(--tm)">−</button><input type="number" id="sim-t1" value="0" min="0" oninput="renderSim()" style="flex:1;border:0;border-left:1px solid var(--b1);border-right:1px solid var(--b1);background:var(--s3);font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;text-align:center;padding:8px 4px;color:var(--tx);width:0"><button onclick="stepSim('t1',1)" style="width:38px;border:0;background:transparent;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;cursor:pointer;color:var(--tm)">+</button></div><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:4px" id="sim-t1-rec">recomendado: —</div></div>
-  </div>
-  <div class="g2">
-    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:14px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="pill t3">T3</span></div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.9rem;letter-spacing:-.03em;line-height:1" id="sim-efic-t3">—</div><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:3px">folios / hora</div><div id="sim-badge-t3" style="margin-top:7px"></div></div>
-    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:14px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="pill t1">T1</span></div><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.9rem;letter-spacing:-.03em;line-height:1" id="sim-efic-t1">—</div><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:3px">folios / hora</div><div id="sim-badge-t1" style="margin-top:7px"></div></div>
-  </div>
-  <button class="btn btn-p btn-w" style="margin-top:18px" onclick="guardarProy()">Guardar proyección →</button>
+
+  <button class="btn btn-p btn-w" onclick="guardarProy()">Guardar proyección →</button>
 </div>
 <!-- ══ MES ══ -->
 <div class="view" id="v-mes">
@@ -208,7 +275,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div>
       <div class="g2" style="margin-bottom:14px">
         <div class="kpi"><div class="kpi-l">Efic. acumulada actual</div><div class="kpi-v w" id="mes-efic-acum">—</div><div class="kpi-s" id="mes-efic-sub">—</div></div>
-        <div class="kpi"><div class="kpi-l">Proyección al cierre</div><div class="kpi-v b" id="mes-efic-proy">—</div><div class="kpi-s">si el ritmo sigue igual</div></div>
+        <div class="kpi"><div class="kpi-l">Proyección al cierre</div><div class="kpi-v b" id="mes-efic-proy">—</div><div class="kpi-s">con predicción del modelo</div></div>
       </div>
       <div>
         <div style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--tm);margin-bottom:5px;font-family:'JetBrains Mono',monospace"><span>Avance vs objetivo</span><strong style="color:var(--tx)" id="mes-avance-pct">—</strong></div>
@@ -216,31 +283,23 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       </div>
     </div>
     <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px 18px;text-align:right;min-width:140px">
-      <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Objetivo</div>
+      <div style="font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Objetivo mes</div>
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;line-height:1;letter-spacing:-.03em;color:var(--ora)" id="mes-obj">—</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:2px">fol/h acumulado</div>
     </div>
   </div>
-  <!-- Curva acumulada SVG -->
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:18px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Curva eficiencia acumulada</div>
-      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
-        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:4px"></span>Acumulada</span>
-        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--ts);display:inline-block;margin-right:4px"></span>Objetivo</span>
-      </div>
+      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)"><span><span style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:4px"></span>Acumulada</span><span><span style="width:8px;height:8px;border-radius:2px;background:var(--ts);display:inline-block;margin-right:4px"></span>Objetivo</span></div>
     </div>
-    <svg id="chart-acum" viewBox="0 0 580 160" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
-      <text x="290" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando datos...</text>
-    </svg>
+    <div id="wrap-acum"><svg id="chart-acum" viewBox="0 0 580 160" style="width:100%;height:auto;display:block"><text x="290" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando...</text></svg></div>
   </div>
-  <!-- Veredicto -->
   <div id="mes-veredic" style="border-radius:10px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;background:rgba(255,149,0,.07);border:1px solid rgba(255,149,0,.2)">
-    <div style="font-size:1.5rem">⚠️</div>
+    <div style="font-size:1.5rem" id="mes-v-ico">⚠️</div>
     <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem;margin-bottom:2px" id="mes-veredic-t">Calculando...</div><div style="font-size:.72rem;color:var(--tm)" id="mes-veredic-s">—</div></div>
   </div>
-  <!-- Días restantes -->
-  <div class="sl">Días restantes del mes</div>
+  <div class="sl">Días restantes del mes · click para detalle</div>
   <div style="display:flex;flex-direction:column;gap:6px" id="dias-restantes"></div>
 </div>
 
@@ -255,611 +314,1065 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     </div>
   </div>
   <div class="g4" style="margin-bottom:20px">
-    <div class="kpi"><div class="kpi-l">Efic. acum. T1</div><div class="kpi-v ok" id="hkpi-t1">—</div><div class="kpi-s" id="hkpi-t1-s">target 25</div></div>
-    <div class="kpi"><div class="kpi-l">Efic. acum. T3</div><div class="kpi-v w" id="hkpi-t3">—</div><div class="kpi-s" id="hkpi-t3-s">target 15</div></div>
-    <div class="kpi"><div class="kpi-l">Total despachado</div><div class="kpi-v n" id="hkpi-fol">—</div><div class="kpi-s">folios acumulados</div></div>
-    <div class="kpi"><div class="kpi-l">Precisión modelo</div><div class="kpi-v ok" id="hkpi-ml">—</div><div class="kpi-s">últimos 30 días</div></div>
-  </div>
-  <!-- Chart -->
-  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Tendencia eficiencia · 30 días</div>
-      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
-        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:4px"></span>T1 Noche</span>
-        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--t3);display:inline-block;margin-right:4px"></span>T3 Día</span>
-      </div>
-    </div>
-    <svg id="chart-tend" viewBox="0 0 580 180" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">
-      <text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando datos...</text>
-    </svg>
+    <div class="kpi"><div class="kpi-l">Efic. acum. T1</div><div class="kpi-v ok" id="hkpi-t1">—</div><div class="kpi-s" id="hkpi-t1-s">—</div></div>
+    <div class="kpi"><div class="kpi-l">Efic. acum. T3</div><div class="kpi-v w" id="hkpi-t3">—</div><div class="kpi-s" id="hkpi-t3-s">—</div></div>
+    <div class="kpi"><div class="kpi-l">Total despachado</div><div class="kpi-v n" id="hkpi-fol">—</div><div class="kpi-s">folios del mes</div></div>
+    <div class="kpi"><div class="kpi-l">Precisión modelo</div><div class="kpi-v ok" id="hkpi-ml">—</div><div class="kpi-s">MAPE últ. 30d</div></div>
   </div>
   <!-- Selector mes -->
-  <div class="sl">Selecciona el mes</div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px" id="mes-sel"></div>
+  <div class="sl">Mes</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px" id="mes-sel"></div>
+  <!-- CHART 1: eficiencia diaria -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Eficiencia diaria</div><div style="font-size:.65rem;color:var(--tm)">Cada día independiente · folios ÷ horas del día</div></div>
+      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)" id="leg-diaria"></div>
+    </div>
+    <div id="wrap-diaria"><svg id="chart-diaria" viewBox="0 0 580 180" style="width:100%;height:auto;display:block"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Selecciona un mes</text></svg></div>
+  </div>
+  <!-- CHART 2: eficiencia acumulada diaria -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Eficiencia acumulada diaria</div><div style="font-size:.65rem;color:var(--tm)">Progresiva · Σfolios ÷ Σhoras hasta ese día</div></div>
+      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)" id="leg-acumd"></div>
+    </div>
+    <div id="wrap-acumd"><svg id="chart-acumd" viewBox="0 0 580 180" style="width:100%;height:auto;display:block"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Selecciona un mes</text></svg></div>
+  </div>
   <!-- Tabla -->
+  <div class="sl">Detalle del mes · click para expandir</div>
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
-    <table style="width:100%;border-collapse:collapse" id="hist-tabla">
-      <thead><tr style="background:var(--s3)">
-        <th style="text-align:left;padding:10px 12px;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);border-bottom:1px solid var(--b1);font-weight:500">Día</th>
-        <th style="text-align:right;padding:10px 12px;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);border-bottom:1px solid var(--b1);font-weight:500;font-family:'JetBrains Mono',monospace">Fol. T3</th>
-        <th style="text-align:right;padding:10px 12px;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);border-bottom:1px solid var(--b1);font-weight:500;font-family:'JetBrains Mono',monospace">Fol. T1</th>
-        <th style="text-align:right;padding:10px 12px;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);border-bottom:1px solid var(--b1);font-weight:500;font-family:'JetBrains Mono',monospace">Efic. T3</th>
-        <th style="text-align:right;padding:10px 12px;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);border-bottom:1px solid var(--b1);font-weight:500;font-family:'JetBrains Mono',monospace">Efic. T1</th>
-        <th style="text-align:right;padding:10px 12px;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);border-bottom:1px solid var(--b1);font-weight:500;font-family:'JetBrains Mono',monospace">Efic. Gral</th>
-        <th style="padding:10px 12px;border-bottom:1px solid var(--b1)"></th>
-      </tr></thead>
-      <tbody id="hist-tbody"><tr><td colspan="7" style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</td></tr></tbody>
-    </table>
+    <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr 36px;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);font-weight:500">
+      <div>Día</div><div style="text-align:right;padding-right:12px">Fol T3</div><div style="text-align:right;padding-right:12px">Fol T1</div><div style="text-align:right;padding-right:12px">Ef T3</div><div style="text-align:right;padding-right:12px">Ef T1</div><div style="text-align:right;padding-right:12px">Ef Gral</div><div></div>
+    </div>
+    <div id="hist-rows"><div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</div></div>
   </div>
 </div>
-
 <!-- ══ DATOS ══ -->
 <div class="view" id="v-datos">
-  <div class="ph"><div><div class="ph-title">Ingresar datos</div><div class="ph-sub">Manual o desde Excel</div></div></div>
-  <!-- Tabs -->
-  <div style="display:flex;border-bottom:1px solid var(--b1);margin-bottom:20px;gap:0">
-    <button class="datos-tab a" onclick="setDatosTab('manual',this)" style="padding:10px 20px;border:0;background:transparent;color:var(--t1);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border-bottom:2px solid var(--t1)">Ingreso manual</button>
-    <button class="datos-tab" onclick="setDatosTab('excel',this)" style="padding:10px 20px;border:0;background:transparent;color:var(--tm);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent">Subir Excel</button>
+  <div class="ph"><div><div class="ph-title">Ingresar datos</div><div class="ph-sub">Registro real diario · manual o Excel</div></div></div>
+  <div style="display:flex;border-bottom:1px solid var(--b1);margin-bottom:20px">
+    <button class="dtab a" onclick="setDatosTab('manual',this)" style="padding:10px 20px;border:0;background:transparent;color:var(--t1);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border-bottom:2px solid var(--t1)">Manual</button>
+    <button class="dtab" onclick="setDatosTab('excel',this)" style="padding:10px 20px;border:0;background:transparent;color:var(--tm);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent">Excel / CSV</button>
+    <button class="dtab" onclick="setDatosTab('hist',this)" style="padding:10px 20px;border:0;background:transparent;color:var(--tm);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent">Importaciones</button>
   </div>
+
   <!-- MANUAL -->
   <div id="tab-manual">
     <div style="margin-bottom:16px">
-      <label style="display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:6px">Fecha</label>
-      <input type="date" id="manual-fecha" style="background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 12px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.88rem;color-scheme:dark;width:100%">
+      <label style="display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Fecha</label>
+      <input type="date" id="manual-fecha" onchange="cargarManualFecha()" style="background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 12px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.88rem;color-scheme:dark;width:100%;max-width:220px">
     </div>
     <div class="g2" style="margin-bottom:16px">
-      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;color:var(--t3);margin-bottom:10px;display:flex;align-items:center;gap:6px"><span class="pill t3">T3</span> Turno Día</div>
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;margin-bottom:10px;display:flex;align-items:center;gap:6px"><span class="pill t3">T3</span> Turno Día</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Folios despachados</label><input type="number" id="m-ft3" placeholder="0" min="0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
-          <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">H. Planilla</label><input type="number" id="m-hpt3" placeholder="0.0" step="0.01" min="0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
-          <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">H. Terceros</label><input type="number" id="m-htt3" placeholder="0.0" step="0.01" min="0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
-          <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">H. Capacitación</label><input type="number" id="m-hct3" placeholder="0.0" step="0.01" min="0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Despachos reales</label><input type="number" id="m-ft3" placeholder="0" min="0" oninput="updateManualPreview()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">HH Planilla</label><input type="number" id="m-hpt3" placeholder="0.0" step="0.01" min="0" oninput="updateManualPreview()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">HH Terceros</label><input type="number" id="m-htt3" placeholder="0.0" step="0.01" min="0" oninput="updateManualPreview()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">HH Capacitación</label><input type="number" id="m-hct3" placeholder="0.0" step="0.01" min="0" oninput="updateManualPreview()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
         </div>
       </div>
-      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;color:var(--t1);margin-bottom:10px;display:flex;align-items:center;gap:6px"><span class="pill t1">T1</span> Turno Noche</div>
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;margin-bottom:10px;display:flex;align-items:center;gap:6px"><span class="pill t1">T1</span> Turno Noche</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Folios despachados</label><input type="number" id="m-ft1" placeholder="0" min="0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
-          <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">H. Planilla</label><input type="number" id="m-hpt1" placeholder="0.0" step="0.01" min="0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
-          <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">H. Terceros</label><input type="number" id="m-htt1" placeholder="0.0" step="0.01" min="0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
-          <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">H. Capacitación</label><input type="number" id="m-hct1" placeholder="0.0" step="0.01" min="0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Despachos reales</label><input type="number" id="m-ft1" placeholder="0" min="0" oninput="updateManualPreview()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">HH Planilla</label><input type="number" id="m-hpt1" placeholder="0.0" step="0.01" min="0" oninput="updateManualPreview()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">HH Terceros</label><input type="number" id="m-htt1" placeholder="0.0" step="0.01" min="0" oninput="updateManualPreview()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">HH Capacitación</label><input type="number" id="m-hct1" placeholder="0.0" step="0.01" min="0" oninput="updateManualPreview()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"></div>
         </div>
       </div>
     </div>
-    <!-- Preview eficiencia -->
-    <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--tm)">
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Efic. efectiva T3 (sin cap.)</span><strong id="prev-et3" style="color:var(--t3)">—</strong></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Efic. efectiva T1 (sin cap.)</span><strong id="prev-et1" style="color:var(--t1)">—</strong></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Efic. total T3 (con cap.)</span><strong id="prev-et3c" style="color:var(--tm)">—</strong></div>
-      <div style="display:flex;justify-content:space-between"><span>Efic. total T1 (con cap.)</span><strong id="prev-et1c" style="color:var(--tm)">—</strong></div>
+    <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm)">
+      <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:8px">Preview eficiencia</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Efectiva T3 (sin capacit.)</span><strong id="prev-ft3" style="color:var(--t3)">—</strong></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Efectiva T1 (sin capacit.)</span><strong id="prev-ft1" style="color:var(--t1)">—</strong></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--b1)"><span>Efectiva general</span><strong id="prev-fgen" style="color:var(--tx)">—</strong></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Total T3 (con capacit.)</span><strong id="prev-ct3" style="color:var(--ts)">—</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>Total T1 (con capacit.)</span><strong id="prev-ct1" style="color:var(--ts)">—</strong></div>
     </div>
-    <button class="btn btn-p btn-w" onclick="guardarManual()">Guardar datos →</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-p" style="flex:1;min-width:160px" onclick="guardarManual()">Guardar datos →</button>
+      <button class="btn btn-s" onclick="borrarDia()">Borrar este día</button>
+    </div>
   </div>
+
   <!-- EXCEL -->
   <div id="tab-excel" style="display:none">
     <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap">
-      <div><div style="font-weight:600;margin-bottom:3px;font-size:.85rem">Plantilla EO Crossdock.xlsx</div><div style="font-size:.68rem;color:var(--tm)">fecha · folios_t3 · folios_t1 · hp_t3 · hp_t1 · ht_t3 · ht_t1 · hc_t3 · hc_t1</div></div>
-      <button class="btn btn-s btn-sm" onclick="descargarPlantilla()">⬇ Descargar</button>
+      <div><div style="font-weight:600;margin-bottom:3px;font-size:.85rem">Plantilla EO Crossdock</div><div style="font-size:.66rem;color:var(--tm);font-family:'JetBrains Mono',monospace">fecha · folios_t3 · folios_t1 · hp_t3 · hp_t1 · ht_t3 · ht_t1 · hc_t3 · hc_t1</div></div>
+      <div style="display:flex;gap:6px"><button class="btn btn-s btn-sm" onclick="descargarPlantilla('csv')">⬇ CSV</button><button class="btn btn-s btn-sm" onclick="descargarPlantilla('xlsx')">⬇ Excel</button></div>
     </div>
-    <div id="drop-zone" style="border:2px dashed var(--b2);border-radius:12px;padding:38px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px" ondragover="event.preventDefault();this.style.borderColor='var(--t1)'" ondragleave="this.style.borderColor='var(--b2)'" ondrop="onDrop(event)">
+    <div id="drop-zone" style="border:2px dashed var(--b2);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px" ondragover="event.preventDefault();this.style.borderColor='var(--t1)'" ondragleave="this.style.borderColor='var(--b2)'" ondrop="onDrop(event)" onclick="document.getElementById('file-input').click()">
       <div style="font-size:2.2rem;margin-bottom:10px">📂</div>
-      <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.95rem;margin-bottom:5px">Arrastra tu Excel aquí</div>
-      <div style="font-size:.72rem;color:var(--tm)">o <label for="file-input" style="color:var(--t1);cursor:pointer">haz click para seleccionar</label> · .xlsx o .csv</div>
-      <input type="file" id="file-input" accept=".xlsx,.csv" style="display:none" onchange="onFileSelect(event)">
+      <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.95rem;margin-bottom:5px">Arrastra tu archivo aquí</div>
+      <div style="font-size:.72rem;color:var(--tm)">o click para seleccionar · .xlsx o .csv</div>
+      <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="onFileSelect(event)">
     </div>
     <div id="upload-preview" style="display:none;background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm);margin-bottom:14px"></div>
     <button class="btn btn-p btn-w" id="btn-importar" style="display:none" onclick="importarExcel()">Importar datos →</button>
+  </div>
+
+  <!-- IMPORTACIONES -->
+  <div id="tab-hist" style="display:none">
+    <div class="sl">Historial de importaciones</div>
+    <div id="imp-lista" style="display:flex;flex-direction:column;gap:8px"><div style="padding:24px;text-align:center;color:var(--ts);font-size:.78rem">Sin importaciones registradas</div></div>
   </div>
 </div>
 
 <!-- ══ AJUSTES ══ -->
 <div class="view" id="v-ajust">
-  <div class="ph"><div><div class="ph-title">Ajustes</div><div class="ph-sub">Configuración del sistema</div></div></div>
+  <div class="ph"><div><div class="ph-title">Ajustes</div><div class="ph-sub">Objetivos y configuración</div></div></div>
+
   <div style="margin-bottom:24px">
-    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Objetivo mensual</div>
+    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Objetivo acumulado mensual</div>
+    <div style="font-size:.68rem;color:var(--ts);margin:8px 0 12px">Eficiencia general que debes cerrar al final del mes</div>
     <div class="g2">
-      <div><label style="display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Mes</label><input type="month" id="aj-mes" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx);color-scheme:dark"></div>
-      <div><label style="display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Objetivo fol/h acumulado</label><input type="number" id="aj-obj" step="0.1" placeholder="20.0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"><div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:3px">fol/h acumulado al cierre del mes</div></div>
+      <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Mes</label><input type="month" id="aj-mes" onchange="cargarObjMes()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx);color-scheme:dark"></div>
+      <div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Objetivo fol/h</label><input type="number" id="aj-obj" step="0.1" placeholder="20.0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--ora)"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">si no lo defines usa el último configurado</div></div>
     </div>
   </div>
+
   <div style="margin-bottom:24px">
-    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Productividad target</div>
+    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Objetivo diario general</div>
+    <div style="font-size:.68rem;color:var(--ts);margin:8px 0 12px">Eficiencia del día completo (T3+T1 juntos) según tipo de día</div>
+    <div class="g3" id="cfg-obj-dia"></div>
+  </div>
+
+  <div style="margin-bottom:24px">
+    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Objetivo por turno</div>
+    <div style="font-size:.68rem;color:var(--ts);margin:8px 0 12px">Productividad target de cada turno según tipo de día</div>
     <div class="g2" id="cfg-targets"></div>
   </div>
+
   <div style="margin-bottom:24px">
-    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Jornadas laborales</div>
+    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Jornadas laborales</div>
+    <div style="font-size:.68rem;color:var(--ts);margin:8px 0 12px">Horas que trabaja cada persona de planilla y cada tercero</div>
     <div class="g2" id="cfg-jornadas"></div>
   </div>
+
   <div style="margin-bottom:24px">
-    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Feriados</div>
+    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Feriados</div>
+    <div style="font-size:.68rem;color:var(--ts);margin:8px 0 12px">Marca los feriados para que el modelo los prediga correctamente</div>
     <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px" id="feriados-lista"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <input type="date" id="fer-fecha" style="background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.78rem;color-scheme:dark">
-      <input type="text" id="fer-desc" placeholder="Descripción (opcional)" style="flex:1;min-width:120px;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.78rem">
+      <input type="text" id="fer-desc" placeholder="Descripción" style="flex:1;min-width:120px;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.78rem">
       <button class="btn btn-s btn-sm" onclick="agregarFeriado()">+ Agregar</button>
     </div>
   </div>
+
   <button class="btn btn-p btn-w" onclick="guardarConfig()">Guardar configuración →</button>
 </div>
   </main>
 </div>
 <nav class="bnav">
-  <button class="bn a" onclick="showView('hoy',this,true)"><span class="ico">📊</span>Hoy</button>
+  <button class="bn a" onclick="showView('hoy',this,true)"><span class="ico">📊</span>Proy.</button>
   <button class="bn" onclick="showView('mes',this,true)"><span class="ico">📅</span>Mes</button>
   <button class="bn" onclick="showView('hist',this,true)"><span class="ico">📈</span>Hist.</button>
   <button class="bn" onclick="showView('datos',this,true)"><span class="ico">⬆️</span>Datos</button>
   <button class="bn" onclick="showView('ajust',this,true)"><span class="ico">⚙️</span>Ajustes</button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 const SUPA_URL='https://lflenisloinbqyuptxzc.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbGVuaXNsb2luYnF5dXB0eHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MzAxNDQsImV4cCI6MjA5MTEwNjE0NH0.jcjKs2xCgxf4mvGbf9a5eRETWAOKf0SXg_JC0iy4UsI';
 const db=supabase.createClient(SUPA_URL,SUPA_KEY);
 
-// ── ESTADO GLOBAL ──
-const S={
-  turno:'t1', turnoHist:'t1',
-  fecha:hoy(), mesSel:null,
-  cfg:{}, feriados:[], objetivos:[],
-  dias:[], proy:null, calc:{},
-  excelData:null, histMes:null
-};
+const S={turno:'t1',turnoHist:'t1',fecha:hoy(),cfg:{},objDia:{},feriados:[],objetivos:[],
+  dias:[],proy:null,calc:{},excelData:null,excelName:'',histMes:[],mesActivo:null,importaciones:[]};
 
-// ── UTILS ──
 function hoy(){return new Date().toLocaleDateString('en-CA',{timeZone:'America/Lima'});}
-function tipoDia(f,feriados){
-  if(feriados.some(x=>x.fecha===f)) return 'feriado';
-  const d=new Date(f+'T12:00:00').getDay();
-  return (d===0||d===6)?'finde':'semana';
-}
+function tipoDia(f){if(S.feriados.some(x=>x.fecha===f))return 'feriado';const d=new Date(f+'T12:00:00').getDay();return(d===0||d===6)?'finde':'semana';}
 function fmt(n,d=1){if(n==null||isNaN(n))return '—';return Number(n).toFixed(d);}
-function fmtI(n){if(n==null||isNaN(n)||n===0)return '—';return Math.round(n).toLocaleString('es-PE');}
-function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-function loading(on){document.getElementById('loader').classList.toggle('show',on);}
-function toast(msg,type='ok'){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast show '+(type==='ok'?'ok-t':'err-t');
-  setTimeout(()=>t.classList.remove('show'),2800);
-}
+function fmtI(n){if(n==null||isNaN(n))return '—';if(n===0)return '0';return Math.round(n).toLocaleString('es-PE');}
+function loading(on){const l=$('loader');if(l)l.classList.toggle('show',on);}
+function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.className='toast show '+(t==='ok'?'ok-t':'err-t');setTimeout(()=>e.classList.remove('show'),2800);}
 const $=id=>document.getElementById(id);
-const num=id=>+($(id)?.value)||0;
+const num=id=>{const e=$(id);return e?(+e.value||0):0;};
+function cfgOf(td,tr){return S.cfg[`${td}_${tr}`]||S.cfg[`semana_${tr}`]||{productividad:tr==='t1'?25:15,jornada_planilla:tr==='t1'?9.36:8,jornada_tercero:8};}
 
-// ── MODELO ML ── EMA + ponderado por tipo de día
-function calcEMA(arr,alpha=0.3){
-  if(!arr.length) return null;
-  return arr.reduce((ema,v)=>ema==null?v:alpha*v+(1-alpha)*ema, null);
-}
+/* ═══ MODELO ML — EMA ponderado por tipo de día y día de semana ═══ */
+function calcEMA(arr,alpha=0.35){if(!arr.length)return null;let e=null;arr.forEach(v=>{e=e==null?v:alpha*v+(1-alpha)*e;});return e;}
 function predecir(fecha){
-  const td=tipoDia(fecha,S.feriados);
+  const td=tipoDia(fecha);
   const dow=new Date(fecha+'T12:00:00').getDay();
-  const mismoDow=S.dias.filter(d=>new Date(d.fecha+'T12:00:00').getDay()===dow&&d.fecha<fecha&&tipoDia(d.fecha,S.feriados)===td);
-  const mismoTipo=S.dias.filter(d=>tipoDia(d.fecha,S.feriados)===td&&d.fecha<fecha);
-  const base=mismoDow.length>=2?mismoDow:mismoTipo;
-  if(!base.length) return null;
-  const recientes=base.slice(-8).sort((a,b)=>a.fecha.localeCompare(b.fecha));
-  const ft3=calcEMA(recientes.map(d=>d.folios_t3||0));
-  const ft1=calcEMA(recientes.map(d=>d.folios_t1||0));
-  const varT3=recientes.length>1?Math.sqrt(recientes.reduce((s,d)=>s+Math.pow((d.folios_t3||0)-(ft3||0),2),0)/recientes.length):0;
-  const varT1=recientes.length>1?Math.sqrt(recientes.reduce((s,d)=>s+Math.pow((d.folios_t1||0)-(ft1||0),2),0)/recientes.length):0;
-  const conf=Math.min(95,60+recientes.length*4+(mismoDow.length>1?15:0));
-  return {ft3:Math.round(ft3||0),ft1:Math.round(ft1||0),int_t3:Math.round(varT3),int_t1:Math.round(varT1),conf,td,n:recientes.length};
+  const conDatos=S.dias.filter(d=>d.fecha<fecha&&((d.folios_t3||0)+(d.folios_t1||0))>0);
+  if(!conDatos.length)return null;
+  const mismoDow=conDatos.filter(d=>new Date(d.fecha+'T12:00:00').getDay()===dow&&tipoDia(d.fecha)===td);
+  const mismoTipo=conDatos.filter(d=>tipoDia(d.fecha)===td);
+  let base,nivel;
+  if(mismoDow.length>=3){base=mismoDow;nivel='dow+tipo';}
+  else if(mismoTipo.length>=3){base=mismoTipo;nivel='tipo';}
+  else{base=conDatos;nivel='global';}
+  const rec=base.slice(-10);
+  const ft3=calcEMA(rec.map(d=>+d.folios_t3||0));
+  const ft1=calcEMA(rec.map(d=>+d.folios_t1||0));
+  const sd=(arr,m)=>arr.length>1?Math.sqrt(arr.reduce((s,v)=>s+Math.pow(v-m,2),0)/arr.length):0;
+  const i3=sd(rec.map(d=>+d.folios_t3||0),ft3||0);
+  const i1=sd(rec.map(d=>+d.folios_t1||0),ft1||0);
+  let conf=45+rec.length*4;
+  if(nivel==='dow+tipo')conf+=18;else if(nivel==='tipo')conf+=8;
+  conf=Math.max(35,Math.min(96,conf));
+  return{ft3:Math.round(ft3||0),ft1:Math.round(ft1||0),i3:Math.round(i3),i1:Math.round(i1),conf:Math.round(conf),nivel,n:rec.length,td};
 }
-function calcPrecisionModelo(){
-  const ultimos=S.dias.filter(d=>S.proy&&d.fecha===S.proy.fecha).length>0
-    ?S.dias.slice(-30):S.dias.slice(-30);
-  if(ultimos.length<5) return null;
-  let errores=[];
-  ultimos.forEach(d=>{
-    const pred=predecir(d.fecha);
-    if(!pred) return;
-    const realT=(d.folios_t3||0)+(d.folios_t1||0);
-    const predT=pred.ft3+pred.ft1;
-    if(predT>0) errores.push(Math.abs(realT-predT)/predT*100);
+function precisionModelo(){
+  const conDatos=S.dias.filter(d=>((d.folios_t3||0)+(d.folios_t1||0))>0);
+  if(conDatos.length<8)return null;
+  const test=conDatos.slice(-30);
+  let errs=[];
+  test.forEach(d=>{
+    const p=predecir(d.fecha);if(!p)return;
+    const real=(+d.folios_t3||0)+(+d.folios_t1||0);
+    const pred=p.ft3+p.ft1;
+    if(real>0)errs.push(Math.abs(real-pred)/real*100);
   });
-  if(!errores.length) return null;
-  const mape=errores.reduce((a,b)=>a+b,0)/errores.length;
-  return Math.max(0,Math.min(100,100-mape));
-}
-function calcTurno(turno,folios){
-  const td=tipoDia(S.fecha,S.feriados);
-  const cfg=S.cfg[`${td}_${turno}`]||S.cfg[`semana_${turno}`]||{productividad:turno==='t1'?25:15,jornada_planilla:turno==='t1'?9.36:8,jornada_tercero:8};
-  const prod=cfg.productividad;
-  const jP=cfg.jornada_planilla;
-  const jT=cfg.jornada_tercero||8;
-  const hrs_nec=folios>0?folios/prod:0;
-  const terceros=folios>0?Math.ceil(hrs_nec/jT):0;
-  const hrs_tot=terceros*jT;
-  const efic=hrs_tot>0?folios/hrs_tot:0;
-  return {folios,prod,terceros,hrs_nec,hrs_tot,efic,jP,jT};
+  if(errs.length<3)return null;
+  return Math.max(0,Math.min(100,100-errs.reduce((a,b)=>a+b,0)/errs.length));
 }
 
-// ── RECALC ──
+/* ═══ CALCULADORA HH ═══ */
+function calcHH(tr,folios,personas){
+  const td=tipoDia(S.fecha);
+  const c=cfgOf(td,tr);
+  const obj=num('obj-'+tr)||c.productividad;
+  const jP=c.jornada_planilla;
+  const jT=num('jor-ter')||8;
+  const hh_nec=obj>0?folios/obj:0;
+  const hh_plan=personas*jP;
+  const gap=hh_nec-hh_plan;
+  const terceros=gap>0?Math.ceil(gap/jT):0;
+  const hh_tot=hh_plan+terceros*jT;
+  const efic=hh_tot>0?folios/hh_tot:0;
+  const cap=hh_tot*obj;
+  return{folios,obj,jP,jT,hh_nec,hh_plan,gap,terceros,hh_tot,efic,cap,personas};
+}
 function recalc(){
-  const total=num('inp-total');
-  const pctT3=clamp(num('pct-t3'),0,100);
-  const pctT1=100-pctT3;
-  const fT3=Math.round(total*pctT3/100);
-  const fT1=Math.round(total*pctT1/100);
-  const cT3=calcTurno('t3',fT3);
-  const cT1=calcTurno('t1',fT1);
-  S.calc={t3:cT3,t1:cT1};
+  const td=tipoDia(S.fecha);
+  ['t3','t1'].forEach(tr=>{
+    const c=cfgOf(td,tr);
+    $('plan-jor-'+tr).textContent=`jornada ${fmt(c.jornada_planilla,2)}h`;
+  });
+  const p3=Math.max(0,num('plan-t3')), p1=Math.max(0,num('plan-t1'));
+  const f3=Math.max(0,num('fol-t3')), f1=Math.max(0,num('fol-t1'));
+  const c3=calcHH('t3',f3,p3), c1=calcHH('t1',f1,p1);
+  S.calc={t3:c3,t1:c1};
 
-  const tot3=cT3.terceros+cT1.terceros;
-  const efGen=(cT3.hrs_tot+cT1.hrs_tot)>0?(fT3+fT1)/(cT3.hrs_tot+cT1.hrs_tot):0;
+  $('plan-hh-t3').textContent=fmt(c3.hh_plan,1)+'h';
+  $('plan-hh-t1').textContent=fmt(c1.hh_plan,1)+'h';
+  $('plan-hh-total').textContent=fmt(c3.hh_plan+c1.hh_plan,1)+'h';
 
-  // Hero
-  $('hero-n').textContent=total>0?tot3:'—';
-  $('hero-dist').textContent=`${cT3.terceros} día · ${cT1.terceros} noche`;
-  $('hero-efic').textContent=total>0?fmt(efGen)+' fol/h':'—';
-  $('hero-hrs').textContent=total>0?fmt(cT3.hrs_nec+cT1.hrs_nec,1)+'h':'—';
-  // Folios calculados
-  $('fol-t3').textContent=fmtI(fT3);
-  $('fol-t1').textContent=fmtI(fT1);
-  // Cards
-  $('ct3-fol').textContent=fmtI(fT3)+' fol';
-  $('ct3-ter').textContent=cT3.terceros;
-  $('ct3-efic').textContent=fmt(cT3.efic)+' fol/h';
-  $('ct3-hrs').textContent=fmt(cT3.hrs_nec,1)+'h';
-  $('ct3-tgt').textContent=fmt(cT3.prod,0)+' fol/h';
-  $('ct1-fol').textContent=fmtI(fT1)+' fol';
-  $('ct1-ter').textContent=cT1.terceros;
-  $('ct1-efic').textContent=fmt(cT1.efic)+' fol/h';
-  $('ct1-hrs').textContent=fmt(cT1.hrs_nec,1)+'h';
-  $('ct1-tgt').textContent=fmt(cT1.prod,0)+' fol/h';
-  // Sim default
-  $('sim-t3').value=cT3.terceros;
-  $('sim-t1').value=cT1.terceros;
-  $('sim-t3-rec').textContent='recomendado: '+cT3.terceros;
-  $('sim-t1-rec').textContent='recomendado: '+cT1.terceros;
-  renderSim();
+  ['t3','t1'].forEach(tr=>{
+    const c=tr==='t3'?c3:c1;
+    $('hh-nec-'+tr).textContent=c.folios>0?fmt(c.hh_nec,1)+'h':'—';
+    $('hh-plan-'+tr).textContent=fmt(c.hh_plan,1)+'h';
+    const gEl=$('hh-gap-'+tr), lEl=$('lbl-gap-'+tr);
+    if(c.folios===0){gEl.textContent='—';gEl.style.color='var(--tm)';lEl.textContent='Déficit';}
+    else if(c.gap>0){gEl.textContent='−'+fmt(c.gap,1)+'h';gEl.style.color='var(--red)';lEl.textContent='Déficit';}
+    else{gEl.textContent='+'+fmt(-c.gap,1)+'h';gEl.style.color='var(--ok)';lEl.textContent='Superávit';}
+    $('ter-'+tr).textContent=c.folios>0?c.terceros:'—';
+    $('ef-res-'+tr).textContent=c.efic>0?fmt(c.efic)+' fol/h':'—';
+    $('cap-'+tr).textContent=c.cap>0?fmtI(c.cap)+' fol':'—';
+  });
+
+  // Resumen general
+  const folTot=f3+f1, hhTot=c3.hh_tot+c1.hh_tot, terTot=c3.terceros+c1.terceros;
+  const efGen=hhTot>0?folTot/hhTot:0;
+  const objGen=num('obj-gen');
+  const el=$('res-ef-gen');
+  el.textContent=efGen>0?fmt(efGen):'—';
+  el.style.color=efGen===0?'var(--tm)':efGen>=objGen?'var(--ok)':'var(--red)';
+  $('res-ef-sub').textContent=folTot>0?`${fmtI(folTot)} fol ÷ ${fmt(hhTot,1)}h`:'—';
+  $('res-fol-tot').textContent=fmtI(folTot);
+  $('res-hh-tot').textContent=hhTot>0?fmt(hhTot,1)+'h':'—';
+  $('res-ter-tot').textContent=folTot>0?terTot:'—';
+
+  const vd=$('res-veredicto'), ico=$('res-ico'), txt=$('res-txt'), sub=$('res-sub');
+  if(folTot===0){
+    vd.style.background='var(--s3)';vd.style.borderColor='var(--b1)';
+    ico.textContent='—';txt.textContent='Ingresa los datos para calcular';sub.textContent='—';
+  } else if(efGen>=objGen){
+    vd.style.background='rgba(0,200,150,.07)';vd.style.borderColor='rgba(0,200,150,.25)';
+    ico.textContent='✅';txt.textContent=`Cumple el objetivo diario de ${fmt(objGen)} fol/h`;
+    sub.textContent=`Margen de +${fmt(efGen-objGen)} fol/h con ${terTot} terceros`;
+  } else {
+    const falta=objGen>0?(folTot/objGen)-hhTot:0;
+    vd.style.background='rgba(255,77,109,.07)';vd.style.borderColor='rgba(255,77,109,.25)';
+    ico.textContent='⚠️';txt.textContent=`No alcanza el objetivo de ${fmt(objGen)} fol/h`;
+    sub.textContent=falta<0?`Sobran ${fmt(-falta,1)}h — reduce personal`:`Necesitas ${fmt(Math.abs(hhTot-(folTot/objGen)),1)}h menos o más despachos`;
+  }
+
+  // Aporte al acumulado
+  const now=new Date(S.fecha+'T12:00:00');
+  const pre=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const dm=S.dias.filter(d=>d.fecha.startsWith(pre)&&d.fecha<S.fecha);
+  const aF=dm.reduce((a,d)=>a+(+d.folios_t3||0)+(+d.folios_t1||0),0);
+  const aH=dm.reduce((a,d)=>a+(+d.hp_t3||0)+(+d.hp_t1||0)+(+d.ht_t3||0)+(+d.ht_t1||0),0);
+  const efAntes=aH>0?aF/aH:0;
+  const efDesp=(aH+hhTot)>0?(aF+folTot)/(aH+hhTot):0;
+  const apEl=$('res-aporte');
+  if(folTot>0&&aH>0){
+    const dif=efDesp-efAntes;
+    apEl.textContent=(dif>=0?'+':'')+fmt(dif,2)+` → ${fmt(efDesp)}`;
+    apEl.style.color=dif>=0?'var(--ok)':'var(--red)';
+  } else {apEl.textContent='—';apEl.style.color='var(--tx)';}
+
   applyTurnoFilter();
-}
-function onTotalChange(){recalc();}
-function onPctChange(t){
-  const v=clamp(num('pct-'+t),0,100);
-  $('pct-'+t).value=v;
-  $('pct-'+(t==='t3'?'t1':'t3')).value=100-v;
-  recalc();
 }
 function applyTurnoFilter(){
   const t=S.turno;
-  $('card-t3').style.display=t==='t1'?'none':'block';
-  $('card-t1').style.display=t==='t3'?'none':'block';
+  ['plan-box','calc'].forEach(pre=>{
+    const e3=$(pre+'-t3'), e1=$(pre+'-t1');
+    if(e3)e3.style.display=t==='t1'?'none':'block';
+    if(e1)e1.style.display=t==='t3'?'none':'block';
+  });
 }
 function setTurno(t,btn){
   S.turno=t;
   document.querySelectorAll('#v-hoy .fp').forEach(b=>b.classList.remove('a','ft1','ft3','fall'));
-  btn.classList.add('a','f'+t);
+  btn.classList.add('a','f'+(t==='all'?'all':t));
   applyTurnoFilter();
 }
-function stepSim(t,d){
-  const el=$('sim-'+t);
-  el.value=Math.max(0,(+el.value||0)+d);
-  renderSim();
+function stepPlan(t,d){const e=$('plan-'+t);e.value=Math.max(0,(+e.value||0)+d);recalc();}
+
+/* ═══ CARGAR / FECHA ═══ */
+async function cambiarFecha(){
+  S.fecha=$('proy-fecha').value||hoy();
+  await cargarProyFecha();
+  aplicarPrediccion();
+  recalc();
 }
-function renderSim(){
-  ['t3','t1'].forEach(t=>{
-    const c=S.calc[t]||{};
-    const n3=Math.max(0,num('sim-'+t));
-    const hrs=n3*(c.jT||8);
-    const eff=hrs>0?(c.folios||0)/hrs:0;
-    const cob=c.hrs_nec>0?hrs/c.hrs_nec:1;
-    const el=$('sim-efic-'+t);
-    el.textContent=fmt(eff);
-    el.style.color=c.folios===0?'var(--tm)':cob>=1?'var(--ok)':cob>=0.85?'var(--ora)':'var(--red)';
-    const falta=Math.max(0,(c.hrs_nec||0)-hrs);
-    const bdg=$('sim-badge-'+t);
-    if(!c.folios){bdg.innerHTML='';return;}
-    if(cob>=1) bdg.innerHTML='<span style="display:inline-block;padding:2px 8px;font-family:\'JetBrains Mono\',monospace;font-size:.6rem;text-transform:uppercase;border:1px solid;border-radius:4px;background:rgba(0,200,150,.1);color:var(--ok);border-color:rgba(0,200,150,.3)">✓ alcanza</span>';
-    else{const cl=cob>=0.85?'rgba(255,149,0,.3)':'rgba(255,77,109,.3)';const cc=cob>=0.85?'var(--ora)':'var(--red)';bdg.innerHTML=`<span style="display:inline-block;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;border:1px solid;border-radius:4px;background:rgba(255,77,109,.08);color:${cc};border-color:${cl}">${cob>=0.85?'⚠':'✕'} faltan ${fmt(falta,1)}h</span>`;}
-  });
+async function cargarProyFecha(){
+  try{
+    const{data}=await db.from('eo_proyecciones').select('*').eq('fecha',S.fecha).maybeSingle();
+    S.proy=data;
+    if(data){
+      $('plan-t3').value=data.planilla_t3||0;
+      $('plan-t1').value=data.planilla_t1||0;
+      if(data.jornada_tercero)$('jor-ter').value=data.jornada_tercero;
+      if(data.folios_t3_proy)$('fol-t3').value=Math.round(data.folios_t3_proy);
+      if(data.folios_t1_proy)$('fol-t1').value=Math.round(data.folios_t1_proy);
+      if(data.efic_esp_t3)$('obj-t3').value=fmt(data.efic_esp_t3);
+    } else {
+      $('plan-t3').value=0;$('plan-t1').value=0;
+    }
+  }catch(e){console.warn(e);}
+}
+function aplicarPrediccion(){
+  const td=tipoDia(S.fecha);
+  const dObj=new Date(S.fecha+'T12:00:00');
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  $('hoy-fecha').textContent=`${dias[dObj.getDay()]}, ${dObj.toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'})}`;
+  $('hoy-tipo').textContent=`${td==='feriado'?'🔴 Feriado':td==='finde'?'Fin de semana':'Semana'} · Lima · 24/7`;
+  // Objetivos por defecto según tipo de día
+  const c3=cfgOf(td,'t3'), c1=cfgOf(td,'t1');
+  if(!S.proy){$('obj-t3').value=fmt(c3.productividad);$('obj-t1').value=fmt(c1.productividad);}
+  else{$('obj-t3').value=fmt(S.proy.efic_esp_t3||c3.productividad);$('obj-t1').value=fmt(S.proy.efic_esp_t1||c1.productividad);}
+  $('obj-gen').value=fmt(S.objDia[td]||20);
+  $('jor-ter').value=fmt(S.proy?.jornada_tercero||c3.jornada_tercero||8,2);
+  // Predicción
+  const p=predecir(S.fecha);
+  if(p){
+    $('pred-t3').textContent=fmtI(p.ft3);
+    $('pred-t1').textContent=fmtI(p.ft1);
+    $('pred-tot').textContent=fmtI(p.ft3+p.ft1);
+    $('pred-t3-int').textContent=`± ${fmtI(p.i3)}`;
+    $('pred-t1-int').textContent=`± ${fmtI(p.i1)}`;
+    $('pred-conf').textContent=`confianza ${p.conf}% · ${p.n} registros`;
+    const nivelTxt={'dow+tipo':'mismo día + tipo','tipo':'mismo tipo de día','global':'histórico general'};
+    $('pred-base').textContent=`base: ${nivelTxt[p.nivel]}`;
+    if(!S.proy||!S.proy.folios_t3_proy){$('fol-t3').value=p.ft3;$('fol-t1').value=p.ft1;}
+  } else {
+    ['pred-t3','pred-t1','pred-tot','pred-t3-int','pred-t1-int'].forEach(i=>{$(i).textContent='—';});
+    $('pred-conf').textContent='sin histórico suficiente';
+    $('pred-base').textContent='carga datos primero';
+  }
+  const prec=precisionModelo();
+  const mlv=document.querySelector('.ml-v'),mls=document.querySelector('.ml-s'),mlb=document.querySelector('.ml-bar-fill');
+  if(prec!=null){
+    if(mlv)mlv.textContent=fmt(prec)+'%';
+    if(mls)mls.textContent=`${S.dias.length} días registrados`;
+    if(mlb)mlb.style.width=prec+'%';
+  } else {
+    if(mlv)mlv.textContent='—';
+    if(mls)mls.textContent=`${S.dias.length} días · faltan datos`;
+  }
 }
 
-// ── MANUAL PREVIEW ──
+/* ═══ GUARDAR PROYECCIÓN ═══ */
+async function guardarProy(){
+  const{t3,t1}=S.calc;
+  if(!t3.folios&&!t1.folios){toast('Sin despachos proyectados','error');return;}
+  loading(true);
+  try{
+    const{error}=await db.from('eo_proyecciones').upsert({
+      fecha:S.fecha,
+      planilla_t3:t3.personas,planilla_t1:t1.personas,
+      hh_disp_t3:t3.hh_plan,hh_disp_t1:t1.hh_plan,
+      deficit_t3:t3.gap,deficit_t1:t1.gap,
+      jornada_tercero:num('jor-ter')||8,
+      folios_t3_proy:t3.folios,folios_t1_proy:t1.folios,
+      terceros_t3:t3.terceros,terceros_t1:t1.terceros,
+      horas_nec_t3:t3.hh_nec,horas_nec_t1:t1.hh_nec,
+      efic_esp_t3:t3.obj,efic_esp_t1:t1.obj,
+      total_folios_usr:t3.folios+t1.folios,
+      updated_at:new Date().toISOString()
+    },{onConflict:'fecha'});
+    if(error)throw error;
+    toast('Proyección guardada ✓');
+    await cargarProyFecha();
+  }catch(e){toast('Error al guardar','error');console.error(e);}
+  finally{loading(false);}
+}
+
+/* ═══ MANUAL ═══ */
 function updateManualPreview(){
+  let tf=0,th=0;
   ['t3','t1'].forEach(t=>{
-    const f=num('m-f'+t), hp=num('m-hp'+t), ht=num('m-ht'+t), hc=num('m-hc'+t);
-    const hef=hp+ht, htot=hp+ht+hc;
-    $('prev-e'+t).textContent=hef>0?fmt(f/hef):'—';
-    $('prev-e'+t+'c').textContent=htot>0?fmt(f/htot):'—';
+    const f=num('m-f'+t),hp=num('m-hp'+t),ht=num('m-ht'+t),hc=num('m-hc'+t);
+    const hef=hp+ht,htot=hp+ht+hc;
+    $('prev-f'+t).textContent=hef>0?fmt(f/hef)+' fol/h':'—';
+    $('prev-c'+t).textContent=htot>0?fmt(f/htot)+' fol/h':'—';
+    tf+=f;th+=hef;
   });
+  $('prev-fgen').textContent=th>0?fmt(tf/th)+' fol/h':'—';
 }
-['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1'].forEach(id=>{
-  setTimeout(()=>{const el=$(id);if(el)el.addEventListener('input',updateManualPreview);},500);
-});
-
-// ── MES ──
-function renderMes(){
-  const now=new Date();
-  const anio=now.getFullYear(), mes=now.getMonth()+1;
-  $('mes-titulo').textContent=now.toLocaleDateString('es-PE',{month:'long',year:'numeric'});
-  const obj=S.objetivos.find(o=>o.anio===anio&&o.mes===mes);
-  const objVal=obj?.objetivo_efic||20;
-  $('mes-obj').textContent=fmt(objVal);
-  // Calcular acumulado real del mes
-  const diasMes=S.dias.filter(d=>d.fecha.startsWith(`${anio}-${String(mes).padStart(2,'0')}`));
-  const totFol=diasMes.reduce((a,d)=>(a+(d.folios_t3||0)+(d.folios_t1||0)),0);
-  const totHrs=diasMes.reduce((a,d)=>(a+(d.hp_t3||0)+(d.hp_t1||0)+(d.ht_t3||0)+(d.ht_t1||0)),0);
-  const eficAcum=totHrs>0?totFol/totHrs:0;
-  $('mes-efic-acum').textContent=fmt(eficAcum);
-  $('mes-efic-sub').textContent=`${fmtI(totFol)} fol ÷ ${fmt(totHrs,0)}h`;
-  const pct=objVal>0?Math.min(100,(eficAcum/objVal)*100):0;
-  $('mes-avance-pct').textContent=fmt(pct,1)+'%';
-  $('mes-prog-bar').style.width=pct+'%';
-  // Curva acumulada
-  drawCurvaAcum(diasMes,objVal);
-  // Días restantes
-  const hoyDate=new Date(hoy()+'T12:00:00');
-  const ultimoDia=new Date(anio,mes,0);
-  const diasRest=[];
-  for(let d=new Date(hoyDate);d<=ultimoDia;d.setDate(d.getDate()+1)){
-    diasRest.push(d.toLocaleDateString('en-CA',{timeZone:'America/Lima'}));
+async function cargarManualFecha(){
+  const f=$('manual-fecha').value;if(!f)return;
+  const d=S.dias.find(x=>x.fecha===f);
+  const set=(id,v)=>{const e=$(id);if(e)e.value=(v!=null&&v!==0)?v:(v===0?0:'');};
+  if(d){
+    set('m-ft3',d.folios_t3);set('m-ft1',d.folios_t1);
+    set('m-hpt3',d.hp_t3);set('m-hpt1',d.hp_t1);
+    set('m-htt3',d.ht_t3);set('m-htt1',d.ht_t1);
+    set('m-hct3',d.hc_t3);set('m-hct1',d.hc_t1);
+    toast('Día ya registrado — puedes editarlo');
+  } else {
+    ['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1'].forEach(i=>{const e=$(i);if(e)e.value='';});
   }
-  // Proyección días restantes
-  const totalFolRestNec=eficAcum>0&&diasRest.length>0?calcFolNecesarios(totFol,totHrs,objVal,diasRest):null;
-  const vEl=$('mes-veredic');
-  if(totalFolRestNec){
-    const efNec=totalFolRestNec.eficNec;
-    const alcanzable=efNec<(eficAcum*1.3);
-    vEl.style.background=alcanzable?'rgba(255,149,0,.07)':'rgba(255,77,109,.07)';
-    vEl.style.borderColor=alcanzable?'rgba(255,149,0,.2)':'rgba(255,77,109,.2)';
-    $('mes-veredic-t').textContent=`Para cerrar en ${fmt(objVal)} fol/h necesitas ${fmt(efNec)} fol/h los próximos ${diasRest.length} días`;
-    $('mes-veredic-s').textContent=alcanzable?'Alcanzable con esfuerzo':'Difícil — requiere rendimiento excepcional';
-  }
-  // Render lista días
-  const cont=$('dias-restantes');
-  cont.innerHTML='';
-  diasRest.slice(0,10).forEach(f=>{
-    const td=tipoDia(f,S.feriados);
-    const pred=predecir(f);
-    const d=new Date(f+'T12:00:00');
-    const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-    const row=document.createElement('div');
-    row.style.cssText='background:var(--s2);border:1px solid var(--b1);border-radius:8px;overflow:hidden';
-    if(td==='feriado') row.style.borderColor='rgba(255,77,109,.2)';
-    const pt3=pred?.ft3||0, pt1=pred?.ft1||0;
-    const hrsNec=pt3>0||pt1>0?fmt((pt3+(pt1))/(S.cfg[`${td}_t3`]?.productividad||15)*0.5+(pt3+pt1)/(S.cfg[`${td}_t1`]?.productividad||25)*0.5,0)+'h':'—';
-    row.innerHTML=`<div style="display:grid;grid-template-columns:100px 1fr 1fr auto;gap:12px;align-items:center;padding:12px 14px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600">${dias[d.getDay()]} ${d.getDate()} ${d.toLocaleDateString('es-PE',{month:'short'})}</div><div style="font-size:.62rem;margin-top:1px">${td==='feriado'?'<span class="pill fer" style="font-size:.55rem;padding:1px 5px">Feriado</span>':td==='finde'?'<span style="color:var(--ora)">Fin de semana</span>':'<span style="color:var(--ts)">Semana</span>'}</div></div>
-      <div style="font-size:.72rem;color:var(--tm)"><span class="pill t3">T3</span> <strong style="color:var(--tx)">${fmtI(pt3)}</strong> fol</div>
-      <div style="font-size:.72rem;color:var(--tm)"><span class="pill t1">T1</span> <strong style="color:var(--tx)">${fmtI(pt1)}</strong> fol</div>
-      <div style="text-align:right"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--t1)">${pred?fmtI(pt3+pt1):'—'}</div><div style="font-size:.58rem;color:var(--ts);text-transform:uppercase">folios pred.</div></div>
-    </div>
-    <div style="display:none;border-top:1px solid var(--b1);padding:12px 14px;background:var(--s3);display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:.68rem">
-      <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.58rem;margin-bottom:6px">T3 Día</div><div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Pred. folios</span><strong style="color:var(--tx);font-family:'JetBrains Mono',monospace">${fmtI(pt3)}</strong></div><div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Target</span><strong style="color:var(--tx);font-family:'JetBrains Mono',monospace">${S.cfg[`${td}_t3`]?.productividad||15} fol/h</strong></div></div>
-      <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.58rem;margin-bottom:6px">T1 Noche</div><div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Pred. folios</span><strong style="color:var(--tx);font-family:'JetBrains Mono',monospace">${fmtI(pt1)}</strong></div><div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Target</span><strong style="color:var(--tx);font-family:'JetBrains Mono',monospace">${S.cfg[`${td}_t1`]?.productividad||25} fol/h</strong></div></div>
-      <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.58rem;margin-bottom:6px">General</div><div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Total folios</span><strong style="color:var(--tx);font-family:'JetBrains Mono',monospace">${fmtI(pt3+pt1)}</strong></div><div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Confianza</span><strong style="color:var(--t1);font-family:'JetBrains Mono',monospace">${pred?pred.conf+'%':'—'}</strong></div></div>
-    </div>`;
-    cont.appendChild(row);
-  });
+  updateManualPreview();
 }
-function calcFolNecesarios(totFolAcum,totHrsAcum,obj,diasRest){
-  const predFolRest=diasRest.reduce((a,f)=>{const p=predecir(f);return a+(p?p.ft3+p.ft1:0);},0);
-  const predHrsRest=diasRest.reduce((a,f)=>{
-    const td=tipoDia(f,S.feriados);
-    const c3=S.cfg[`${td}_t3`]||{productividad:15};
-    const c1=S.cfg[`${td}_t1`]||{productividad:25};
-    const p=predecir(f);
-    if(!p) return a;
-    return a+(p.ft3/c3.productividad)+(p.ft1/c1.productividad);
-  },0);
-  const eficNec=predHrsRest>0?((obj*(totHrsAcum+predHrsRest)-totFolAcum)/predHrsRest):obj;
-  return {eficNec,predFolRest,predHrsRest};
+async function guardarManual(){
+  const f=$('manual-fecha').value;
+  if(!f){toast('Ingresa la fecha','error');return;}
+  loading(true);
+  try{
+    const row={fecha:f,tipo_dia:tipoDia(f),fuente:'manual',
+      folios_t3:num('m-ft3'),folios_t1:num('m-ft1'),
+      hp_t3:num('m-hpt3'),hp_t1:num('m-hpt1'),
+      ht_t3:num('m-htt3'),ht_t1:num('m-htt1'),
+      hc_t3:num('m-hct3'),hc_t1:num('m-hct1'),
+      updated_at:new Date().toISOString()};
+    const{error}=await db.from('eo_dias').upsert(row,{onConflict:'fecha'});
+    if(error)throw error;
+    const i=S.dias.findIndex(d=>d.fecha===f);
+    if(i>=0)S.dias[i]={...S.dias[i],...row};else S.dias.push(row);
+    S.dias.sort((a,b)=>a.fecha.localeCompare(b.fecha));
+    toast('Datos guardados ✓ modelo actualizado');
+    aplicarPrediccion();recalc();
+    if(S.mesActivo)cargarHistMes(S.mesActivo.a,S.mesActivo.m);
+  }catch(e){toast('Error al guardar','error');console.error(e);}
+  finally{loading(false);}
 }
-function drawCurvaAcum(diasMes,obj){
-  const svg=$('chart-acum');
-  if(!diasMes.length){svg.innerHTML='<text x="290" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text>';return;}
-  const W=580,H=160,M={t:15,r:14,b:30,l:38};
-  const w=W-M.l-M.r, h=H-M.t-M.b;
-  let cumFol=0,cumHrs=0;
-  const puntos=diasMes.map(d=>{cumFol+=(d.folios_t3||0)+(d.folios_t1||0);cumHrs+=(d.hp_t3||0)+(d.hp_t1||0)+(d.ht_t3||0)+(d.ht_t1||0);return cumHrs>0?cumFol/cumHrs:0;});
-  const maxY=Math.max(...puntos,obj)*1.2;
-  const n=puntos.length;
-  let out=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-  for(let i=0;i<=3;i++){const y=M.t+(h*i/3);const v=maxY*(1-i/3);out+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#1e1e32"/><text x="${M.l-5}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${v.toFixed(0)}</text>`;}
-  const yObj=M.t+h-(h*obj/maxY);
-  out+=`<line x1="${M.l}" y1="${yObj}" x2="${M.l+w}" y2="${yObj}" stroke="#4a4a6a" stroke-dasharray="4,3"/>`;
-  let path='';
-  puntos.forEach((v,i)=>{const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;const y=M.t+h-(h*v/maxY);path+=(i===0?'M ':' L ')+x.toFixed(1)+' '+y.toFixed(1);});
-  out+=`<path d="${path}" stroke="#7c6fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
-  if(puntos.length){const lx=n>1?M.l+(w*(n-1)/(n-1)):M.l+w/2;const ly=M.t+h-(h*puntos[n-1]/maxY);out+=`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="4" fill="#07070f" stroke="#7c6fff" stroke-width="2.5"/>`;}
-  diasMes.forEach((d,i)=>{if(i%Math.ceil(n/5)===0||i===n-1){const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;const lbl=new Date(d.fecha+'T12:00:00').getDate();out+=`<text x="${x.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${lbl}</text>`;}});
-  out+='</svg>';svg.outerHTML=out;
+async function borrarDia(){
+  const f=$('manual-fecha').value;
+  if(!f){toast('Selecciona una fecha','error');return;}
+  if(!confirm(`¿Borrar los datos del ${f}?`))return;
+  loading(true);
+  try{
+    await db.from('eo_dias').delete().eq('fecha',f);
+    S.dias=S.dias.filter(d=>d.fecha!==f);
+    ['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1'].forEach(i=>{const e=$(i);if(e)e.value='';});
+    updateManualPreview();
+    toast('Día borrado ✓');
+    aplicarPrediccion();recalc();
+    if(S.mesActivo)cargarHistMes(S.mesActivo.a,S.mesActivo.m);
+  }catch(e){toast('Error al borrar','error');}
+  finally{loading(false);}
 }
 
-// ── HISTÓRICO ──
+/* ═══ EXCEL / CSV ═══ */
+const COLS=['fecha','folios_t3','folios_t1','hp_t3','hp_t1','ht_t3','ht_t1','hc_t3','hc_t1'];
+function descargarPlantilla(tipo){
+  const sample=[COLS,['01/01/2026',0,1972,0,83.5,0,8,0,0],['02/01/2026',2676,6462,96.5,81.77,17.3,182.14,0,0]];
+  if(tipo==='xlsx'&&typeof XLSX!=='undefined'){
+    const ws=XLSX.utils.aoa_to_sheet(sample);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Datos');
+    XLSX.writeFile(wb,'Plantilla_EO_Crossdock.xlsx');
+  } else {
+    const csv=sample.map(r=>r.join(',')).join('\n');
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
+    a.download='Plantilla_EO_Crossdock.csv';a.click();
+  }
+}
+function normHeader(h){return String(h||'').trim().toLowerCase().replace(/[\s.]+/g,'_').replace(/[^a-z0-9_]/g,'');}
+function parseNum(v){
+  if(v==null||v==='')return 0;
+  if(typeof v==='number')return v;
+  let s=String(v).trim().replace(/\s/g,'').replace(/%$/,'');
+  if(!s)return 0;
+  const lc=s.lastIndexOf(','), ld=s.lastIndexOf('.');
+  if(lc>-1&&ld>-1){
+    // el separador que aparece al final es el decimal
+    if(lc>ld) s=s.replace(/\./g,'').replace(',','.');
+    else s=s.replace(/,/g,'');
+  } else if(lc>-1){
+    // solo coma: decimal si tiene 1-2 digitos despues, si no es separador de miles
+    s=(s.length-lc-1)<=2 ? s.replace(',','.') : s.replace(/,/g,'');
+  } else if(ld>-1){
+    // solo punto: si hay mas de uno son miles
+    if((s.match(/\./g)||[]).length>1) s=s.replace(/\./g,'');
+  }
+  const n=parseFloat(s);
+  return isNaN(n)?0:n;
+}
+/* Despachos son SIEMPRE enteros -> se eliminan todos los separadores.
+   Evita que "1.972" o "1,972" se lean como 1.972 en vez de 1972. */
+function parseEntero(v){
+  if(v==null||v==='')return 0;
+  if(typeof v==='number')return Math.round(v);
+  let s=String(v).trim().replace(/\s/g,'');
+  if(!s)return 0;
+  // si termina en separador + 1-2 digitos, es parte decimal -> se descarta
+  const m=s.match(/^(.*)[.,](\d{1,2})$/);
+  if(m)s=m[1];
+  s=s.replace(/[.,]/g,'');   // el resto son separadores de miles
+  const n=parseInt(s,10);
+  return isNaN(n)?0:n;
+}
+function parseFecha(v){
+  if(v==null||v==='')return null;
+  if(typeof v==='number'){ // serial de Excel
+    const d=new Date(Date.UTC(1899,11,30)+v*86400000);
+    return d.toISOString().slice(0,10);
+  }
+  let s=String(v).trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);
+  let m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if(m){let[,d,mo,a]=m;if(a.length===2)a='20'+a;return `${a}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+  const dt=new Date(s);
+  if(!isNaN(dt))return dt.toISOString().slice(0,10);
+  return null;
+}
+function onDrop(e){e.preventDefault();$('drop-zone').style.borderColor='var(--b2)';const f=e.dataTransfer.files[0];if(f)processFile(f);}
+function onFileSelect(e){const f=e.target.files[0];if(f)processFile(f);}
+function processFile(file){
+  S.excelName=file.name;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      let matriz;
+      if(ext==='csv'){
+        const txt=new TextDecoder('utf-8').decode(ev.target.result);
+        const sep=(txt.split('\n')[0].match(/;/g)||[]).length>(txt.split('\n')[0].match(/,/g)||[]).length?';':',';
+        matriz=txt.split(/\r?\n/).filter(l=>l.trim()).map(l=>l.split(sep));
+      } else {
+        if(typeof XLSX==='undefined'){toast('Librería Excel no cargó — usa CSV','error');return;}
+        const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        matriz=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
+      }
+      procesarMatriz(matriz);
+    }catch(err){console.error(err);toast('Error leyendo el archivo','error');}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function procesarMatriz(matriz){
+  if(!matriz||!matriz.length){toast('Archivo vacío','error');return;}
+  // Buscar la fila de encabezados
+  let hIdx=-1,map={};
+  for(let i=0;i<Math.min(matriz.length,30);i++){
+    const hs=matriz[i].map(normHeader);
+    if(hs.some(h=>h==='fecha')&&hs.some(h=>h.startsWith('folios')||h.startsWith('hp')||h.startsWith('h_p'))){
+      hIdx=i;
+      hs.forEach((h,j)=>{
+        let key=h;
+        if(h==='h_p_t3'||h==='hp_t3')key='hp_t3';
+        if(h==='h_p_t1'||h==='hp_t1')key='hp_t1';
+        if(h==='h_t_t3'||h==='ht_t3')key='ht_t3';
+        if(h==='h_t_t1'||h==='ht_t1')key='ht_t1';
+        if(h==='h_c_t3'||h==='hc_t3')key='hc_t3';
+        if(h==='h_c_t1'||h==='hc_t1')key='hc_t1';
+        if(COLS.includes(key)&&map[key]==null)map[key]=j;
+      });
+      break;
+    }
+  }
+  const prev=$('upload-preview');
+  if(hIdx<0){
+    prev.style.display='block';
+    prev.innerHTML=`<div style="color:var(--red)">No se encontró la fila de encabezados.</div><div style="margin-top:6px">Debe contener: ${COLS.join(' · ')}</div><div style="margin-top:6px;color:var(--ts)">Primera fila leída: ${(matriz[0]||[]).slice(0,10).join(' | ')}</div>`;
+    $('btn-importar').style.display='none';return;
+  }
+  const faltan=COLS.filter(c=>map[c]==null);
+  const rows=[];let invalidas=0;
+  for(let i=hIdx+1;i<matriz.length;i++){
+    const r=matriz[i];if(!r||!r.length)continue;
+    const f=parseFecha(r[map.fecha]);
+    if(!f){invalidas++;continue;}
+    rows.push({fecha:f,tipo_dia:tipoDia(f),fuente:'excel',
+      folios_t3:parseEntero(r[map.folios_t3]),folios_t1:parseEntero(r[map.folios_t1]),
+      hp_t3:parseNum(r[map.hp_t3]),hp_t1:parseNum(r[map.hp_t1]),
+      ht_t3:parseNum(r[map.ht_t3]),ht_t1:parseNum(r[map.ht_t1]),
+      hc_t3:parseNum(r[map.hc_t3]),hc_t1:parseNum(r[map.hc_t1])});
+  }
+  S.excelData=rows;
+  prev.style.display='block';
+  if(!rows.length){
+    prev.innerHTML=`<div style="color:var(--red)">Encabezados detectados en fila ${hIdx+1}, pero ninguna fila con fecha válida.</div>`;
+    $('btn-importar').style.display='none';return;
+  }
+  const fs=rows.map(r=>r.fecha).sort();
+  const nuevos=rows.filter(r=>!S.dias.some(d=>d.fecha===r.fecha)).length;
+  prev.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Archivo</span><span style="color:var(--tx)">${S.excelName}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Encabezados en fila</span><strong style="color:var(--tx)">${hIdx+1}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Filas válidas</span><strong style="color:var(--ok)">${rows.length}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Rango</span><strong style="color:var(--tx)">${fs[0]} → ${fs[fs.length-1]}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Nuevos · a actualizar</span><strong style="color:var(--tx)">${nuevos} · ${rows.length-nuevos}</strong></div>
+    ${invalidas?`<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Filas sin fecha (ignoradas)</span><strong style="color:var(--ora)">${invalidas}</strong></div>`:''}
+    <div style="display:flex;justify-content:space-between"><span>Columnas faltantes</span><strong style="color:${faltan.length?'var(--ora)':'var(--ok)'}">${faltan.length?faltan.join(', '):'ninguna ✓'}</strong></div>`;
+  $('btn-importar').style.display='block';
+}
+async function importarExcel(){
+  if(!S.excelData?.length){toast('Sin datos','error');return;}
+  loading(true);
+  try{
+    const fs=S.excelData.map(r=>r.fecha).sort();
+    const{data:imp,error:e1}=await db.from('eo_importaciones').insert({
+      archivo:S.excelName,filas:S.excelData.length,desde:fs[0],hasta:fs[fs.length-1]
+    }).select().single();
+    if(e1)throw e1;
+    const rows=S.excelData.map(r=>({...r,importacion_id:imp.id,updated_at:new Date().toISOString()}));
+    for(let i=0;i<rows.length;i+=100){
+      const{error}=await db.from('eo_dias').upsert(rows.slice(i,i+100),{onConflict:'fecha'});
+      if(error)throw error;
+    }
+    toast(`${rows.length} días importados ✓`);
+    $('upload-preview').style.display='none';
+    $('btn-importar').style.display='none';
+    $('file-input').value='';
+    S.excelData=null;
+    await cargarTodo();
+  }catch(e){toast('Error al importar','error');console.error(e);}
+  finally{loading(false);}
+}
+async function cargarImportaciones(){
+  try{
+    const{data}=await db.from('eo_importaciones').select('*').order('created_at',{ascending:false});
+    S.importaciones=data||[];
+    const c=$('imp-lista');
+    if(!S.importaciones.length){c.innerHTML='<div style="padding:24px;text-align:center;color:var(--ts);font-size:.78rem">Sin importaciones registradas</div>';return;}
+    c.innerHTML='';
+    S.importaciones.forEach(im=>{
+      const d=new Date(im.created_at);
+      const el=document.createElement('div');
+      el.style.cssText='background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap';
+      el.innerHTML=`<div><div style="font-size:.8rem;font-weight:600">${im.archivo||'archivo'}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--tm);margin-top:2px">${d.toLocaleString('es-PE',{dateStyle:'short',timeStyle:'short'})} · ${im.filas} filas · ${im.desde} → ${im.hasta}</div></div>
+        <button class="btn btn-s btn-sm" onclick="deshacerImport(${im.id},${im.filas})">Deshacer</button>`;
+      c.appendChild(el);
+    });
+  }catch(e){console.warn(e);}
+}
+async function deshacerImport(id,filas){
+  if(!confirm(`¿Borrar los ${filas} días de esta importación?`))return;
+  loading(true);
+  try{
+    await db.from('eo_dias').delete().eq('importacion_id',id);
+    await db.from('eo_importaciones').delete().eq('id',id);
+    toast('Importación deshecha ✓');
+    await cargarTodo();
+    cargarImportaciones();
+  }catch(e){toast('Error','error');}
+  finally{loading(false);}
+}
+function setDatosTab(t,btn){
+  document.querySelectorAll('.dtab').forEach(b=>{b.style.color='var(--tm)';b.style.borderBottomColor='transparent';b.style.fontWeight='500';});
+  btn.style.color='var(--t1)';btn.style.borderBottomColor='var(--t1)';btn.style.fontWeight='600';
+  $('tab-manual').style.display=t==='manual'?'block':'none';
+  $('tab-excel').style.display=t==='excel'?'block':'none';
+  $('tab-hist').style.display=t==='hist'?'block':'none';
+  if(t==='hist')cargarImportaciones();
+}
+
+/* ═══ HISTÓRICO ═══ */
 function setTurnoHist(t,btn){
   S.turnoHist=t;
   document.querySelectorAll('#v-hist .fp').forEach(b=>b.classList.remove('a','ft1','ft3','fall'));
-  btn.classList.add('a','f'+t);
-  renderHistTabla();
-}
-function renderHistTabla(){
-  if(!S.histMes) return;
-  const t=S.turnoHist;
-  const tbody=$('hist-tbody');
-  tbody.innerHTML='';
-  const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  S.histMes.forEach(d=>{
-    const td=tipoDia(d.fecha,S.feriados);
-    const dObj=new Date(d.fecha+'T12:00:00');
-    const hef_t3=(d.hp_t3||0)+(d.ht_t3||0);
-    const hef_t1=(d.hp_t1||0)+(d.ht_t1||0);
-    const ef_t3=hef_t3>0?(d.folios_t3||0)/hef_t3:0;
-    const ef_t1=hef_t1>0?(d.folios_t1||0)/hef_t1:0;
-    const hef_gen=hef_t3+hef_t1;
-    const ef_gen=hef_gen>0?((d.folios_t3||0)+(d.folios_t1||0))/hef_gen:0;
-    const esHoy=d.fecha===S.fecha;
-    const rowId='row-'+d.fecha.replace(/-/g,'');
-    tbody.innerHTML+=`<tr id="${rowId}">
-      <td style="padding:0">
-        <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr 36px;align-items:center;padding:11px 12px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .1s;${esHoy?'background:rgba(124,111,255,.05)':''}" onclick="toggleHist('${d.fecha}')">
-          <div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;${esHoy?'color:var(--t1)':''}">${dias[dObj.getDay()]} ${dObj.getDate()}</div><div style="font-size:.62rem;color:var(--tm)">${td==='feriado'?'<span style="color:var(--red)">Feriado</span>':td==='finde'?'Finde':'Semana'}</div></div>
-          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:.75rem;padding-right:12px;color:${t==='t1'?'var(--ts)':'var(--tx)'}">${fmtI(d.folios_t3)}</div>
-          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:.75rem;padding-right:12px;color:${t==='t3'?'var(--ts)':'var(--tx)'}">${fmtI(d.folios_t1)}</div>
-          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:.75rem;padding-right:12px;color:var(--t3)">${ef_t3>0?fmt(ef_t3):'—'}</div>
-          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:.75rem;padding-right:12px;color:var(--t1)">${ef_t1>0?fmt(ef_t1):'—'}</div>
-          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:.75rem;padding-right:12px;color:var(--tx)">${ef_gen>0?fmt(ef_gen):'—'}</div>
-          <div style="color:var(--ts);font-size:.75rem;text-align:right" id="chev-${d.fecha.replace(/-/g,'')}">▾</div>
-        </div>
-        <div id="exp-${d.fecha.replace(/-/g,'')}" style="display:none;border-top:1px solid var(--b1);padding:14px 12px;background:var(--s3)">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:.68rem">
-            <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.58rem;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--b1)">T3 Día</div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>Folios</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmtI(d.folios_t3)}</strong></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>H. Planilla</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(d.hp_t3)}h</strong></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>H. Terceros</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(d.ht_t3)}h</strong></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>H. Capacit.</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(d.hc_t3)}h</strong></div>
-              <div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t3)">${ef_t3>0?fmt(ef_t3):'—'}</strong></div>
-            </div>
-            <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.58rem;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--b1)">T1 Noche</div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>Folios</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmtI(d.folios_t1)}</strong></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>H. Planilla</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(d.hp_t1)}h</strong></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>H. Terceros</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(d.ht_t1)}h</strong></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>H. Capacit.</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(d.hc_t1)}h</strong></div>
-              <div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t1)">${ef_t1>0?fmt(ef_t1):'—'}</strong></div>
-            </div>
-            <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.58rem;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--b1)">General</div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>Total folios</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmtI((d.folios_t3||0)+(d.folios_t1||0))}</strong></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>Horas efectivas</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(hef_gen)}h</strong></div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--tm)"><span>Efic. gral</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${ef_gen>0?fmt(ef_gen):' —'}</strong></div>
-              <div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Tipo día</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${td}</strong></div>
-            </div>
-          </div>
-        </div>
-      </td>
-    </tr>`;
-  });
-}
-function toggleHist(f){
-  const id=f.replace(/-/g,'');
-  const exp=$('exp-'+id);
-  const chev=$('chev-'+id);
-  if(!exp) return;
-  const open=exp.style.display==='none'||exp.style.display==='';
-  exp.style.display=open?'grid':'none';
-  if(chev) chev.style.transform=open?'rotate(180deg)':'';
+  btn.classList.add('a','f'+(t==='all'?'all':t));
+  renderHist();
 }
 function renderMesSel(){
   const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  const cont=$('mes-sel');
-  if(!cont) return;
-  const now=new Date();
-  cont.innerHTML='';
-  for(let m=1;m<=now.getMonth()+1;m++){
-    const btn=document.createElement('button');
-    btn.textContent=meses[m-1];
-    btn.className='msel'+(m===now.getMonth()+1?' a':'');
-    btn.style.cssText='background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:5px 12px;font-family:\'JetBrains Mono\',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;color:var(--tm);transition:all .15s';
-    if(m===now.getMonth()+1){btn.style.background='rgba(124,111,255,.15)';btn.style.borderColor='rgba(124,111,255,.4)';btn.style.color='var(--t1)';}
-    btn.onclick=()=>{
-      document.querySelectorAll('.msel').forEach(b=>{b.style.background='var(--s2)';b.style.borderColor='var(--b1)';b.style.color='var(--tm)';});
-      btn.style.background='rgba(124,111,255,.15)';btn.style.borderColor='rgba(124,111,255,.4)';btn.style.color='var(--t1)';
-      cargarHistMes(now.getFullYear(),m);
+  const c=$('mes-sel');if(!c)return;
+  const now=new Date(hoy()+'T12:00:00');
+  const anio=now.getFullYear(), mesAct=now.getMonth()+1;
+  c.innerHTML='';
+  for(let m=1;m<=12;m++){
+    const tiene=S.dias.some(d=>d.fecha.startsWith(`${anio}-${String(m).padStart(2,'0')}`));
+    if(!tiene&&m>mesAct)continue;
+    const b=document.createElement('button');
+    b.textContent=meses[m-1];
+    b.dataset.mes=m;
+    b.style.cssText='background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:5px 12px;font-family:\'JetBrains Mono\',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;color:'+(tiene?'var(--tm)':'var(--ts)')+';transition:all .15s';
+    b.onclick=()=>{
+      c.querySelectorAll('button').forEach(x=>{x.style.background='var(--s2)';x.style.borderColor='var(--b1)';x.style.color='var(--tm)';});
+      b.style.background='rgba(124,111,255,.15)';b.style.borderColor='rgba(124,111,255,.4)';b.style.color='var(--t1)';
+      cargarHistMes(anio,m);
     };
-    cont.appendChild(btn);
+    c.appendChild(b);
+    if(m===mesAct){b.style.background='rgba(124,111,255,.15)';b.style.borderColor='rgba(124,111,255,.4)';b.style.color='var(--t1)';}
   }
 }
-async function cargarHistMes(anio,mes){
-  loading(true);
-  try{
-    const desde=`${anio}-${String(mes).padStart(2,'0')}-01`;
-    const hasta=new Date(anio,mes,0).toLocaleDateString('en-CA');
-    const{data}=await db.from('eo_dias').select('*').gte('fecha',desde).lte('fecha',hasta).order('fecha',{ascending:true});
-    S.histMes=data||[];
-    renderHistTabla();
-    renderChartTend();
-    // KPIs
-    const t1f=S.histMes.reduce((a,d)=>a+(d.folios_t1||0),0);
-    const t1h=S.histMes.reduce((a,d)=>a+(d.hp_t1||0)+(d.ht_t1||0),0);
-    const t3f=S.histMes.reduce((a,d)=>a+(d.folios_t3||0),0);
-    const t3h=S.histMes.reduce((a,d)=>a+(d.hp_t3||0)+(d.ht_t3||0),0);
-    $('hkpi-t1').textContent=t1h>0?fmt(t1f/t1h):'—';
-    $('hkpi-t3').textContent=t3h>0?fmt(t3f/t3h):'—';
-    $('hkpi-fol').textContent=fmtI(t1f+t3f);
-    const prec=calcPrecisionModelo();
-    $('hkpi-ml').textContent=prec?fmt(prec)+'%':'—';
-    $('hist-sub').textContent=`${new Date(desde+'T12:00:00').toLocaleDateString('es-PE',{month:'long',year:'numeric'})} · ${S.histMes.length} días`;
-  }catch(e){toast('Error cargando histórico','error');}
-  finally{loading(false);}
+function cargarHistMes(a,m){
+  S.mesActivo={a,m};
+  const pre=`${a}-${String(m).padStart(2,'0')}`;
+  S.histMes=S.dias.filter(d=>d.fecha.startsWith(pre)).sort((x,y)=>x.fecha.localeCompare(y.fecha));
+  const nm=new Date(a,m-1,1).toLocaleDateString('es-PE',{month:'long',year:'numeric'});
+  $('hist-sub').textContent=`${nm} · ${S.histMes.length} días registrados`;
+  renderHist();
 }
-function renderChartTend(){
-  const svg=$('chart-tend');
-  const data=S.histMes?.slice(-30)||[];
-  if(!data.length){svg.innerHTML='<text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos</text>';return;}
+function efDia(d,tr){
+  if(tr==='t3'){const h=(+d.hp_t3||0)+(+d.ht_t3||0);return h>0?(+d.folios_t3||0)/h:null;}
+  if(tr==='t1'){const h=(+d.hp_t1||0)+(+d.ht_t1||0);return h>0?(+d.folios_t1||0)/h:null;}
+  const h=(+d.hp_t3||0)+(+d.ht_t3||0)+(+d.hp_t1||0)+(+d.ht_t1||0);
+  return h>0?((+d.folios_t3||0)+(+d.folios_t1||0))/h:null;
+}
+function renderHist(){
+  const t=S.turnoHist;
+  // KPIs
+  const sum=(k)=>S.histMes.reduce((a,d)=>a+(+d[k]||0),0);
+  const f1=sum('folios_t1'),h1=sum('hp_t1')+sum('ht_t1');
+  const f3=sum('folios_t3'),h3=sum('hp_t3')+sum('ht_t3');
+  const td='semana';
+  $('hkpi-t1').textContent=h1>0?fmt(f1/h1):'—';
+  $('hkpi-t1-s').textContent=`target ${fmt(cfgOf(td,'t1').productividad,0)}`;
+  $('hkpi-t3').textContent=h3>0?fmt(f3/h3):'—';
+  $('hkpi-t3-s').textContent=`target ${fmt(cfgOf(td,'t3').productividad,0)}`;
+  $('hkpi-fol').textContent=fmtI(f1+f3);
+  const prec=precisionModelo();
+  $('hkpi-ml').textContent=prec!=null?fmt(prec)+'%':'—';
+  // Leyendas
+  const legs=[];
+  if(t==='t3'||t==='all')legs.push(`<span><span style="width:8px;height:8px;border-radius:2px;background:var(--t3);display:inline-block;margin-right:4px"></span>T3 Día</span>`);
+  if(t==='t1'||t==='all')legs.push(`<span><span style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:4px"></span>T1 Noche</span>`);
+  if(t==='all')legs.push(`<span><span style="width:8px;height:8px;border-radius:2px;background:var(--tx);display:inline-block;margin-right:4px"></span>General</span>`);
+  $('leg-diaria').innerHTML=legs.join('');
+  $('leg-acumd').innerHTML=legs.join('');
+  drawDiaria();
+  drawAcumDiaria();
+  renderHistRows();
+}
+function svgBase(W,H,M,maxY,data,extra){
+  const w=W-M.l-M.r,h=H-M.t-M.b,n=data.length;
+  let s='';
+  for(let i=0;i<=3;i++){const y=M.t+(h*i/3),v=maxY*(1-i/3);
+    s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#1e1e32"/><text x="${M.l-5}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${v.toFixed(0)}</text>`;}
+  data.forEach((d,i)=>{if(n<=1||i%Math.ceil(n/6)===0||i===n-1){
+    const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;
+    s+=`<text x="${x.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${new Date(d.fecha+'T12:00:00').getDate()}</text>`;}});
+  return s;
+}
+function linePath(vals,W,H,M,maxY,color,dots){
+  const w=W-M.l-M.r,h=H-M.t-M.b,n=vals.length;
+  let pts=[];
+  vals.forEach((v,i)=>{if(v!=null&&!isNaN(v)){const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;const y=M.t+h-(h*v/maxY);pts.push({x,y});}});
+  if(!pts.length)return '';
+  let p='';pts.forEach((q,i)=>{p+=(i===0?'M ':' L ')+q.x.toFixed(1)+' '+q.y.toFixed(1);});
+  let s=`<path d="${p}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  if(dots)pts.forEach(q=>{s+=`<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="2.5" fill="#07070f" stroke="${color}" stroke-width="1.5"/>`;});
+  else{const l=pts[pts.length-1];s+=`<circle cx="${l.x.toFixed(1)}" cy="${l.y.toFixed(1)}" r="3.5" fill="#07070f" stroke="${color}" stroke-width="2"/>`;}
+  return s;
+}
+function drawDiaria(){
+  const wrap=$('wrap-diaria'),t=S.turnoHist,data=S.histMes;
+  if(!data.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';return;}
   const W=580,H=180,M={t:15,r:20,b:30,l:38};
-  const w=W-M.l-M.r, h=H-M.t-M.b, n=data.length;
-  const ef_t1=data.map(d=>{const hh=(d.hp_t1||0)+(d.ht_t1||0);return hh>0?(d.folios_t1||0)/hh:null;});
-  const ef_t3=data.map(d=>{const hh=(d.hp_t3||0)+(d.ht_t3||0);return hh>0?(d.folios_t3||0)/hh:null;});
-  const allVals=[...ef_t1,...ef_t3].filter(Boolean);
-  const cfg3=S.cfg['semana_t3']||{productividad:15};
-  const cfg1=S.cfg['semana_t1']||{productividad:25};
-  allVals.push(cfg3.productividad,cfg1.productividad);
-  const maxY=Math.max(...allVals)*1.2;
-  let out=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
-  for(let i=0;i<=3;i++){const y=M.t+(h*i/3);const v=maxY*(1-i/3);out+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#1e1e32"/><text x="${M.l-5}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${v.toFixed(0)}</text>`;}
-  const yT1=M.t+h-(h*cfg1.productividad/maxY);
-  const yT3=M.t+h-(h*cfg3.productividad/maxY);
-  out+=`<line x1="${M.l}" y1="${yT1}" x2="${M.l+w}" y2="${yT1}" stroke="#7c6fff" stroke-dasharray="3,3" opacity="0.35"/>`;
-  out+=`<line x1="${M.l}" y1="${yT3}" x2="${M.l+w}" y2="${yT3}" stroke="#00c896" stroke-dasharray="3,3" opacity="0.35"/>`;
-  const drawLine=(vals,color)=>{
-    let pts=[];
-    vals.forEach((v,i)=>{if(v!=null){const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;const y=M.t+h-(h*v/maxY);pts.push({x,y});}});
-    if(!pts.length) return;
-    let path='';pts.forEach((p,i)=>{path+=(i===0?'M ':' L ')+p.x.toFixed(1)+' '+p.y.toFixed(1);});
-    out+=`<path d="${path}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
-    const last=pts[pts.length-1];
-    out+=`<circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="3.5" fill="#07070f" stroke="${color}" stroke-width="2"/>`;
-  };
-  drawLine(ef_t1,'#7c6fff');drawLine(ef_t3,'#00c896');
-  data.forEach((d,i)=>{if(i%Math.ceil(n/5)===0||i===n-1){const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;const lbl=new Date(d.fecha+'T12:00:00').getDate();out+=`<text x="${x.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${lbl}</text>`;}});
-  out+='</svg>';svg.outerHTML=out;
+  const v3=data.map(d=>efDia(d,'t3')),v1=data.map(d=>efDia(d,'t1')),vg=data.map(d=>efDia(d,'all'));
+  let all=[];
+  if(t==='t3'||t==='all')all=all.concat(v3.filter(Boolean));
+  if(t==='t1'||t==='all')all=all.concat(v1.filter(Boolean));
+  if(t==='all')all=all.concat(vg.filter(Boolean));
+  const tgt3=cfgOf('semana','t3').productividad,tgt1=cfgOf('semana','t1').productividad;
+  if(t==='t3')all.push(tgt3);if(t==='t1')all.push(tgt1);if(t==='all')all.push(tgt3,tgt1);
+  if(!all.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin horas registradas</text></svg>';return;}
+  const maxY=Math.max(...all)*1.25;
+  const w=W-M.l-M.r,h=H-M.t-M.b;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  s+=svgBase(W,H,M,maxY,data);
+  if(t==='t3'||t==='all'){const y=M.t+h-(h*tgt3/maxY);s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#00c896" stroke-dasharray="3,3" opacity=".3"/>`;}
+  if(t==='t1'||t==='all'){const y=M.t+h-(h*tgt1/maxY);s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#7c6fff" stroke-dasharray="3,3" opacity=".3"/>`;}
+  if(t==='t3'||t==='all')s+=linePath(v3,W,H,M,maxY,'#00c896',true);
+  if(t==='t1'||t==='all')s+=linePath(v1,W,H,M,maxY,'#7c6fff',true);
+  if(t==='all')s+=linePath(vg,W,H,M,maxY,'#e2e2f0',true);
+  s+='</svg>';wrap.innerHTML=s;
+}
+function drawAcumDiaria(){
+  const wrap=$('wrap-acumd'),t=S.turnoHist,data=S.histMes;
+  if(!data.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';return;}
+  const W=580,H=180,M={t:15,r:20,b:30,l:38};
+  const acum=(tr)=>{let cf=0,ch=0;return data.map(d=>{
+    if(tr==='t3'){cf+=+d.folios_t3||0;ch+=(+d.hp_t3||0)+(+d.ht_t3||0);}
+    else if(tr==='t1'){cf+=+d.folios_t1||0;ch+=(+d.hp_t1||0)+(+d.ht_t1||0);}
+    else{cf+=(+d.folios_t3||0)+(+d.folios_t1||0);ch+=(+d.hp_t3||0)+(+d.ht_t3||0)+(+d.hp_t1||0)+(+d.ht_t1||0);}
+    return ch>0?cf/ch:null;});};
+  const a3=acum('t3'),a1=acum('t1'),ag=acum('all');
+  let all=[];
+  if(t==='t3'||t==='all')all=all.concat(a3.filter(Boolean));
+  if(t==='t1'||t==='all')all=all.concat(a1.filter(Boolean));
+  if(t==='all')all=all.concat(ag.filter(Boolean));
+  const objM=objMes(S.mesActivo?.a,S.mesActivo?.m);
+  if(t==='all')all.push(objM);
+  if(!all.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin horas registradas</text></svg>';return;}
+  const maxY=Math.max(...all)*1.25;
+  const w=W-M.l-M.r,h=H-M.t-M.b;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  s+=svgBase(W,H,M,maxY,data);
+  if(t==='all'){const y=M.t+h-(h*objM/maxY);s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#ff9500" stroke-dasharray="4,3" opacity=".5"/><text x="${M.l+w+2}" y="${y+3}" font-family="JetBrains Mono" font-size="7" fill="#ff9500">obj</text>`;}
+  if(t==='t3'||t==='all')s+=linePath(a3,W,H,M,maxY,'#00c896',false);
+  if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',false);
+  if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',false);
+  s+='</svg>';wrap.innerHTML=s;
+}
+function renderHistRows(){
+  const c=$('hist-rows');
+  if(!S.histMes.length){c.innerHTML='<div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos en este mes</div>';return;}
+  const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  c.innerHTML='';
+  S.histMes.forEach(d=>{
+    const td=tipoDia(d.fecha), dObj=new Date(d.fecha+'T12:00:00');
+    const e3=efDia(d,'t3'),e1=efDia(d,'t1'),eg=efDia(d,'all');
+    const esHoy=d.fecha===hoy(), id=d.fecha.replace(/-/g,'');
+    const p=predecir(d.fecha);
+    const hef3=(+d.hp_t3||0)+(+d.ht_t3||0), hef1=(+d.hp_t1||0)+(+d.ht_t1||0);
+    const div=document.createElement('div');
+    div.innerHTML=`<div onclick="toggleHist('${id}')" style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr 36px;align-items:center;padding:11px 12px;cursor:pointer;border-bottom:1px solid var(--b1)${esHoy?';background:rgba(124,111,255,.05)':''}">
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600${esHoy?';color:var(--t1)':''}">${dias[dObj.getDay()]} ${dObj.getDate()}</div><div style="font-size:.6rem;color:${td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--tm)'}">${td==='feriado'?'Feriado':td==='finde'?'Finde':'Semana'}</div></div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)">${fmtI(d.folios_t3)}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)">${fmtI(d.folios_t1)}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t3)">${e3!=null?fmt(e3):'—'}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t1)">${e1!=null?fmt(e1):'—'}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;color:var(--tx)">${eg!=null?fmt(eg):'—'}</div>
+      <div style="text-align:right;color:var(--ts);font-size:.75rem" id="chev-${id}">▾</div>
+    </div>
+    <div id="exp-${id}" style="display:none;border-bottom:1px solid var(--b1);padding:14px 12px;background:var(--s3)">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;font-size:.68rem">
+        <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--b1)">T3 Día · real</div>
+          ${['Despachos|'+fmtI(d.folios_t3),'HH planilla|'+fmt(d.hp_t3,2)+'h','HH terceros|'+fmt(d.ht_t3,2)+'h','HH capacit.|'+fmt(d.hc_t3,2)+'h','HH efectivas|'+fmt(hef3,2)+'h'].map(x=>{const[a,b]=x.split('|');return `<div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>${a}</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${b}</strong></div>`;}).join('')}
+          <div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t3)">${e3!=null?fmt(e3):'—'}</strong></div>
+        </div>
+        <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--b1)">T1 Noche · real</div>
+          ${['Despachos|'+fmtI(d.folios_t1),'HH planilla|'+fmt(d.hp_t1,2)+'h','HH terceros|'+fmt(d.ht_t1,2)+'h','HH capacit.|'+fmt(d.hc_t1,2)+'h','HH efectivas|'+fmt(hef1,2)+'h'].map(x=>{const[a,b]=x.split('|');return `<div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>${a}</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${b}</strong></div>`;}).join('')}
+          <div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t1)">${e1!=null?fmt(e1):'—'}</strong></div>
+        </div>
+        <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--b1)">Proyección vs real</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Modelo T3</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft3):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Modelo T1</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft1):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Real total</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmtI((+d.folios_t3||0)+(+d.folios_t1||0))}</strong></div>
+          ${p?(()=>{const pt=p.ft3+p.ft1,rt=(+d.folios_t3||0)+(+d.folios_t1||0);const dv=pt>0?((rt-pt)/pt*100):0;return `<div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Desviación</span><strong style="font-family:'JetBrains Mono',monospace;color:${Math.abs(dv)<10?'var(--ok)':'var(--red)'}">${dv>=0?'+':''}${fmt(dv)}%</strong></div>`;})():''}
+          <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--tm)"><span>Efic. general</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${eg!=null?fmt(eg):'—'}</strong></div>
+        </div>
+      </div>
+    </div>`;
+    c.appendChild(div);
+  });
+}
+function toggleHist(id){
+  const e=$('exp-'+id),ch=$('chev-'+id);
+  if(!e)return;
+  const open=e.style.display==='none';
+  e.style.display=open?'block':'none';
+  if(ch)ch.style.transform=open?'rotate(180deg)':'';
 }
 
-// ── AJUSTES ──
+/* ═══ MES ═══ */
+function objMes(a,m){
+  if(!a||!m){const n=new Date(hoy()+'T12:00:00');a=n.getFullYear();m=n.getMonth()+1;}
+  const o=S.objetivos.find(x=>x.anio===a&&x.mes===m);
+  if(o)return +o.objetivo_efic;
+  const prev=S.objetivos.filter(x=>x.anio*100+x.mes<a*100+m).sort((x,y)=>(y.anio*100+y.mes)-(x.anio*100+x.mes))[0];
+  return prev?+prev.objetivo_efic:20;
+}
+function renderMes(){
+  const n=new Date(hoy()+'T12:00:00');
+  const a=n.getFullYear(),m=n.getMonth()+1;
+  const pre=`${a}-${String(m).padStart(2,'0')}`;
+  $('mes-titulo').textContent=n.toLocaleDateString('es-PE',{month:'long',year:'numeric'});
+  const obj=objMes(a,m);
+  $('mes-obj').textContent=fmt(obj);
+  const dm=S.dias.filter(d=>d.fecha.startsWith(pre)).sort((x,y)=>x.fecha.localeCompare(y.fecha));
+  const tF=dm.reduce((s,d)=>s+(+d.folios_t3||0)+(+d.folios_t1||0),0);
+  const tH=dm.reduce((s,d)=>s+(+d.hp_t3||0)+(+d.hp_t1||0)+(+d.ht_t3||0)+(+d.ht_t1||0),0);
+  const efAc=tH>0?tF/tH:0;
+  const eAc=$('mes-efic-acum');
+  eAc.textContent=efAc>0?fmt(efAc):'—';
+  eAc.className='kpi-v '+(efAc===0?'n':efAc>=obj?'ok':'w');
+  $('mes-efic-sub').textContent=tH>0?`${fmtI(tF)} fol ÷ ${fmt(tH,0)}h · ${dm.length}d`:'sin datos';
+  const pct=obj>0&&efAc>0?Math.min(100,(efAc/obj)*100):0;
+  $('mes-avance-pct').textContent=fmt(pct,1)+'%';
+  $('mes-prog-bar').style.width=pct+'%';
+  // Días restantes
+  const ultimo=new Date(a,m,0);
+  const rest=[];
+  const start=new Date(hoy()+'T12:00:00');
+  for(let d=new Date(start);d<=ultimo;d.setDate(d.getDate()+1)){
+    const f=d.toLocaleDateString('en-CA');
+    if(!dm.some(x=>x.fecha===f&&((+x.folios_t3||0)+(+x.folios_t1||0))>0))rest.push(f);
+  }
+  // Proyección de cierre
+  let pF=0,pH=0;
+  rest.forEach(f=>{
+    const p=predecir(f);if(!p)return;
+    const td=tipoDia(f);
+    const o3=cfgOf(td,'t3').productividad,o1=cfgOf(td,'t1').productividad;
+    pF+=p.ft3+p.ft1;
+    pH+=(o3>0?p.ft3/o3:0)+(o1>0?p.ft1/o1:0);
+  });
+  const efProy=(tH+pH)>0?(tF+pF)/(tH+pH):0;
+  const eP=$('mes-efic-proy');
+  eP.textContent=efProy>0?fmt(efProy):'—';
+  eP.className='kpi-v '+(efProy===0?'n':efProy>=obj?'ok':'b');
+  drawCurvaMes(dm,obj);
+  // Veredicto
+  const vd=$('mes-veredic'),ico=$('mes-v-ico'),vt=$('mes-veredic-t'),vs=$('mes-veredic-s');
+  if(!dm.length){
+    vd.style.background='var(--s2)';vd.style.borderColor='var(--b1)';
+    ico.textContent='📊';vt.textContent='Sin datos del mes';vs.textContent='Carga los despachos reales para ver la proyección';
+  } else if(!rest.length){
+    const ok=efAc>=obj;
+    vd.style.background=ok?'rgba(0,200,150,.07)':'rgba(255,77,109,.07)';
+    vd.style.borderColor=ok?'rgba(0,200,150,.2)':'rgba(255,77,109,.2)';
+    ico.textContent=ok?'✅':'❌';
+    vt.textContent=ok?`Mes cerrado en ${fmt(efAc)} fol/h — objetivo cumplido`:`Mes cerrado en ${fmt(efAc)} fol/h — bajo el objetivo de ${fmt(obj)}`;
+    vs.textContent=`Diferencia: ${efAc>=obj?'+':''}${fmt(efAc-obj)} fol/h`;
+  } else {
+    const efNec=pH>0?((obj*(tH+pH))-tF)/pH:obj;
+    const mejor=dm.map(d=>efDia(d,'all')).filter(Boolean);
+    const max=mejor.length?Math.max(...mejor):0;
+    const viable=efNec<=max*1.05;
+    vd.style.background=viable?'rgba(255,149,0,.07)':'rgba(255,77,109,.07)';
+    vd.style.borderColor=viable?'rgba(255,149,0,.2)':'rgba(255,77,109,.2)';
+    ico.textContent=efNec<=efAc?'✅':viable?'⚠️':'❌';
+    vt.textContent=`Para cerrar en ${fmt(obj)} fol/h necesitas ${fmt(Math.max(0,efNec))} fol/h los próximos ${rest.length} días`;
+    vs.textContent=efNec<=efAc?`Vas por encima — mantén el ritmo actual de ${fmt(efAc)}`
+      :viable?`Tu mejor día fue ${fmt(max)} fol/h · alcanzable con esfuerzo`
+      :`Tu mejor día fue ${fmt(max)} fol/h · requiere rendimiento excepcional`;
+  }
+  // Lista días
+  const c=$('dias-restantes');c.innerHTML='';
+  if(!rest.length){c.innerHTML='<div style="padding:20px;text-align:center;color:var(--ts);font-size:.78rem">Mes completo — todos los días registrados</div>';return;}
+  const dnames=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  rest.forEach(f=>{
+    const td=tipoDia(f),p=predecir(f),d=new Date(f+'T12:00:00');
+    const c3=cfgOf(td,'t3'),c1=cfgOf(td,'t1');
+    const hh3=p&&c3.productividad>0?p.ft3/c3.productividad:0;
+    const hh1=p&&c1.productividad>0?p.ft1/c1.productividad:0;
+    const id='dr'+f.replace(/-/g,'');
+    const el=document.createElement('div');
+    el.style.cssText='background:var(--s2);border:1px solid '+(td==='feriado'?'rgba(255,77,109,.2)':'var(--b1)')+';border-radius:8px;overflow:hidden';
+    el.innerHTML=`<div onclick="toggleDr('${id}')" style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 14px;cursor:pointer">
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600">${dnames[d.getDay()]} ${d.getDate()} ${d.toLocaleDateString('es-PE',{month:'short'})}</div>
+      <div style="font-size:.62rem;margin-top:2px;color:${td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--ts)'}">${td==='feriado'?'🔴 Feriado':td==='finde'?'Fin de semana':'Semana'}</div></div>
+      <div style="text-align:right"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--t1)">${p?fmtI(p.ft3+p.ft1):'—'}</div><div style="font-size:.55rem;color:var(--ts);text-transform:uppercase;letter-spacing:.06em">despachos pred.</div></div>
+      <div style="text-align:right;min-width:60px"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--tx)">${p?fmt(hh3+hh1,0)+'h':'—'}</div><div style="font-size:.55rem;color:var(--ts);text-transform:uppercase;letter-spacing:.06em">HH nec.</div></div>
+    </div>
+    <div id="${id}" style="display:none;border-top:1px solid var(--b1);padding:12px 14px;background:var(--s3)">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;font-size:.68rem">
+        <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:6px"><span class="pill t3">T3 Día</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Despachos</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft3):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Rango ±</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--ts)">${p?fmtI(p.i3):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Objetivo</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(c3.productividad,0)}</strong></div>
+          <div style="display:flex;justify-content:space-between;color:var(--tm)"><span>HH nec.</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t3)">${fmt(hh3,1)}h</strong></div></div>
+        <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:6px"><span class="pill t1">T1 Noche</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Despachos</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft1):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Rango ±</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--ts)">${p?fmtI(p.i1):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Objetivo</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(c1.productividad,0)}</strong></div>
+          <div style="display:flex;justify-content:space-between;color:var(--tm)"><span>HH nec.</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t1)">${fmt(hh1,1)}h</strong></div></div>
+        <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:6px">General</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Total desp.</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft3+p.ft1):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Total HH</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(hh3+hh1,1)}h</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Obj. diario</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--ora)">${fmt(S.objDia[td]||20)}</strong></div>
+          <div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Confianza</span><strong style="font-family:'JetBrains Mono',monospace;color:${p&&p.conf>=75?'var(--ok)':'var(--ora)'}">${p?p.conf+'%':'—'}</strong></div></div>
+      </div>
+    </div>`;
+    c.appendChild(el);
+  });
+}
+function toggleDr(id){const e=$(id);if(e)e.style.display=e.style.display==='none'?'block':'none';}
+function drawCurvaMes(dm,obj){
+  const wrap=$('wrap-acum');
+  if(!dm.length){wrap.innerHTML='<svg viewBox="0 0 580 160" style="width:100%;height:auto"><text x="290" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';return;}
+  const W=580,H=160,M={t:15,r:20,b:30,l:38};
+  let cf=0,ch=0;
+  const pts=dm.map(d=>{cf+=(+d.folios_t3||0)+(+d.folios_t1||0);ch+=(+d.hp_t3||0)+(+d.hp_t1||0)+(+d.ht_t3||0)+(+d.ht_t1||0);return ch>0?cf/ch:null;});
+  const vals=pts.filter(Boolean);
+  if(!vals.length){wrap.innerHTML='<svg viewBox="0 0 580 160" style="width:100%;height:auto"><text x="290" y="85" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin horas registradas</text></svg>';return;}
+  const maxY=Math.max(...vals,obj)*1.2;
+  const w=W-M.l-M.r,h=H-M.t-M.b;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  s+=svgBase(W,H,M,maxY,dm);
+  const yO=M.t+h-(h*obj/maxY);
+  s+=`<line x1="${M.l}" y1="${yO}" x2="${M.l+w}" y2="${yO}" stroke="#ff9500" stroke-dasharray="4,3" opacity=".6"/><text x="${M.l+w+2}" y="${yO+3}" font-family="JetBrains Mono" font-size="7" fill="#ff9500">${fmt(obj)}</text>`;
+  s+=linePath(pts,W,H,M,maxY,'#7c6fff',false);
+  s+='</svg>';wrap.innerHTML=s;
+}
+
+/* ═══ AJUSTES ═══ */
 function renderConfig(){
   const tipos=[['semana','Semana'],['finde','Fin de semana'],['feriado','Feriado']];
   const turnos=[['t3','T3 Día'],['t1','T1 Noche']];
-  let htar='',hjor='';
-  tipos.forEach(([td,tl])=>{
-    turnos.forEach(([tr,trl])=>{
-      const cfg=S.cfg[`${td}_${tr}`]||{};
-      htar+=`<div><label style="display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px"><span class="pill ${tr}">${trl}</span> ${tl}</label><input type="number" id="cfg-prod-${td}-${tr}" value="${cfg.productividad||0}" step="0.1" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"><div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:3px">fol/h</div></div>`;
-      hjor+=`<div><label style="display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px"><span class="pill ${tr}">${trl}</span> Planilla ${tl}</label><input type="number" id="cfg-jp-${td}-${tr}" value="${cfg.jornada_planilla||8}" step="0.01" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"><div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:3px">h/persona</div></div>`;
-    });
+  // Objetivo diario general
+  $('cfg-obj-dia').innerHTML=tipos.map(([td,tl])=>
+    `<div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">${tl}</label><input type="number" id="objd-${td}" value="${fmt(S.objDia[td]||20)}" step="0.1" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--ora)"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">fol/h general</div></div>`).join('');
+  // Targets por turno
+  let ht='',hj='';
+  tipos.forEach(([td,tl])=>{turnos.forEach(([tr,trl])=>{
+    const c=cfgOf(td,tr);
+    ht+=`<div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px"><span class="pill ${tr}">${trl}</span> ${tl}</label><input type="number" id="cp-${td}-${tr}" value="${fmt(c.productividad,1)}" step="0.1" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">fol/h</div></div>`;
+  });});
+  turnos.forEach(([tr,trl])=>{
+    const c=cfgOf('semana',tr);
+    hj+=`<div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px"><span class="pill ${tr}">${trl}</span> Planilla</label><input type="number" id="cjp-${tr}" value="${fmt(c.jornada_planilla,2)}" step="0.01" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">h/persona</div></div>`;
+    hj+=`<div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px"><span class="pill ${tr}">${trl}</span> Tercero</label><input type="number" id="cjt-${tr}" value="${fmt(c.jornada_tercero||8,2)}" step="0.01" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">h/persona</div></div>`;
   });
-  $('cfg-targets').innerHTML=htar;
-  $('cfg-jornadas').innerHTML=hjor;
-  // Feriados
-  renderFeriadosList();
-  // Objetivo
-  const now=new Date();
-  $('aj-mes').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  const obj=S.objetivos.find(o=>o.anio===now.getFullYear()&&o.mes===now.getMonth()+1);
-  if(obj) $('aj-obj').value=obj.objetivo_efic;
+  $('cfg-targets').innerHTML=ht;
+  $('cfg-jornadas').innerHTML=hj;
+  renderFeriados();
+  const n=new Date(hoy()+'T12:00:00');
+  $('aj-mes').value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  cargarObjMes();
 }
-function renderFeriadosList(){
-  const cont=$('feriados-lista');
-  if(!cont) return;
-  cont.innerHTML='';
-  S.feriados.sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(f=>{
+function cargarObjMes(){
+  const v=$('aj-mes').value;if(!v)return;
+  const[a,m]=v.split('-').map(Number);
+  $('aj-obj').value=fmt(objMes(a,m));
+}
+function renderFeriados(){
+  const c=$('feriados-lista');if(!c)return;
+  c.innerHTML='';
+  if(!S.feriados.length){c.innerHTML='<div style="font-size:.72rem;color:var(--ts);padding:8px 0">Sin feriados registrados</div>';return;}
+  [...S.feriados].sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(f=>{
     const d=new Date(f.fecha+'T12:00:00');
     const el=document.createElement('div');
     el.style.cssText='display:flex;align-items:center;justify-content:space-between;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 12px;font-family:\'JetBrains Mono\',monospace;font-size:.75rem';
-    el.innerHTML=`<div><div style="font-weight:600">${d.toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'})}</div><div style="font-family:\'Inter\',sans-serif;font-size:.65rem;color:var(--tm);margin-top:1px">${f.descripcion||''}</div></div><button onclick="eliminarFeriado(${f.id})" style="background:transparent;border:1px solid var(--b2);border-radius:4px;width:20px;height:20px;cursor:pointer;color:var(--ts);font-size:.75rem">×</button>`;
-    cont.appendChild(el);
+    el.innerHTML=`<div><div style="font-weight:600">${d.toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'})}</div>${f.descripcion?`<div style="font-family:'Inter',sans-serif;font-size:.65rem;color:var(--tm);margin-top:1px">${f.descripcion}</div>`:''}</div><button onclick="eliminarFeriado(${f.id})" style="background:transparent;border:1px solid var(--b2);border-radius:4px;width:22px;height:22px;cursor:pointer;color:var(--ts);font-size:.8rem;flex-shrink:0">×</button>`;
+    c.appendChild(el);
   });
 }
 async function agregarFeriado(){
-  const f=$('fer-fecha').value, desc=$('fer-desc').value;
+  const f=$('fer-fecha').value,d=$('fer-desc').value;
   if(!f){toast('Ingresa una fecha','error');return;}
   loading(true);
   try{
-    const{error}=await db.from('eo_feriados').insert({fecha:f,descripcion:desc||null});
-    if(error) throw error;
-    S.feriados.push({fecha:f,descripcion:desc||null});
-    renderFeriadosList();
-    $('fer-fecha').value=''; $('fer-desc').value='';
+    const{data,error}=await db.from('eo_feriados').insert({fecha:f,descripcion:d||null}).select().single();
+    if(error)throw error;
+    S.feriados.push(data);
+    renderFeriados();
+    $('fer-fecha').value='';$('fer-desc').value='';
     toast('Feriado agregado ✓');
-  }catch(e){toast('Error al agregar','error');}
+    aplicarPrediccion();recalc();
+  }catch(e){toast('Error — ¿ya existe esa fecha?','error');}
   finally{loading(false);}
 }
 async function eliminarFeriado(id){
@@ -867,227 +1380,84 @@ async function eliminarFeriado(id){
   try{
     await db.from('eo_feriados').delete().eq('id',id);
     S.feriados=S.feriados.filter(f=>f.id!==id);
-    renderFeriadosList();
-    toast('Feriado eliminado ✓');
+    renderFeriados();toast('Feriado eliminado ✓');
+    aplicarPrediccion();recalc();
   }catch(e){toast('Error','error');}
   finally{loading(false);}
 }
 async function guardarConfig(){
   loading(true);
   try{
-    const tipos=['semana','finde','feriado'], turnos=['t3','t1'];
+    const tipos=['semana','finde','feriado'],turnos=['t3','t1'];
     for(const td of tipos){for(const tr of turnos){
-      const prod=+($(`cfg-prod-${td}-${tr}`)?.value)||0;
-      const jp=+($(`cfg-jp-${td}-${tr}`)?.value)||8;
-      await db.from('eo_configuracion').update({productividad:prod,jornada_planilla:jp,updated_at:new Date().toISOString()}).eq('tipo_dia',td).eq('turno',tr);
-      if(S.cfg[`${td}_${tr}`]){S.cfg[`${td}_${tr}`].productividad=prod;S.cfg[`${td}_${tr}`].jornada_planilla=jp;}
+      const prod=+($(`cp-${td}-${tr}`)?.value)||0;
+      const jp=+($(`cjp-${tr}`)?.value)||8;
+      const jt=+($(`cjt-${tr}`)?.value)||8;
+      await db.from('eo_configuracion').update({productividad:prod,jornada_planilla:jp,jornada_tercero:jt}).eq('tipo_dia',td).eq('turno',tr);
+      S.cfg[`${td}_${tr}`]={...(S.cfg[`${td}_${tr}`]||{}),tipo_dia:td,turno:tr,productividad:prod,jornada_planilla:jp,jornada_tercero:jt};
     }}
-    // Objetivo
-    const mesVal=$('aj-mes').value;
-    if(mesVal){
-      const[anio,mes]=mesVal.split('-').map(Number);
-      const objVal=+($('aj-obj')?.value)||20;
-      await db.from('eo_objetivos').upsert({anio,mes,objetivo_efic:objVal},{onConflict:'anio,mes'});
-      const idx=S.objetivos.findIndex(o=>o.anio===anio&&o.mes===mes);
-      if(idx>=0)S.objetivos[idx].objetivo_efic=objVal;else S.objetivos.push({anio,mes,objetivo_efic:objVal});
+    for(const td of tipos){
+      const v=+($(`objd-${td}`)?.value)||20;
+      await db.from('eo_objetivos_dia').upsert({tipo_dia:td,objetivo:v},{onConflict:'tipo_dia'});
+      S.objDia[td]=v;
+    }
+    const mv=$('aj-mes').value;
+    if(mv){
+      const[a,m]=mv.split('-').map(Number);
+      const ov=+($('aj-obj')?.value)||20;
+      await db.from('eo_objetivos').upsert({anio:a,mes:m,objetivo_efic:ov},{onConflict:'anio,mes'});
+      const i=S.objetivos.findIndex(o=>o.anio===a&&o.mes===m);
+      if(i>=0)S.objetivos[i].objetivo_efic=ov;else S.objetivos.push({anio:a,mes:m,objetivo_efic:ov});
     }
     toast('Configuración guardada ✓');
-    recalc();
+    aplicarPrediccion();recalc();
+    if(S.mesActivo)renderHist();
   }catch(e){toast('Error al guardar','error');console.error(e);}
   finally{loading(false);}
 }
 
-// ── GUARDAR PROYECCIÓN ──
-async function guardarProy(){
-  const total=num('inp-total');
-  if(!total){toast('Ingresa el total de folios','error');return;}
+/* ═══ INIT ═══ */
+async function cargarTodo(){
   loading(true);
   try{
-    const{t3,t1}=S.calc;
-    await db.from('eo_proyecciones').upsert({
-      fecha:S.fecha, total_folios_usr:total,
-      pct_t3_usr:num('pct-t3'), pct_t1_usr:num('pct-t1'),
-      folios_t3_proy:t3.folios, folios_t1_proy:t1.folios,
-      terceros_t3:t3.terceros, terceros_t1:t1.terceros,
-      horas_nec_t3:t3.hrs_nec, horas_nec_t1:t1.hrs_nec,
-      efic_esp_t3:t3.efic, efic_esp_t1:t1.efic,
-      updated_at:new Date().toISOString()
-    },{onConflict:'fecha'});
-    toast('Proyección guardada ✓');
-  }catch(e){toast('Error al guardar','error');console.error(e);}
-  finally{loading(false);}
-}
-
-// ── GUARDAR MANUAL ──
-async function guardarManual(){
-  const f=$('manual-fecha').value;
-  if(!f){toast('Ingresa la fecha','error');return;}
-  loading(true);
-  try{
-    const td=tipoDia(f,S.feriados);
-    await db.from('eo_dias').upsert({
-      fecha:f, tipo_dia:td, fuente:'manual',
-      folios_t3:num('m-ft3')||0, folios_t1:num('m-ft1')||0,
-      hp_t3:num('m-hpt3')||0, hp_t1:num('m-hpt1')||0,
-      ht_t3:num('m-htt3')||0, ht_t1:num('m-htt1')||0,
-      hc_t3:num('m-hct3')||0, hc_t1:num('m-hct1')||0,
-      updated_at:new Date().toISOString()
-    },{onConflict:'fecha'});
-    // Actualizar cache
-    const idx=S.dias.findIndex(d=>d.fecha===f);
-    const newRow={fecha:f,tipo_dia:td,folios_t3:num('m-ft3'),folios_t1:num('m-ft1'),hp_t3:num('m-hpt3'),hp_t1:num('m-hpt1'),ht_t3:num('m-htt3'),ht_t1:num('m-htt1'),hc_t3:num('m-hct3'),hc_t1:num('m-hct1')};
-    if(idx>=0)S.dias[idx]=newRow;else S.dias.push(newRow);
-    S.dias.sort((a,b)=>a.fecha.localeCompare(b.fecha));
-    toast('Datos guardados ✓');
-    // Reset
-    ['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1'].forEach(id=>{const el=$(id);if(el)el.value='';});
-    updateManualPreview();
-  }catch(e){toast('Error al guardar','error');console.error(e);}
-  finally{loading(false);}
-}
-
-// ── EXCEL ──
-function descargarPlantilla(){
-  const csv='fecha,folios_t3,folios_t1,hp_t3,hp_t1,ht_t3,ht_t1,hc_t3,hc_t1\n01/01/2026,0,1972,0,83.5,0,8,0,0\n02/01/2026,2676,6462,96.5,81.77,17.3,182.14,0,0\n';
-  const blob=new Blob([csv],{type:'text/csv'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='Plantilla_EO_Crossdock.csv';
-  a.click();
-}
-function onDrop(e){e.preventDefault();$('drop-zone').style.borderColor='var(--b2)';const f=e.dataTransfer.files[0];if(f) processFile(f);}
-function onFileSelect(e){const f=e.target.files[0];if(f) processFile(f);}
-function processFile(file){
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const text=e.target.result;
-    const lines=text.split('\n').filter(l=>l.trim());
-    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase());
-    const rows=lines.slice(1).map(l=>{
-      const vals=l.split(',');
-      const obj={};
-      headers.forEach((h,i)=>{obj[h]=vals[i]?.trim();});
-      return obj;
-    }).filter(r=>r.fecha);
-    S.excelData=rows;
-    const prev=$('upload-preview');
-    prev.style.display='block';
-    prev.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Archivo</span><span>${file.name}</span></div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Filas detectadas</span><strong style="color:var(--ok)">${rows.length} días</strong></div><div style="display:flex;justify-content:space-between"><span>Columnas</span><strong style="color:var(--ok)">${headers.length}/9 ✓</strong></div>`;
-    $('btn-importar').style.display='block';
-  };
-  reader.readAsText(file);
-}
-async function importarExcel(){
-  if(!S.excelData?.length){toast('Sin datos para importar','error');return;}
-  loading(true);
-  try{
-    const rows=S.excelData.map(r=>{
-      let f=r.fecha;
-      if(f.includes('/')){const[d,m,a]=f.split('/');f=`${a}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
-      const td=tipoDia(f,S.feriados);
-      return{fecha:f,tipo_dia:td,fuente:'excel',folios_t3:parseFloat(r.folios_t3)||0,folios_t1:parseFloat(r.folios_t1)||0,hp_t3:parseFloat(r.hp_t3)||0,hp_t1:parseFloat(r.hp_t1)||0,ht_t3:parseFloat(r.ht_t3)||0,ht_t1:parseFloat(r.ht_t1)||0,hc_t3:parseFloat(r.hc_t3)||0,hc_t1:parseFloat(r.hc_t1)||0,updated_at:new Date().toISOString()};
-    });
-    const chunk=50;
-    for(let i=0;i<rows.length;i+=chunk){
-      await db.from('eo_dias').upsert(rows.slice(i,i+chunk),{onConflict:'fecha'});
-    }
-    // Reload
-    await cargarDatos();
-    toast(`${rows.length} días importados ✓`);
-    $('upload-preview').style.display='none';
-    $('btn-importar').style.display='none';
-    S.excelData=null;
-  }catch(e){toast('Error al importar','error');console.error(e);}
-  finally{loading(false);}
-}
-function setDatosTab(t,btn){
-  document.querySelectorAll('.datos-tab').forEach(b=>{b.style.color='var(--tm)';b.style.borderBottomColor='transparent';b.classList.remove('a');});
-  btn.style.color='var(--t1)';btn.style.borderBottomColor='var(--t1)';btn.classList.add('a');
-  $('tab-manual').style.display=t==='manual'?'block':'none';
-  $('tab-excel').style.display=t==='excel'?'block':'none';
-}
-
-// ── CARGAR DATOS ──
-async function cargarDatos(){
-  loading(true);
-  try{
-    const[cfgRes,ferRes,objRes,diasRes]=await Promise.all([
+    const[c,f,o,d,od]=await Promise.all([
       db.from('eo_configuracion').select('*'),
       db.from('eo_feriados').select('*').order('fecha'),
       db.from('eo_objetivos').select('*'),
-      db.from('eo_dias').select('*').order('fecha',{ascending:true})
+      db.from('eo_dias').select('*').order('fecha',{ascending:true}),
+      db.from('eo_objetivos_dia').select('*')
     ]);
-    if(cfgRes.data) cfgRes.data.forEach(r=>{S.cfg[`${r.tipo_dia}_${r.turno}`]=r;});
-    S.feriados=ferRes.data||[];
-    S.objetivos=objRes.data||[];
-    S.dias=diasRes.data||[];
-    // Predicción para hoy
-    const pred=predecir(S.fecha);
-    if(pred){
-      $('pred-t3').textContent=pred.ft3>0?fmtI(pred.ft3):'—';
-      $('pred-t1').textContent=pred.ft1>0?fmtI(pred.ft1):'—';
-      $('pred-tot').textContent=fmtI(pred.ft3+pred.ft1);
-      $('pred-t3-int').textContent=pred.int_t3?`±${fmtI(pred.int_t3)}`:'—';
-      $('pred-t1-int').textContent=pred.int_t1?`±${fmtI(pred.int_t1)}`:'—';
-      $('pred-conf').textContent=`confianza ${pred.conf}%`;
-      // Sugerir % basado en predicción
-      const totPred=pred.ft3+pred.ft1;
-      if(totPred>0){
-        const pctT3=Math.round(pred.ft3/totPred*100);
-        $('pct-t3').value=pctT3;
-        $('pct-t1').value=100-pctT3;
-        $('pct-t3-hint').textContent=`modelo ${pctT3}%`;
-        $('pct-t1-hint').textContent=`modelo ${100-pctT3}%`;
-      }
-    } else {
-      ['pred-t3','pred-t1','pred-tot','pred-t3-int','pred-t1-int'].forEach(id=>{const el=$(id);if(el)el.textContent='—';});
-      $('pred-conf').textContent='sin datos históricos';
-    }
-    // Precisión modelo
-    const prec=calcPrecisionModelo();
-    if(prec){
-      $('hero-prec').textContent=fmt(prec)+'%';
-      $('hero-prec-bar').style.width=prec+'%';
-      // Sidebar
-      const mlv=document.querySelector('.ml-v');
-      const mls=document.querySelector('.ml-s');
-      const mlb=document.querySelector('.ml-bar-fill');
-      if(mlv)mlv.textContent=fmt(prec)+'%';
-      if(mls)mls.textContent=`Últ. 30 días · ${S.dias.length} registros`;
-      if(mlb)mlb.style.width=prec+'%';
-    }
-    // Tipo de día hoy
-    const td=tipoDia(S.fecha,S.feriados);
-    const dObj=new Date(S.fecha+'T12:00:00');
-    const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-    $('hoy-fecha').textContent=`${dias[dObj.getDay()]}, ${dObj.toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'})}`;
-    $('hoy-tipo').textContent=`${td==='feriado'?'🔴 Feriado':td==='finde'?'Fin de semana':'Semana'} · Lima · 24/7`;
-    $('hero-eye').textContent=`Recomendación del sistema · ${td==='feriado'?'Feriado':td==='finde'?'Fin de semana':'Semana'}`;
+    if(c.data)c.data.forEach(r=>{S.cfg[`${r.tipo_dia}_${r.turno}`]=r;});
+    S.feriados=f.data||[];
+    S.objetivos=(o.data||[]).map(x=>({...x,objetivo_efic:+x.objetivo_efic}));
+    S.dias=d.data||[];
+    S.objDia={};
+    (od.data||[]).forEach(r=>{S.objDia[r.tipo_dia]=+r.objetivo;});
+    if(!Object.keys(S.objDia).length)S.objDia={semana:20,finde:17,feriado:15};
     renderConfig();
     renderMesSel();
-    // Cargar mes actual en histórico
-    const now=new Date();
-    cargarHistMes(now.getFullYear(),now.getMonth()+1);
+    await cargarProyFecha();
+    aplicarPrediccion();
     recalc();
+    const n=new Date(hoy()+'T12:00:00');
+    cargarHistMes(n.getFullYear(),n.getMonth()+1);
   }catch(e){toast('Error cargando datos','error');console.error(e);}
   finally{loading(false);}
 }
-
-// ── NAVEGACIÓN ──
 function showView(id,btn,mobile){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('a'));
   $('v-'+id).classList.add('a');
-  if(mobile){document.querySelectorAll('.bn').forEach(b=>b.classList.remove('a'));}
-  else{document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('a'));}
+  if(mobile)document.querySelectorAll('.bn').forEach(b=>b.classList.remove('a'));
+  else document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('a'));
   btn.classList.add('a');
   window.scrollTo(0,0);
-  if(id==='mes') renderMes();
+  if(id==='mes')renderMes();
+  if(id==='hist')renderHist();
 }
-
-// ── INIT ──
 document.addEventListener('DOMContentLoaded',()=>{
+  $('proy-fecha').value=hoy();
   $('manual-fecha').value=hoy();
-  cargarDatos();
+  cargarTodo();
 });
 </script>
 </body>
