@@ -126,7 +126,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 <!-- ══ HOY ══ -->
 <div class="view a" id="v-hoy">
   <div class="ph">
-    <div><div class="ph-title" id="hoy-fecha">—</div><div class="ph-sub" id="hoy-tipo">Lima · 24/7</div></div>
+    <div><div class="ph-title" id="hoy-fecha">—</div><div class="ph-sub" id="hoy-tipo">Lima · 24/7</div><div id="hoy-evento-badge" style="display:none;margin-top:6px"></div></div>
     <div class="fp-row">
       <button class="fp a ft1" onclick="setTurno('t1',this)">T1 Noche</button>
       <button class="fp ft3" onclick="setTurno('t3',this)">T3 Día</button>
@@ -472,6 +472,18 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     </div>
   </div>
 
+  <div style="margin-bottom:24px">
+    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Eventos especiales</div>
+    <div style="font-size:.68rem;color:var(--ts);margin:8px 0 12px">Campañas o picos atípicos (Cyber, Black Friday...) — el modelo aprende de cada categoría por separado y no las mezcla con días normales</div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px" id="eventos-lista"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input type="date" id="ev-fecha" style="background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.78rem;color-scheme:dark">
+      <input type="text" id="ev-nombre" list="ev-sugeridos" placeholder="Nombre del evento (ej: Cyber Days)" style="flex:1;min-width:160px;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.78rem">
+      <datalist id="ev-sugeridos"></datalist>
+      <button class="btn btn-s btn-sm" onclick="agregarEvento()">+ Agregar</button>
+    </div>
+  </div>
+
   <button class="btn btn-p btn-w" onclick="guardarConfig()">Guardar configuración →</button>
 </div>
   </main>
@@ -490,11 +502,13 @@ const SUPA_URL='https://lflenisloinbqyuptxzc.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbGVuaXNsb2luYnF5dXB0eHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MzAxNDQsImV4cCI6MjA5MTEwNjE0NH0.jcjKs2xCgxf4mvGbf9a5eRETWAOKf0SXg_JC0iy4UsI';
 const db=supabase.createClient(SUPA_URL,SUPA_KEY);
 
-const S={turno:'t1',turnoHist:'t1',fecha:hoy(),cfg:{},objDia:{},feriados:[],objetivos:[],
+const S={turno:'t1',turnoHist:'t1',fecha:hoy(),cfg:{},objDia:{},feriados:[],objetivos:[],eventos:[],
   dias:[],proy:null,calc:{},excelData:null,excelName:'',histMes:[],mesActivo:null,importaciones:[]};
 
 function hoy(){return new Date().toLocaleDateString('en-CA',{timeZone:'America/Lima'});}
 function tipoDia(f){if(S.feriados.some(x=>x.fecha===f))return 'feriado';const d=new Date(f+'T12:00:00').getDay();return(d===0||d===6)?'finde':'semana';}
+function eventoDe(f){return S.eventos.find(e=>e.fecha===f)||null;}
+function normEvento(n){return String(n||'').trim().toLowerCase();}
 function fmt(n,d=1){if(n==null||isNaN(n))return '—';return Number(n).toFixed(d);}
 /* Eficiencia: SIEMPRE 2 decimales */
 function fmtE(n){if(n==null||isNaN(n)||n===0)return '—';return Number(n).toFixed(2);}
@@ -512,9 +526,41 @@ function cfgOf(td,tr){return S.cfg[`${td}_${tr}`]||S.cfg[`semana_${tr}`]||{produ
 /* ═══ MODELO ML — EMA ponderado por tipo de día y día de semana ═══ */
 function calcEMA(arr,alpha=0.35){if(!arr.length)return null;let e=null;arr.forEach(v=>{e=e==null?v:alpha*v+(1-alpha)*e;});return e;}
 function predecir(fecha){
+  const ev=eventoDe(fecha);
   const td=tipoDia(fecha);
+
+  /* ── Rama EVENTO: se predice contra el historial de esa MISMA categoría ── */
+  if(ev){
+    const nombre=normEvento(ev.nombre);
+    const previos=S.eventos.filter(e=>e.fecha<fecha&&normEvento(e.nombre)===nombre)
+      .map(e=>e.fecha)
+      .map(f=>S.dias.find(d=>d.fecha===f))
+      .filter(d=>d&&((+d.folios_t3||0)+(+d.folios_t1||0))>0)
+      .sort((a,b)=>a.fecha.localeCompare(b.fecha));
+    if(!previos.length){
+      // Sin historial de este evento: usar el día normal pero avisar
+      const base=predecirBase(fecha,td);
+      if(base){base.evento=ev.nombre;base.sinHistEvento=true;base.conf=Math.max(20,base.conf-25);}
+      return base;
+    }
+    const rec=previos.slice(-6);
+    const ft3=calcEMA(rec.map(d=>+d.folios_t3||0));
+    const ft1=calcEMA(rec.map(d=>+d.folios_t1||0));
+    const sd=(arr,m)=>arr.length>1?Math.sqrt(arr.reduce((s,v)=>s+Math.pow(v-m,2),0)/arr.length):0;
+    const i3=sd(rec.map(d=>+d.folios_t3||0),ft3||0);
+    const i1=sd(rec.map(d=>+d.folios_t1||0),ft1||0);
+    let conf=40+rec.length*8;
+    conf=Math.max(30,Math.min(90,conf));
+    return{ft3:Math.round(ft3||0),ft1:Math.round(ft1||0),i3:Math.round(i3),i1:Math.round(i1),
+      conf:Math.round(conf),nivel:'evento',n:rec.length,td,evento:ev.nombre,sinHistEvento:false};
+  }
+
+  return predecirBase(fecha,td);
+}
+function predecirBase(fecha,td){
   const dow=new Date(fecha+'T12:00:00').getDay();
-  const conDatos=S.dias.filter(d=>d.fecha<fecha&&((d.folios_t3||0)+(d.folios_t1||0))>0);
+  // Los días marcados como evento NO deben contaminar el promedio de días normales
+  const conDatos=S.dias.filter(d=>d.fecha<fecha&&((d.folios_t3||0)+(d.folios_t1||0))>0&&!eventoDe(d.fecha));
   if(!conDatos.length)return null;
   const mismoDow=conDatos.filter(d=>new Date(d.fecha+'T12:00:00').getDay()===dow&&tipoDia(d.fecha)===td);
   const mismoTipo=conDatos.filter(d=>tipoDia(d.fecha)===td);
@@ -688,20 +734,32 @@ function aplicarPrediccion(){
   $('jor-ter').value=fmt(S.proy?.jornada_tercero||c3.jornada_tercero||8,2);
   // Predicción
   const p=predecir(S.fecha);
+  const evBadge=$('hoy-evento-badge');
   if(p){
     $('pred-t3').textContent=fmtI(p.ft3);
     $('pred-t1').textContent=fmtI(p.ft1);
     $('pred-tot').textContent=fmtI(p.ft3+p.ft1);
     $('pred-t3-int').textContent=`± ${fmtI(p.i3)}`;
     $('pred-t1-int').textContent=`± ${fmtI(p.i1)}`;
-    $('pred-conf').textContent=`confianza ${p.conf}% · ${p.n} registros`;
-    const nivelTxt={'dow+tipo':'mismo día + tipo','tipo':'mismo tipo de día','global':'histórico general'};
-    $('pred-base').textContent=`base: ${nivelTxt[p.nivel]}`;
+    if(p.evento){
+      $('pred-conf').textContent=p.sinHistEvento?`confianza ${p.conf}% · sin historial de este evento`:`confianza ${p.conf}% · ${p.n} evento(s) previos`;
+      $('pred-base').textContent=`base: histórico de "${p.evento}"`;
+    } else {
+      $('pred-conf').textContent=`confianza ${p.conf}% · ${p.n} registros`;
+      const nivelTxt={'dow+tipo':'mismo día + tipo','tipo':'mismo tipo de día','global':'histórico general'};
+      $('pred-base').textContent=`base: ${nivelTxt[p.nivel]}`;
+    }
     if(!S.proy||!S.proy.folios_t3_proy){$('fol-t3').value=p.ft3;$('fol-t1').value=p.ft1;}
   } else {
     ['pred-t3','pred-t1','pred-tot','pred-t3-int','pred-t1-int'].forEach(i=>{$(i).textContent='—';});
     $('pred-conf').textContent='sin histórico suficiente';
     $('pred-base').textContent='carga datos primero';
+  }
+  if(p&&p.evento){
+    evBadge.style.display='block';
+    evBadge.innerHTML=`<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;background:rgba(255,149,0,.12);color:var(--ora);border:1px solid rgba(255,149,0,.3)">🎯 ${p.evento}${p.sinHistEvento?' · sin histórico previo':''}</span>`;
+  } else {
+    evBadge.style.display='none';evBadge.innerHTML='';
   }
   const prec=precisionModelo();
   const mlv=document.querySelector('.ml-v'),mls=document.querySelector('.ml-s'),mlb=document.querySelector('.ml-bar-fill');
@@ -1208,14 +1266,14 @@ function renderHistRows(){
   if(!S.histMes.length){c.innerHTML='<div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos en este mes</div>';return;}
   c.innerHTML='';
   S.histMes.forEach(d=>{
-    const td=tipoDia(d.fecha), dObj=new Date(d.fecha+'T12:00:00');
+    const td=tipoDia(d.fecha), dObj=new Date(d.fecha+'T12:00:00'), ev=eventoDe(d.fecha);
     const e3=efDia(d,'t3'),e1=efDia(d,'t1'),eg=efDia(d,'all');
     const esHoy=d.fecha===hoy(), id=d.fecha.replace(/-/g,'');
     const p=predecir(d.fecha);
     const hef3=(+d.hp_t3||0)+(+d.ht_t3||0), hef1=(+d.hp_t1||0)+(+d.ht_t1||0);
     const div=document.createElement('div');
     div.innerHTML=`<div onclick="toggleHist('${id}')" style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr 36px;align-items:center;padding:11px 12px;cursor:pointer;border-bottom:1px solid var(--b1)${esHoy?';background:rgba(124,111,255,.05)':''}">
-      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600${esHoy?';color:var(--t1)':''}">${DN[dObj.getDay()]} ${dObj.getDate()}</div><div style="font-size:.6rem;color:${td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--tm)'}">${td==='feriado'?'Feriado':td==='finde'?'Finde':'Semana'}</div></div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600${esHoy?';color:var(--t1)':''}">${DN[dObj.getDay()]} ${dObj.getDate()}</div><div style="font-size:.6rem;color:${ev?'var(--ora)':td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--tm)'}">${ev?'🎯 '+ev.nombre:td==='feriado'?'Feriado':td==='finde'?'Finde':'Semana'}</div></div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)">${fmtI(d.folios_t3)}</div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)">${fmtI(d.folios_t1)}</div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t3)">${e3!=null?fmtE(e3):'—'}</div>
@@ -1386,12 +1444,13 @@ function renderMes(){
     const c3=cfgOf(td,'t3'),c1=cfgOf(td,'t1');
     const hh3=p&&c3.productividad>0?p.ft3/c3.productividad:0;
     const hh1=p&&c1.productividad>0?p.ft1/c1.productividad:0;
+    const ev=eventoDe(f);
     const id='dr'+f.replace(/-/g,'');
     const el=document.createElement('div');
-    el.style.cssText='background:var(--s2);border:1px solid '+(td==='feriado'?'rgba(255,77,109,.2)':'var(--b1)')+';border-radius:8px;overflow:hidden';
+    el.style.cssText='background:var(--s2);border:1px solid '+(ev?'rgba(255,149,0,.3)':td==='feriado'?'rgba(255,77,109,.2)':'var(--b1)')+';border-radius:8px;overflow:hidden';
     el.innerHTML=`<div onclick="toggleDr('${id}')" style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 14px;cursor:pointer">
       <div><div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600">${DN[d.getDay()]} ${d.getDate()} ${d.toLocaleDateString('es-PE',{month:'short'})}</div>
-      <div style="font-size:.62rem;margin-top:2px;color:${td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--ts)'}">${td==='feriado'?'🔴 Feriado':td==='finde'?'Fin de semana':'Semana'}</div></div>
+      <div style="font-size:.62rem;margin-top:2px;color:${ev?'var(--ora)':td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--ts)'}">${ev?'🎯 '+ev.nombre:td==='feriado'?'🔴 Feriado':td==='finde'?'Fin de semana':'Semana'}</div></div>
       <div style="text-align:right"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--t1)">${p?fmtI(p.ft3+p.ft1):'—'}</div><div style="font-size:.55rem;color:var(--ts);text-transform:uppercase;letter-spacing:.06em">despachos pred.</div></div>
       <div style="text-align:right;min-width:60px"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--tx)">${p?fmt(hh3+hh1,0)+'h':'—'}</div><div style="font-size:.55rem;color:var(--ts);text-transform:uppercase;letter-spacing:.06em">HH nec.</div></div>
     </div>
@@ -1457,6 +1516,7 @@ function renderConfig(){
   $('cfg-targets').innerHTML=ht;
   $('cfg-jornadas').innerHTML=hj;
   renderFeriados();
+  renderEventos();
   const n=new Date(hoy()+'T12:00:00');
   $('aj-mes').value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
   cargarObjMes();
@@ -1465,6 +1525,55 @@ function cargarObjMes(){
   const v=$('aj-mes').value;if(!v)return;
   const[a,m]=v.split('-').map(Number);
   $('aj-obj').value=fmtE(objMes(a,m));
+}
+function renderEventos(){
+  const c=$('eventos-lista'); if(!c) return;
+  c.innerHTML='';
+  if(!S.eventos.length){c.innerHTML='<div style="font-size:.72rem;color:var(--ts);padding:8px 0">Sin eventos registrados</div>';}
+  else{
+    [...S.eventos].sort((a,b)=>a.fecha.localeCompare(b.fecha)).forEach(e=>{
+      const d=new Date(e.fecha+'T12:00:00');
+      const mismos=S.eventos.filter(x=>normEvento(x.nombre)===normEvento(e.nombre));
+      const idx=mismos.findIndex(x=>x.id===e.id)+1;
+      const el=document.createElement('div');
+      el.style.cssText='display:flex;align-items:center;justify-content:space-between;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 12px;font-family:\'JetBrains Mono\',monospace;font-size:.75rem';
+      el.innerHTML=`<div><div style="font-weight:600">${d.toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'})} <span style="color:var(--ora)">· ${e.nombre}</span></div><div style="font-family:'Inter',sans-serif;font-size:.62rem;color:var(--tm);margin-top:1px">${mismos.length>1?`Ocurrencia ${idx} de ${mismos.length} registradas`:'Primera vez registrado — sin histórico previo'}</div></div><button onclick="eliminarEvento(${e.id})" style="background:transparent;border:1px solid var(--b2);border-radius:4px;width:22px;height:22px;cursor:pointer;color:var(--ts);font-size:.8rem;flex-shrink:0">×</button>`;
+      c.appendChild(el);
+    });
+  }
+  // Sugerencias para el datalist
+  const dl=$('ev-sugeridos');
+  if(dl){
+    const nombresUnicos=[...new Set(S.eventos.map(e=>e.nombre))];
+    dl.innerHTML=nombresUnicos.map(n=>`<option value="${n}"></option>`).join('');
+  }
+}
+async function agregarEvento(){
+  const f=$('ev-fecha').value, n=$('ev-nombre').value.trim();
+  if(!f||!n){toast('Ingresa fecha y nombre del evento','error');return;}
+  loading(true);
+  try{
+    const{data,error}=await db.from('eo_eventos').insert({fecha:f,nombre:n}).select().single();
+    if(error)throw error;
+    S.eventos.push(data);
+    renderEventos();
+    $('ev-fecha').value='';$('ev-nombre').value='';
+    toast('Evento agregado ✓');
+    aplicarPrediccion();recalc();
+    if(S.mesActivo)renderMes();
+  }catch(e){toast('Error — ¿ya existe un evento en esa fecha?','error');}
+  finally{loading(false);}
+}
+async function eliminarEvento(id){
+  loading(true);
+  try{
+    await db.from('eo_eventos').delete().eq('id',id);
+    S.eventos=S.eventos.filter(e=>e.id!==id);
+    renderEventos();toast('Evento eliminado ✓');
+    aplicarPrediccion();recalc();
+    if(S.mesActivo)renderMes();
+  }catch(e){toast('Error','error');}
+  finally{loading(false);}
 }
 function renderFeriados(){
   const c=$('feriados-lista');if(!c)return;
@@ -1538,17 +1647,19 @@ async function guardarConfig(){
 async function cargarTodo(){
   loading(true);
   try{
-    const[c,f,o,d,od]=await Promise.all([
+    const[c,f,o,d,od,ev]=await Promise.all([
       db.from('eo_configuracion').select('*'),
       db.from('eo_feriados').select('*').order('fecha'),
       db.from('eo_objetivos').select('*'),
       db.from('eo_dias').select('*').order('fecha',{ascending:true}),
-      db.from('eo_objetivos_dia').select('*')
+      db.from('eo_objetivos_dia').select('*'),
+      db.from('eo_eventos').select('*').order('fecha')
     ]);
     if(c.data)c.data.forEach(r=>{S.cfg[`${r.tipo_dia}_${r.turno}`]=r;});
     S.feriados=f.data||[];
     S.objetivos=(o.data||[]).map(x=>({...x,objetivo_efic:+x.objetivo_efic}));
     S.dias=d.data||[];
+    S.eventos=ev.data||[];
     S.objDia={};
     (od.data||[]).forEach(r=>{S.objDia[r.tipo_dia]=+r.objetivo;});
     if(!Object.keys(S.objDia).length)S.objDia={semana:20,finde:17,feriado:15};
