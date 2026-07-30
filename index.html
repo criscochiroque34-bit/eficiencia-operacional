@@ -333,6 +333,60 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <!-- Selector mes -->
   <div class="sl">Mes</div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px" id="mes-sel"></div>
+  <!-- PANEL DIAGNÓSTICO DEL MODELO -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:18px;margin-bottom:18px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+      <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.95rem">Diagnóstico del modelo</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts)" id="diag-periodo">—</div>
+    </div>
+    <div style="font-size:.66rem;color:var(--ts);margin-bottom:14px">Backtesting: predice cada día usando solo datos anteriores y compara contra lo real</div>
+
+    <div class="g3" style="margin-bottom:14px">
+      <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px">
+        <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Precisión · MAPE</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;line-height:1" id="diag-prec">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:3px" id="diag-prec-sub">—</div>
+      </div>
+      <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px">
+        <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Precisión · WAPE</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;line-height:1" id="diag-precw">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:3px">ponderado por volumen</div>
+      </div>
+      <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px">
+        <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">vs. baseline</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;line-height:1" id="diag-skill">—</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:3px" id="diag-skill-sub">mismo día semana previa</div>
+      </div>
+    </div>
+
+    <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:8px">Desglose por turno</div>
+    <div class="g2" style="margin-bottom:14px">
+      <div style="background:var(--s3);border:1px solid rgba(0,200,150,.2);border-radius:8px;padding:11px 13px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span class="pill t3">T3 Día</span><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem" id="diag-t3">—</span></div>
+        <div style="height:5px;background:var(--b1);border-radius:3px;overflow:hidden;margin-bottom:5px"><div style="height:100%;border-radius:3px;background:var(--t3);width:0%" id="diag-t3-bar"></div></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm)" id="diag-t3-sub">—</div>
+      </div>
+      <div style="background:var(--s3);border:1px solid rgba(124,111,255,.25);border-radius:8px;padding:11px 13px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span class="pill t1">T1 Noche</span><span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem" id="diag-t1">—</span></div>
+        <div style="height:5px;background:var(--b1);border-radius:3px;overflow:hidden;margin-bottom:5px"><div style="height:100%;border-radius:3px;background:var(--t1);width:0%" id="diag-t1-bar"></div></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm)" id="diag-t1-sub">—</div>
+      </div>
+    </div>
+
+    <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:8px">Tendencia de precisión · últimos 6 meses</div>
+    <div id="wrap-tendml" style="margin-bottom:12px"><svg viewBox="0 0 580 130" style="width:100%;height:auto;display:block"><text x="290" y="70" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Calculando…</text></svg></div>
+
+    <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:11px 13px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tm)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Sesgo del modelo</span><strong id="diag-sesgo" style="color:var(--tx)">—</strong></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Cobertura del intervalo ±</span><strong id="diag-cob" style="color:var(--tx)">—</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>Días evaluados · eventos excluidos</span><strong id="diag-n" style="color:var(--tx)">—</strong></div>
+    </div>
+    <div id="diag-veredicto" style="margin-top:12px;border-radius:8px;padding:11px 13px;display:flex;align-items:center;gap:10px;background:var(--s3);border:1px solid var(--b1)">
+      <span style="font-size:1.2rem" id="diag-ico">📊</span>
+      <div><div style="font-size:.78rem;font-weight:600" id="diag-txt">Calculando diagnóstico…</div><div style="font-size:.65rem;color:var(--tm)" id="diag-sub">—</div></div>
+    </div>
+  </div>
+
   <!-- TARJETA CIERRE DE MES -->
   <div id="cierre-mes" style="display:none;border:1px solid var(--b1);border-radius:12px;padding:20px;margin-bottom:18px;background:var(--s2)"></div>
   <!-- CHART 1: eficiencia diaria -->
@@ -542,44 +596,103 @@ const $=id=>document.getElementById(id);
 const num=id=>{const e=$(id);return e?(+e.value||0):0;};
 function cfgOf(td,tr){return S.cfg[`${td}_${tr}`]||S.cfg[`semana_${tr}`]||{productividad:tr==='t1'?25:15,jornada_planilla:tr==='t1'?9.36:8,jornada_tercero:8};}
 
-/* ═══ MODELO ML — EMA ponderado por tipo de día y día de semana ═══ */
-function calcEMA(arr,alpha=0.35){if(!arr.length)return null;let e=null;arr.forEach(v=>{e=e==null?v:alpha*v+(1-alpha)*e;});return e;}
+/* ═══════════════════════════════════════════════════════════
+   MODELO ML — EMA ponderado + motor de evaluación (backtesting)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Índices y caché (evita O(n²) al recalcular) ── */
+const _idx={feriados:new Set(),eventos:new Map(),dias:new Map(),pred:new Map()};
+function reindexar(){
+  _idx.feriados=new Set(S.feriados.map(f=>f.fecha));
+  _idx.eventos=new Map(S.eventos.map(e=>[e.fecha,e]));
+  _idx.dias=new Map(S.dias.map(d=>[d.fecha,d]));
+  _idx.pred.clear();
+  _mem.evalCache=null;
+}
+const _mem={evalCache:null};
+function predecirCached(fecha){
+  if(_idx.pred.has(fecha))return _idx.pred.get(fecha);
+  const p=predecir(fecha);
+  _idx.pred.set(fecha,p);
+  return p;
+}
+
+/* ── Estadística base ── */
+function media(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;}
+/* Desviación estándar muestral (corrección de Bessel: n-1) */
+function sdMuestral(arr,centro){
+  if(arr.length<2)return 0;
+  const m=centro!=null?centro:media(arr);
+  return Math.sqrt(arr.reduce((s,v)=>s+Math.pow(v-m,2),0)/(arr.length-1));
+}
+function calcEMA(arr,alpha=0.35){
+  if(!arr.length)return null;
+  let e=null;
+  arr.forEach(v=>{e=e==null?v:alpha*v+(1-alpha)*e;});
+  return e;
+}
+
+/* ── Confianza derivada del comportamiento REAL de la muestra ──
+   Se basa en el coeficiente de variación (CV = sd/media): cuanto más
+   dispersa la serie histórica, menos confiable la predicción.
+   Reemplaza la fórmula arbitraria anterior que siempre devolvía ~96%. */
+function confianzaDe(muestraT3,muestraT1,n,nivel){
+  const cv=arr=>{const m=media(arr);return m>0?sdMuestral(arr,m)/m:1;};
+  const vals=[];
+  if(media(muestraT3)>0)vals.push(cv(muestraT3));
+  if(media(muestraT1)>0)vals.push(cv(muestraT1));
+  const cvProm=vals.length?media(vals):1;
+  // CV 0.00 → 100% · CV 0.20 → 70% · CV 0.40 → 40% · CV ≥0.67 → 0%
+  let conf=100*(1-Math.min(1,cvProm*1.5));
+  // Penalización por muestra pequeña (suave, no destructiva)
+  conf*=0.60+0.40*Math.min(1,n/8);
+  // Penalización por usar un segmento menos específico
+  if(nivel==='tipo')conf*=0.93;
+  else if(nivel==='global')conf*=0.85;
+  else if(nivel==='evento')conf*=0.90;
+  return Math.round(Math.max(15,Math.min(95,conf)));
+}
+
+/* ── Predicción ── */
 function predecir(fecha){
-  const ev=eventoDe(fecha);
+  const ev=_idx.eventos.get(fecha)||eventoDe(fecha);
   const td=tipoDia(fecha);
 
-  /* ── Rama EVENTO: se predice contra el historial de esa MISMA categoría ── */
+  /* Rama EVENTO: se predice contra el historial de esa MISMA categoría */
   if(ev){
     const nombre=normEvento(ev.nombre);
-    const previos=S.eventos.filter(e=>e.fecha<fecha&&normEvento(e.nombre)===nombre)
-      .map(e=>e.fecha)
-      .map(f=>S.dias.find(d=>d.fecha===f))
+    const previos=S.eventos
+      .filter(e=>e.fecha<fecha&&normEvento(e.nombre)===nombre)
+      .map(e=>_idx.dias.get(e.fecha)||S.dias.find(d=>d.fecha===e.fecha))
       .filter(d=>d&&((+d.folios_t3||0)+(+d.folios_t1||0))>0)
       .sort((a,b)=>a.fecha.localeCompare(b.fecha));
     if(!previos.length){
-      // Sin historial de este evento: usar el día normal pero avisar
       const base=predecirBase(fecha,td);
-      if(base){base.evento=ev.nombre;base.sinHistEvento=true;base.conf=Math.max(20,base.conf-25);}
+      if(base){
+        base.evento=ev.nombre;
+        base.sinHistEvento=true;
+        base.conf=Math.max(15,Math.round(base.conf*0.55));
+      }
       return base;
     }
     const rec=previos.slice(-6);
-    const ft3=calcEMA(rec.map(d=>+d.folios_t3||0));
-    const ft1=calcEMA(rec.map(d=>+d.folios_t1||0));
-    const sd=(arr,m)=>arr.length>1?Math.sqrt(arr.reduce((s,v)=>s+Math.pow(v-m,2),0)/arr.length):0;
-    const i3=sd(rec.map(d=>+d.folios_t3||0),ft3||0);
-    const i1=sd(rec.map(d=>+d.folios_t1||0),ft1||0);
-    let conf=40+rec.length*8;
-    conf=Math.max(30,Math.min(90,conf));
-    return{ft3:Math.round(ft3||0),ft1:Math.round(ft1||0),i3:Math.round(i3),i1:Math.round(i1),
-      conf:Math.round(conf),nivel:'evento',n:rec.length,td,evento:ev.nombre,sinHistEvento:false};
+    const m3=rec.map(d=>+d.folios_t3||0), m1=rec.map(d=>+d.folios_t1||0);
+    const ft3=calcEMA(m3), ft1=calcEMA(m1);
+    return{
+      ft3:Math.round(ft3||0), ft1:Math.round(ft1||0),
+      i3:Math.round(sdMuestral(m3,ft3)), i1:Math.round(sdMuestral(m1,ft1)),
+      conf:confianzaDe(m3,m1,rec.length,'evento'),
+      nivel:'evento', n:rec.length, td, evento:ev.nombre, sinHistEvento:false
+    };
   }
-
   return predecirBase(fecha,td);
 }
 function predecirBase(fecha,td){
   const dow=new Date(fecha+'T12:00:00').getDay();
-  // Los días marcados como evento NO deben contaminar el promedio de días normales
-  const conDatos=S.dias.filter(d=>d.fecha<fecha&&((d.folios_t3||0)+(d.folios_t1||0))>0&&!eventoDe(d.fecha));
+  // Los días de evento NO contaminan el promedio de días normales
+  const conDatos=S.dias.filter(d=>d.fecha<fecha
+    &&((+d.folios_t3||0)+(+d.folios_t1||0))>0
+    &&!(_idx.eventos.get(d.fecha)||eventoDe(d.fecha)));
   if(!conDatos.length)return null;
   const mismoDow=conDatos.filter(d=>new Date(d.fecha+'T12:00:00').getDay()===dow&&tipoDia(d.fecha)===td);
   const mismoTipo=conDatos.filter(d=>tipoDia(d.fecha)===td);
@@ -588,29 +701,119 @@ function predecirBase(fecha,td){
   else if(mismoTipo.length>=3){base=mismoTipo;nivel='tipo';}
   else{base=conDatos;nivel='global';}
   const rec=base.slice(-10);
-  const ft3=calcEMA(rec.map(d=>+d.folios_t3||0));
-  const ft1=calcEMA(rec.map(d=>+d.folios_t1||0));
-  const sd=(arr,m)=>arr.length>1?Math.sqrt(arr.reduce((s,v)=>s+Math.pow(v-m,2),0)/arr.length):0;
-  const i3=sd(rec.map(d=>+d.folios_t3||0),ft3||0);
-  const i1=sd(rec.map(d=>+d.folios_t1||0),ft1||0);
-  let conf=45+rec.length*4;
-  if(nivel==='dow+tipo')conf+=18;else if(nivel==='tipo')conf+=8;
-  conf=Math.max(35,Math.min(96,conf));
-  return{ft3:Math.round(ft3||0),ft1:Math.round(ft1||0),i3:Math.round(i3),i1:Math.round(i1),conf:Math.round(conf),nivel,n:rec.length,td};
+  const m3=rec.map(d=>+d.folios_t3||0), m1=rec.map(d=>+d.folios_t1||0);
+  const ft3=calcEMA(m3), ft1=calcEMA(m1);
+  return{
+    ft3:Math.round(ft3||0), ft1:Math.round(ft1||0),
+    i3:Math.round(sdMuestral(m3,ft3)), i1:Math.round(sdMuestral(m1,ft1)),
+    conf:confianzaDe(m3,m1,rec.length,nivel),
+    nivel, n:rec.length, td
+  };
 }
-function precisionModelo(){
-  const conDatos=S.dias.filter(d=>((d.folios_t3||0)+(d.folios_t1||0))>0);
-  if(conDatos.length<8)return null;
-  const test=conDatos.slice(-30);
-  let errs=[];
+
+/* ── Baseline ingenuo: "mismo día de la semana pasada" ──
+   Referencia estándar en forecasting. Si el modelo no le gana,
+   el modelo no está aportando valor real. */
+function baselineNaive(fecha){
+  const d=new Date(fecha+'T12:00:00');
+  d.setDate(d.getDate()-7);
+  const prev=_idx.dias.get(fechaStr(d));
+  if(!prev)return null;
+  return{ft3:+prev.folios_t3||0, ft1:+prev.folios_t1||0};
+}
+
+/* ── MOTOR DE EVALUACIÓN (walk-forward backtesting) ──
+   Para cada día del test, predice usando SOLO información anterior
+   a esa fecha y compara contra el valor real registrado. */
+function evaluarModelo(opts){
+  opts=opts||{};
+  const ventana=opts.ventana||30;
+  let pool=S.dias.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+  const conEvento=pool.filter(d=>_idx.eventos.get(d.fecha));
+  if(!opts.incluirEventos)pool=pool.filter(d=>!_idx.eventos.get(d.fecha));
+  const test=opts.dias||pool.slice(-ventana);
+  if(test.length<3)return null;
+
+  const acc={
+    n:0, nEventos:conEvento.length,
+    absT3:0,sumT3:0, absT1:0,sumT1:0, absTot:0,sumTot:0,
+    mapesT3:[], mapesT1:[], mapesTot:[],
+    sesgo:[], dentroInt:0, conInt:0,
+    baseAbs:0, baseSum:0, baseMapes:[], baseN:0
+  };
+
   test.forEach(d=>{
-    const p=predecir(d.fecha);if(!p)return;
-    const real=(+d.folios_t3||0)+(+d.folios_t1||0);
-    const pred=p.ft3+p.ft1;
-    if(real>0)errs.push(Math.abs(real-pred)/real*100);
+    const p=predecirCached(d.fecha);
+    if(!p)return;
+    const r3=+d.folios_t3||0, r1=+d.folios_t1||0, rt=r3+r1;
+    const p3=p.ft3, p1=p.ft1, pt=p3+p1;
+    if(rt<=0)return;
+    acc.n++;
+    // WAPE (acumula absolutos y totales)
+    acc.absTot+=Math.abs(rt-pt); acc.sumTot+=rt;
+    if(r3>0){acc.absT3+=Math.abs(r3-p3); acc.sumT3+=r3; acc.mapesT3.push(Math.abs(r3-p3)/r3*100);}
+    if(r1>0){acc.absT1+=Math.abs(r1-p1); acc.sumT1+=r1; acc.mapesT1.push(Math.abs(r1-p1)/r1*100);}
+    acc.mapesTot.push(Math.abs(rt-pt)/rt*100);
+    // Sesgo: positivo = el modelo sobreestima
+    acc.sesgo.push((pt-rt)/rt*100);
+    // Cobertura del intervalo de confianza
+    const int=(p.i3||0)+(p.i1||0);
+    if(int>0){acc.conInt++; if(Math.abs(rt-pt)<=int)acc.dentroInt++;}
+    // Baseline
+    const b=baselineNaive(d.fecha);
+    if(b){
+      const bt=b.ft3+b.ft1;
+      acc.baseAbs+=Math.abs(rt-bt); acc.baseSum+=rt;
+      acc.baseMapes.push(Math.abs(rt-bt)/rt*100);
+      acc.baseN++;
+    }
   });
-  if(errs.length<3)return null;
-  return Math.max(0,Math.min(100,100-errs.reduce((a,b)=>a+b,0)/errs.length));
+  if(acc.n<3)return null;
+
+  const mape=media(acc.mapesTot);
+  const wape=acc.sumTot>0?acc.absTot/acc.sumTot*100:null;
+  const baseMape=acc.baseN>=3?media(acc.baseMapes):null;
+  const baseWape=acc.baseSum>0?acc.baseAbs/acc.baseSum*100:null;
+  // Skill score: cuánto mejor es el modelo vs el baseline (>0 = aporta valor)
+  const skill=(baseWape!=null&&baseWape>0&&wape!=null)?(1-wape/baseWape)*100:null;
+
+  return{
+    n:acc.n, nEventosExcluidos:acc.nEventos,
+    mape, wape,
+    precision:Math.max(0,Math.min(100,100-mape)),
+    precisionW:wape!=null?Math.max(0,Math.min(100,100-wape)):null,
+    mapeT3:acc.mapesT3.length?media(acc.mapesT3):null,
+    mapeT1:acc.mapesT1.length?media(acc.mapesT1):null,
+    wapeT3:acc.sumT3>0?acc.absT3/acc.sumT3*100:null,
+    wapeT1:acc.sumT1>0?acc.absT1/acc.sumT1*100:null,
+    sesgo:media(acc.sesgo),
+    cobertura:acc.conInt>0?acc.dentroInt/acc.conInt*100:null,
+    baseMape, baseWape, skill,
+    desde:test[0]?.fecha, hasta:test[test.length-1]?.fecha
+  };
+}
+/* Compatibilidad: el sidebar y KPIs siguen usando esta función */
+function precisionModelo(){
+  if(_mem.evalCache===null)_mem.evalCache=evaluarModelo({ventana:30});
+  return _mem.evalCache?_mem.evalCache.precision:null;
+}
+/* Precisión mes a mes — para el gráfico de tendencia */
+function precisionPorMes(nMeses){
+  nMeses=nMeses||6;
+  const ref=new Date(hoy()+'T12:00:00');
+  const out=[];
+  for(let k=nMeses-1;k>=0;k--){
+    const d=new Date(ref.getFullYear(),ref.getMonth()-k,1);
+    const a=d.getFullYear(), m=d.getMonth()+1;
+    const pre=`${a}-${String(m).padStart(2,'0')}`;
+    const dias=S.dias.filter(x=>x.fecha.startsWith(pre)
+      &&((+x.folios_t3||0)+(+x.folios_t1||0))>0
+      &&!_idx.eventos.get(x.fecha));
+    const ev=dias.length>=3?evaluarModelo({dias}):null;
+    out.push({anio:a,mes:m,label:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][m-1],
+      precision:ev?ev.precision:null, precisionW:ev?ev.precisionW:null, n:dias.length});
+  }
+  return out;
 }
 
 /* ═══ CALCULADORA HH ═══ */
@@ -633,7 +836,8 @@ function recalc(){
   const td=tipoDia(S.fecha);
   ['t3','t1'].forEach(tr=>{
     const c=cfgOf(td,tr);
-    $('plan-jor-'+tr).textContent=`jornada ${fmt(c.jornada_planilla,2)}h`;
+    const e=$('plan-jor-'+tr);
+    if(e)e.textContent=`jornada ${fmt(c.jornada_planilla,2)}h`;
   });
   const p3=Math.max(0,num('plan-t3')), p1=Math.max(0,num('plan-t1'));
   const f3=Math.max(0,num('fol-t3')), f1=Math.max(0,num('fol-t1'));
@@ -646,15 +850,18 @@ function recalc(){
 
   ['t3','t1'].forEach(tr=>{
     const c=tr==='t3'?c3:c1;
-    $('hh-nec-'+tr).textContent=c.folios>0?fmt(c.hh_nec,1)+'h':'—';
-    $('hh-plan-'+tr).textContent=fmt(c.hh_plan,1)+'h';
+    const setT=(id,v)=>{const e=$(id);if(e)e.textContent=v;};
+    setT('hh-nec-'+tr,c.folios>0?fmt(c.hh_nec,1)+'h':'—');
+    setT('hh-plan-'+tr,fmt(c.hh_plan,1)+'h');
     const gEl=$('hh-gap-'+tr), lEl=$('lbl-gap-'+tr);
-    if(c.folios===0){gEl.textContent='—';gEl.style.color='var(--tm)';lEl.textContent='Déficit';}
-    else if(c.gap>0){gEl.textContent='−'+fmt(c.gap,1)+'h';gEl.style.color='var(--red)';lEl.textContent='Déficit';}
-    else{gEl.textContent='+'+fmt(-c.gap,1)+'h';gEl.style.color='var(--ok)';lEl.textContent='Superávit';}
-    $('ter-'+tr).textContent=c.folios>0?c.terceros:'—';
-    $('ef-res-'+tr).textContent=c.efic>0?fmtE(c.efic)+' fol/h':'—';
-    $('cap-'+tr).textContent=c.cap>0?fmtI(c.cap)+' fol':'—';
+    if(gEl&&lEl){
+      if(c.folios===0){gEl.textContent='—';gEl.style.color='var(--tm)';lEl.textContent='Déficit';}
+      else if(c.gap>0){gEl.textContent='−'+fmt(c.gap,1)+'h';gEl.style.color='var(--red)';lEl.textContent='Déficit';}
+      else{gEl.textContent='+'+fmt(-c.gap,1)+'h';gEl.style.color='var(--ok)';lEl.textContent='Superávit';}
+    }
+    setT('ter-'+tr,c.folios>0?c.terceros:'—');
+    setT('ef-res-'+tr,c.efic>0?fmtE(c.efic)+' fol/h':'—');
+    setT('cap-'+tr,c.cap>0?fmtI(c.cap)+' fol':'—');
   });
 
   // Resumen general
@@ -662,14 +869,17 @@ function recalc(){
   const efGen=hhTot>0?folTot/hhTot:0;
   const objGen=num('obj-gen');
   const el=$('res-ef-gen');
-  el.textContent=efGen>0?fmtE(efGen):'—';
-  el.style.color=efGen===0?'var(--tm)':efGen>=objGen?'var(--ok)':'var(--red)';
+  if(el){
+    el.textContent=efGen>0?fmtE(efGen):'—';
+    el.style.color=efGen===0?'var(--tm)':efGen>=objGen?'var(--ok)':'var(--red)';
+  }
   $('res-ef-sub').textContent=folTot>0?`${fmtI(folTot)} fol ÷ ${fmt(hhTot,1)}h`:'—';
   $('res-fol-tot').textContent=fmtI(folTot);
   $('res-hh-tot').textContent=hhTot>0?fmt(hhTot,1)+'h':'—';
   $('res-ter-tot').textContent=folTot>0?terTot:'—';
 
   const vd=$('res-veredicto'), ico=$('res-ico'), txt=$('res-txt'), sub=$('res-sub');
+  if(!vd||!ico||!txt||!sub){applyTurnoFilter();return;}
   if(folTot===0){
     vd.style.background='var(--s3)';vd.style.borderColor='var(--b1)';
     ico.textContent='—';txt.textContent='Ingresa los datos para calcular';sub.textContent='—';
@@ -693,6 +903,7 @@ function recalc(){
   const efAntes=aH>0?aF/aH:0;
   const efDesp=(aH+hhTot)>0?(aF+folTot)/(aH+hhTot):0;
   const apEl=$('res-aporte');
+  if(!apEl){applyTurnoFilter();return;}
   if(folTot>0&&aH>0){
     const dif=efDesp-efAntes;
     apEl.textContent=(dif>=0?'+':'')+fmt(dif,2)+` → ${fmtE(efDesp)}`;
@@ -861,6 +1072,7 @@ async function guardarManual(){
     const i=S.dias.findIndex(d=>d.fecha===f);
     if(i>=0)S.dias[i]={...S.dias[i],...row};else S.dias.push(row);
     S.dias.sort((a,b)=>a.fecha.localeCompare(b.fecha));
+    reindexar();
     toast('Datos guardados ✓ modelo actualizado');
     aplicarPrediccion();recalc();
     if(S.mesActivo)cargarHistMes(S.mesActivo.a,S.mesActivo.m);
@@ -875,6 +1087,7 @@ async function borrarDia(){
   try{
     await db.from('eo_dias').delete().eq('fecha',f);
     S.dias=S.dias.filter(d=>d.fecha!==f);
+    reindexar();
     ['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1'].forEach(i=>{const e=$(i);if(e)e.value='';});
     updateManualPreview();
     toast('Día borrado ✓');
@@ -1147,7 +1360,8 @@ function renderHist(){
   $('hkpi-t3-s').textContent=`target ${fmtE(cfgOf(td,'t3').productividad)}`;
   $('hkpi-fol').textContent=fmtI(f1+f3);
   const prec=precisionModelo();
-  $('hkpi-ml').textContent=prec!=null?fmt(prec)+'%':'—';
+  $('hkpi-ml').textContent=prec!=null?fmt(prec,1)+'%':'—';
+  renderDiagnostico();
   renderCierreMes();
   // Leyendas
   const legs=[];
@@ -1382,6 +1596,125 @@ function renderCierreMes(){
     </div>`;
 }
 
+/* ═══ PANEL DE DIAGNÓSTICO DEL MODELO ═══ */
+function renderDiagnostico(){
+  const ev=evaluarModelo({ventana:30});
+  const set=(id,txt,color)=>{const e=$(id);if(e){e.textContent=txt;if(color)e.style.color=color;}};
+  const colorPrec=v=>v==null?'var(--tm)':v>=85?'var(--ok)':v>=70?'var(--ora)':'var(--red)';
+
+  if(!ev){
+    ['diag-prec','diag-precw','diag-skill','diag-t3','diag-t1'].forEach(i=>set(i,'—','var(--tm)'));
+    ['diag-prec-sub','diag-skill-sub','diag-t3-sub','diag-t1-sub','diag-sesgo','diag-cob','diag-n','diag-periodo'].forEach(i=>set(i,'—'));
+    set('diag-txt','Datos insuficientes para diagnóstico');
+    set('diag-sub','Se necesitan al menos 3 días con despachos registrados');
+    set('diag-ico','📊');
+    const w=$('wrap-tendml');
+    if(w)w.innerHTML='<svg viewBox="0 0 580 130" style="width:100%;height:auto"><text x="290" y="70" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos suficientes</text></svg>';
+    return;
+  }
+
+  set('diag-periodo',`${ev.desde} → ${ev.hasta}`);
+  set('diag-prec',fmt(ev.precision,1)+'%',colorPrec(ev.precision));
+  set('diag-prec-sub',`MAPE ${fmt(ev.mape,2)}%`);
+  set('diag-precw',ev.precisionW!=null?fmt(ev.precisionW,1)+'%':'—',colorPrec(ev.precisionW));
+
+  // Skill score vs baseline
+  const sk=$('diag-skill');
+  if(ev.skill!=null){
+    const mejor=ev.skill>0;
+    sk.textContent=(ev.skill>=0?'+':'')+fmt(ev.skill,1)+'%';
+    sk.style.color=mejor?'var(--ok)':'var(--red)';
+    set('diag-skill-sub',mejor?'el modelo supera al baseline':'el baseline es mejor ⚠');
+  } else {sk.textContent='—';sk.style.color='var(--tm)';set('diag-skill-sub','sin datos suficientes');}
+
+  // Por turno (WAPE, más robusto que MAPE para comparar turnos)
+  [['t3',ev.wapeT3,ev.mapeT3],['t1',ev.wapeT1,ev.mapeT1]].forEach(([tr,wp,mp])=>{
+    const prec=wp!=null?Math.max(0,100-wp):null;
+    set('diag-'+tr,prec!=null?fmt(prec,1)+'%':'—',colorPrec(prec));
+    set('diag-'+tr+'-sub',mp!=null?`MAPE ${fmt(mp,2)}% · WAPE ${fmt(wp,2)}%`:'sin datos');
+    const bar=$('diag-'+tr+'-bar');
+    if(bar)bar.style.width=(prec!=null?Math.max(0,Math.min(100,prec)):0)+'%';
+  });
+
+  // Sesgo
+  const sEl=$('diag-sesgo');
+  if(sEl){
+    const s=ev.sesgo;
+    const dir=Math.abs(s)<3?'equilibrado':s>0?'sobreestima':'subestima';
+    sEl.textContent=`${s>=0?'+':''}${fmt(s,2)}% · ${dir}`;
+    sEl.style.color=Math.abs(s)<3?'var(--ok)':Math.abs(s)<10?'var(--ora)':'var(--red)';
+  }
+  // Cobertura
+  const cEl=$('diag-cob');
+  if(cEl){
+    cEl.textContent=ev.cobertura!=null?fmt(ev.cobertura,1)+'% de los días':'—';
+    cEl.style.color=ev.cobertura==null?'var(--tx)':ev.cobertura>=65?'var(--ok)':'var(--ora)';
+  }
+  set('diag-n',`${ev.n} días · ${ev.nEventosExcluidos} eventos fuera`);
+
+  // Veredicto
+  const vd=$('diag-veredicto');
+  let ico,txt,sub,bg,bd;
+  const p=ev.precisionW!=null?ev.precisionW:ev.precision;
+  if(ev.skill!=null&&ev.skill<0){
+    ico='⚠️';txt='El modelo no supera al baseline simple';
+    sub='Predecir "lo mismo que la semana pasada" está dando mejor resultado — revisa eventos sin marcar o datos atípicos';
+    bg='rgba(255,77,109,.07)';bd='rgba(255,77,109,.25)';
+  } else if(p>=85){
+    ico='✅';txt='Modelo saludable';
+    sub=`Precisión ${fmt(p,1)}% y supera al baseline en ${fmt(ev.skill||0,1)}% — el aprendizaje continuo funciona`;
+    bg='rgba(0,200,150,.07)';bd='rgba(0,200,150,.25)';
+  } else if(p>=70){
+    ico='⚡';txt='Modelo aceptable con margen de mejora';
+    sub='Variabilidad normal de operación. Revisa si hay días atípicos o feriados sin marcar';
+    bg='rgba(255,149,0,.07)';bd='rgba(255,149,0,.2)';
+  } else {
+    ico='🔍';txt='Precisión baja — requiere revisión';
+    sub='Posibles causas: eventos sin marcar, errores de digitación, o pocos días con el mismo patrón';
+    bg='rgba(255,77,109,.07)';bd='rgba(255,77,109,.25)';
+  }
+  set('diag-ico',ico);set('diag-txt',txt);set('diag-sub',sub);
+  if(vd){vd.style.background=bg;vd.style.borderColor=bd;}
+
+  drawTendenciaML();
+}
+function drawTendenciaML(){
+  const wrap=$('wrap-tendml');if(!wrap)return;
+  const datos=precisionPorMes(6);
+  const conVal=datos.filter(d=>d.precision!=null);
+  if(conVal.length<2){
+    wrap.innerHTML='<svg viewBox="0 0 580 130" style="width:100%;height:auto"><text x="290" y="70" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Se necesitan al menos 2 meses con datos</text></svg>';
+    return;
+  }
+  const W=580,H=130,M={t:14,r:16,b:26,l:36};
+  const w=W-M.l-M.r,h=H-M.t-M.b,n=datos.length;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  [100,75,50,25].forEach((v,i)=>{
+    const y=M.t+(h*i/3);
+    s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#1e1e32"${i===3?'':' stroke-dasharray="2,4"'}/>`;
+    s+=`<text x="${M.l-5}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${v}</text>`;
+  });
+  // Referencia 85% = umbral "saludable"
+  const y85=M.t+h-(h*(85-25)/75);
+  s+=`<line x1="${M.l}" y1="${y85}" x2="${M.l+w}" y2="${y85}" stroke="#00c896" stroke-dasharray="4,3" opacity=".35"/>`;
+  const bw=w/n, barW=Math.min(46,bw*0.55);
+  datos.forEach((d,i)=>{
+    const cx=M.l+bw*i+bw/2;
+    if(d.precision!=null){
+      const v=Math.max(25,Math.min(100,d.precision));
+      const bh=h*(v-25)/75;
+      const col=d.precision>=85?'#00c896':d.precision>=70?'#ff9500':'#ff4d6d';
+      s+=`<rect x="${(cx-barW/2).toFixed(1)}" y="${(M.t+h-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="${col}" opacity=".85" rx="3"/>`;
+      s+=`<text x="${cx.toFixed(1)}" y="${(M.t+h-bh-4).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-size="8.5" font-weight="700" fill="${col}">${fmt(d.precision,1)}</text>`;
+    } else {
+      s+=`<text x="${cx.toFixed(1)}" y="${(M.t+h-6).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">s/d</text>`;
+    }
+    s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+14}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
+  });
+  s+='</svg>';
+  wrap.innerHTML=s;
+}
+
 /* ═══ MES ═══ */
 function objMes(a,m){
   if(!a||!m){const n=new Date(hoy()+'T12:00:00');a=n.getFullYear();m=n.getMonth()+1;}
@@ -1607,6 +1940,7 @@ async function agregarEvento(){
     const{data,error}=await db.from('eo_eventos').insert({fecha:f,nombre:n}).select().single();
     if(error)throw error;
     S.eventos.push(data);
+    reindexar();
     renderEventos();
     $('ev-fecha').value='';$('ev-nombre').value='';
     toast('Evento agregado ✓');
@@ -1629,6 +1963,7 @@ async function agregarEventoRango(){
     if(error)throw error;
     dias.forEach(f=>{S.eventos=S.eventos.filter(e=>e.fecha!==f);});
     S.eventos.push(...(data||rows));
+    reindexar();
     renderEventos();
     $('ev-desde').value='';$('ev-hasta').value='';$('ev-nombre-r').value='';$('ev-rango-info').textContent='';
     toast(`Evento agregado ✓ (${dias.length} días)`);
@@ -1642,6 +1977,7 @@ async function eliminarEventoGrupo(ids){
   try{
     await db.from('eo_eventos').delete().in('id',ids);
     S.eventos=S.eventos.filter(e=>!ids.includes(e.id));
+    reindexar();
     renderEventos();toast('Evento eliminado ✓');
     aplicarPrediccion();recalc();
     if(S.mesActivo)renderMes();
@@ -1668,6 +2004,7 @@ async function agregarFeriado(){
     const{data,error}=await db.from('eo_feriados').insert({fecha:f,descripcion:d||null}).select().single();
     if(error)throw error;
     S.feriados.push(data);
+    reindexar();
     renderFeriados();
     $('fer-fecha').value='';$('fer-desc').value='';
     toast('Feriado agregado ✓');
@@ -1680,6 +2017,7 @@ async function eliminarFeriado(id){
   try{
     await db.from('eo_feriados').delete().eq('id',id);
     S.feriados=S.feriados.filter(f=>f.id!==id);
+    reindexar();
     renderFeriados();toast('Feriado eliminado ✓');
     aplicarPrediccion();recalc();
   }catch(e){toast('Error','error');}
@@ -1736,6 +2074,7 @@ async function cargarTodo(){
     S.objDia={};
     (od.data||[]).forEach(r=>{S.objDia[r.tipo_dia]=+r.objetivo;});
     if(!Object.keys(S.objDia).length)S.objDia={semana:20,finde:17,feriado:15};
+    reindexar();
     renderConfig();
     renderMesSel();
     await cargarProyFecha();
