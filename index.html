@@ -86,6 +86,17 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 .toast.err-t{border-color:var(--red);color:var(--red)}
 .loading{display:none;position:fixed;inset:0;background:rgba(7,7,15,.85);align-items:center;justify-content:center;z-index:60;font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:600;color:var(--t1)}
 .loading.show{display:flex}
+
+/* ── Tooltip de gráficos ── */
+.chart-tt{position:fixed;z-index:200;pointer-events:none;opacity:0;transition:opacity .12s;
+  background:#1a1a2e;border:1px solid var(--b2);border-radius:8px;padding:8px 12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:96px}
+.chart-tt .tt-d{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.chart-tt .tt-v{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;line-height:1.1}
+.chart-tt .tt-v span{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:400;color:var(--tm)}
+.chart-tt .tt-s{font-family:'Inter',sans-serif;font-size:.62rem;color:var(--tm);margin-top:3px}
+.dot-hit:hover ~ circle{r:5}
 </style>
 </head>
 <body>
@@ -322,6 +333,8 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <!-- Selector mes -->
   <div class="sl">Mes</div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px" id="mes-sel"></div>
+  <!-- TARJETA CIERRE DE MES -->
+  <div id="cierre-mes" style="display:none;border:1px solid var(--b1);border-radius:12px;padding:20px;margin-bottom:18px;background:var(--s2)"></div>
   <!-- CHART 1: eficiencia diaria -->
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
@@ -483,6 +496,12 @@ const S={turno:'t1',turnoHist:'t1',fecha:hoy(),cfg:{},objDia:{},feriados:[],obje
 function hoy(){return new Date().toLocaleDateString('en-CA',{timeZone:'America/Lima'});}
 function tipoDia(f){if(S.feriados.some(x=>x.fecha===f))return 'feriado';const d=new Date(f+'T12:00:00').getDay();return(d===0||d===6)?'finde':'semana';}
 function fmt(n,d=1){if(n==null||isNaN(n))return '—';return Number(n).toFixed(d);}
+/* Eficiencia: SIEMPRE 2 decimales */
+function fmtE(n){if(n==null||isNaN(n)||n===0)return '—';return Number(n).toFixed(2);}
+/* Fecha local YYYY-MM-DD sin depender de zona horaria */
+function fechaStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DNL=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 function fmtI(n){if(n==null||isNaN(n))return '—';if(n===0)return '0';return Math.round(n).toLocaleString('es-PE');}
 function loading(on){const l=$('loader');if(l)l.classList.toggle('show',on);}
 function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.className='toast show '+(t==='ok'?'ok-t':'err-t');setTimeout(()=>e.classList.remove('show'),2800);}
@@ -569,7 +588,7 @@ function recalc(){
     else if(c.gap>0){gEl.textContent='−'+fmt(c.gap,1)+'h';gEl.style.color='var(--red)';lEl.textContent='Déficit';}
     else{gEl.textContent='+'+fmt(-c.gap,1)+'h';gEl.style.color='var(--ok)';lEl.textContent='Superávit';}
     $('ter-'+tr).textContent=c.folios>0?c.terceros:'—';
-    $('ef-res-'+tr).textContent=c.efic>0?fmt(c.efic)+' fol/h':'—';
+    $('ef-res-'+tr).textContent=c.efic>0?fmtE(c.efic)+' fol/h':'—';
     $('cap-'+tr).textContent=c.cap>0?fmtI(c.cap)+' fol':'—';
   });
 
@@ -578,7 +597,7 @@ function recalc(){
   const efGen=hhTot>0?folTot/hhTot:0;
   const objGen=num('obj-gen');
   const el=$('res-ef-gen');
-  el.textContent=efGen>0?fmt(efGen):'—';
+  el.textContent=efGen>0?fmtE(efGen):'—';
   el.style.color=efGen===0?'var(--tm)':efGen>=objGen?'var(--ok)':'var(--red)';
   $('res-ef-sub').textContent=folTot>0?`${fmtI(folTot)} fol ÷ ${fmt(hhTot,1)}h`:'—';
   $('res-fol-tot').textContent=fmtI(folTot);
@@ -591,12 +610,12 @@ function recalc(){
     ico.textContent='—';txt.textContent='Ingresa los datos para calcular';sub.textContent='—';
   } else if(efGen>=objGen){
     vd.style.background='rgba(0,200,150,.07)';vd.style.borderColor='rgba(0,200,150,.25)';
-    ico.textContent='✅';txt.textContent=`Cumple el objetivo diario de ${fmt(objGen)} fol/h`;
-    sub.textContent=`Margen de +${fmt(efGen-objGen)} fol/h con ${terTot} terceros`;
+    ico.textContent='✅';txt.textContent=`Cumple el objetivo diario de ${fmtE(objGen)} fol/h`;
+    sub.textContent=`Margen de +${fmtE(efGen-objGen)} fol/h con ${terTot} terceros`;
   } else {
     const falta=objGen>0?(folTot/objGen)-hhTot:0;
     vd.style.background='rgba(255,77,109,.07)';vd.style.borderColor='rgba(255,77,109,.25)';
-    ico.textContent='⚠️';txt.textContent=`No alcanza el objetivo de ${fmt(objGen)} fol/h`;
+    ico.textContent='⚠️';txt.textContent=`No alcanza el objetivo de ${fmtE(objGen)} fol/h`;
     sub.textContent=falta<0?`Sobran ${fmt(-falta,1)}h — reduce personal`:`Necesitas ${fmt(Math.abs(hhTot-(folTot/objGen)),1)}h menos o más despachos`;
   }
 
@@ -611,7 +630,7 @@ function recalc(){
   const apEl=$('res-aporte');
   if(folTot>0&&aH>0){
     const dif=efDesp-efAntes;
-    apEl.textContent=(dif>=0?'+':'')+fmt(dif,2)+` → ${fmt(efDesp)}`;
+    apEl.textContent=(dif>=0?'+':'')+fmt(dif,2)+` → ${fmtE(efDesp)}`;
     apEl.style.color=dif>=0?'var(--ok)':'var(--red)';
   } else {apEl.textContent='—';apEl.style.color='var(--tx)';}
 
@@ -650,7 +669,7 @@ async function cargarProyFecha(){
       if(data.jornada_tercero)$('jor-ter').value=data.jornada_tercero;
       if(data.folios_t3_proy)$('fol-t3').value=Math.round(data.folios_t3_proy);
       if(data.folios_t1_proy)$('fol-t1').value=Math.round(data.folios_t1_proy);
-      if(data.efic_esp_t3)$('obj-t3').value=fmt(data.efic_esp_t3);
+      if(data.efic_esp_t3)$('obj-t3').value=fmtE(data.efic_esp_t3);
     } else {
       $('plan-t3').value=0;$('plan-t1').value=0;
     }
@@ -659,14 +678,13 @@ async function cargarProyFecha(){
 function aplicarPrediccion(){
   const td=tipoDia(S.fecha);
   const dObj=new Date(S.fecha+'T12:00:00');
-  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  $('hoy-fecha').textContent=`${dias[dObj.getDay()]}, ${dObj.toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'})}`;
+  $('hoy-fecha').textContent=`${DNL[dObj.getDay()]}, ${dObj.toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'})}`;
   $('hoy-tipo').textContent=`${td==='feriado'?'🔴 Feriado':td==='finde'?'Fin de semana':'Semana'} · Lima · 24/7`;
   // Objetivos por defecto según tipo de día
   const c3=cfgOf(td,'t3'), c1=cfgOf(td,'t1');
-  if(!S.proy){$('obj-t3').value=fmt(c3.productividad);$('obj-t1').value=fmt(c1.productividad);}
-  else{$('obj-t3').value=fmt(S.proy.efic_esp_t3||c3.productividad);$('obj-t1').value=fmt(S.proy.efic_esp_t1||c1.productividad);}
-  $('obj-gen').value=fmt(S.objDia[td]||20);
+  if(!S.proy){$('obj-t3').value=fmtE(c3.productividad);$('obj-t1').value=fmtE(c1.productividad);}
+  else{$('obj-t3').value=fmtE(S.proy.efic_esp_t3||c3.productividad);$('obj-t1').value=fmtE(S.proy.efic_esp_t1||c1.productividad);}
+  $('obj-gen').value=fmtE(S.objDia[td]||20);
   $('jor-ter').value=fmt(S.proy?.jornada_tercero||c3.jornada_tercero||8,2);
   // Predicción
   const p=predecir(S.fecha);
@@ -729,11 +747,11 @@ function updateManualPreview(){
   ['t3','t1'].forEach(t=>{
     const f=num('m-f'+t),hp=num('m-hp'+t),ht=num('m-ht'+t),hc=num('m-hc'+t);
     const hef=hp+ht,htot=hp+ht+hc;
-    $('prev-f'+t).textContent=hef>0?fmt(f/hef)+' fol/h':'—';
-    $('prev-c'+t).textContent=htot>0?fmt(f/htot)+' fol/h':'—';
+    $('prev-f'+t).textContent=hef>0?fmtE(f/hef)+' fol/h':'—';
+    $('prev-c'+t).textContent=htot>0?fmtE(f/htot)+' fol/h':'—';
     tf+=f;th+=hef;
   });
-  $('prev-fgen').textContent=th>0?fmt(tf/th)+' fol/h':'—';
+  $('prev-fgen').textContent=th>0?fmtE(tf/th)+' fol/h':'—';
 }
 async function cargarManualFecha(){
   const f=$('manual-fecha').value;if(!f)return;
@@ -1046,13 +1064,14 @@ function renderHist(){
   const f1=sum('folios_t1'),h1=sum('hp_t1')+sum('ht_t1');
   const f3=sum('folios_t3'),h3=sum('hp_t3')+sum('ht_t3');
   const td='semana';
-  $('hkpi-t1').textContent=h1>0?fmt(f1/h1):'—';
-  $('hkpi-t1-s').textContent=`target ${fmt(cfgOf(td,'t1').productividad,0)}`;
-  $('hkpi-t3').textContent=h3>0?fmt(f3/h3):'—';
-  $('hkpi-t3-s').textContent=`target ${fmt(cfgOf(td,'t3').productividad,0)}`;
+  $('hkpi-t1').textContent=h1>0?fmtE(f1/h1):'—';
+  $('hkpi-t1-s').textContent=`target ${fmtE(cfgOf(td,'t1').productividad)}`;
+  $('hkpi-t3').textContent=h3>0?fmtE(f3/h3):'—';
+  $('hkpi-t3-s').textContent=`target ${fmtE(cfgOf(td,'t3').productividad)}`;
   $('hkpi-fol').textContent=fmtI(f1+f3);
   const prec=precisionModelo();
   $('hkpi-ml').textContent=prec!=null?fmt(prec)+'%':'—';
+  renderCierreMes();
   // Leyendas
   const legs=[];
   if(t==='t3'||t==='all')legs.push(`<span><span style="width:8px;height:8px;border-radius:2px;background:var(--t3);display:inline-block;margin-right:4px"></span>T3 Día</span>`);
@@ -1064,27 +1083,74 @@ function renderHist(){
   drawAcumDiaria();
   renderHistRows();
 }
-function svgBase(W,H,M,maxY,data,extra){
+function svgBase(W,H,M,maxY,data){
   const w=W-M.l-M.r,h=H-M.t-M.b,n=data.length;
   let s='';
-  for(let i=0;i<=3;i++){const y=M.t+(h*i/3),v=maxY*(1-i/3);
-    s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#1e1e32"/><text x="${M.l-5}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${v.toFixed(0)}</text>`;}
-  data.forEach((d,i)=>{if(n<=1||i%Math.ceil(n/6)===0||i===n-1){
+  for(let i=0;i<=4;i++){const y=M.t+(h*i/4),v=maxY*(1-i/4);
+    s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#1e1e32"${i===4?'':' stroke-dasharray="2,4"'}/>`;
+    s+=`<text x="${M.l-5}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${v.toFixed(1)}</text>`;}
+  data.forEach((d,i)=>{if(n<=1||i%Math.ceil(n/8)===0||i===n-1){
     const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;
-    s+=`<text x="${x.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${new Date(d.fecha+'T12:00:00').getDate()}</text>`;}});
+    s+=`<text x="${x.toFixed(1)}" y="${M.t+h+15}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${new Date(d.fecha+'T12:00:00').getDate()}</text>`;}});
   return s;
 }
-function linePath(vals,W,H,M,maxY,color,dots){
+/* Línea con puntos interactivos: hover en desktop, tap en móvil */
+function linePath(vals,W,H,M,maxY,color,opts){
+  opts=opts||{};
   const w=W-M.l-M.r,h=H-M.t-M.b,n=vals.length;
   let pts=[];
-  vals.forEach((v,i)=>{if(v!=null&&!isNaN(v)){const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;const y=M.t+h-(h*v/maxY);pts.push({x,y});}});
+  vals.forEach((v,i)=>{if(v!=null&&!isNaN(v)){
+    const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;
+    pts.push({x,y:M.t+h-(h*v/maxY),v,i});}});
   if(!pts.length)return '';
-  let p='';pts.forEach((q,i)=>{p+=(i===0?'M ':' L ')+q.x.toFixed(1)+' '+q.y.toFixed(1);});
+  let p='';pts.forEach((q,k)=>{p+=(k===0?'M ':' L ')+q.x.toFixed(1)+' '+q.y.toFixed(1);});
   let s=`<path d="${p}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
-  if(dots)pts.forEach(q=>{s+=`<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="2.5" fill="#07070f" stroke="${color}" stroke-width="1.5"/>`;});
-  else{const l=pts[pts.length-1];s+=`<circle cx="${l.x.toFixed(1)}" cy="${l.y.toFixed(1)}" r="3.5" fill="#07070f" stroke="${color}" stroke-width="2"/>`;}
+  const fechas=opts.fechas||[];
+  pts.forEach(q=>{
+    const f=fechas[q.i]||'';
+    let lbl='';
+    if(f){const d=new Date(f+'T12:00:00');lbl=DN[d.getDay()]+' '+d.getDate()+' '+d.toLocaleDateString('es-PE',{month:'short'});}
+    s+=`<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="10" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${lbl}" data-v="${fmtE(q.v)}" data-s="${opts.serie||''}" data-c="${color}"/>`;
+    s+=`<circle cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="3.2" fill="#0c0c18" stroke="${color}" stroke-width="1.8" pointer-events="none"/>`;
+  });
+  const l=pts[pts.length-1];
+  s+=`<circle cx="${l.x.toFixed(1)}" cy="${l.y.toFixed(1)}" r="4.5" fill="${color}" pointer-events="none"/>`;
+  if(opts.labelLast!==false)
+    s+=`<text x="${l.x.toFixed(1)}" y="${(l.y-10).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-size="9.5" font-weight="700" fill="${color}" pointer-events="none">${fmtE(l.v)}</text>`;
   return s;
 }
+/* ── Tooltip de gráficos ── */
+let _TT=null;
+function ttEl(){
+  if(_TT)return _TT;
+  _TT=document.createElement('div');
+  _TT.className='chart-tt';
+  document.body.appendChild(_TT);
+  return _TT;
+}
+function ttHide(){if(_TT)_TT.style.opacity='0';}
+function bindDots(wrapId){
+  const w=$(wrapId);if(!w)return;
+  w.querySelectorAll('.dot-hit').forEach(el=>{
+    const show=ev=>{
+      const t=ttEl();
+      t.innerHTML=`<div class="tt-d">${el.dataset.d||''}</div>`+
+        `<div class="tt-v" style="color:${el.dataset.c}">${el.dataset.v} <span>fol/h</span></div>`+
+        (el.dataset.s?`<div class="tt-s">${el.dataset.s}</div>`:'');
+      t.style.opacity='1';
+      const r=el.getBoundingClientRect(), tr=t.getBoundingClientRect();
+      t.style.left=Math.max(8,Math.min(window.innerWidth-tr.width-8,r.left+r.width/2-tr.width/2))+'px';
+      t.style.top=Math.max(8,r.top-tr.height-8)+'px';
+      if(ev.type!=='mouseenter')ev.stopPropagation();
+    };
+    el.addEventListener('mouseenter',show);
+    el.addEventListener('mouseleave',ttHide);
+    el.addEventListener('touchstart',show,{passive:true});
+    el.addEventListener('click',show);
+  });
+}
+document.addEventListener('click',e=>{if(!e.target.classList||!e.target.classList.contains('dot-hit'))ttHide();});
+window.addEventListener('scroll',ttHide,{passive:true});
 function drawDiaria(){
   const wrap=$('wrap-diaria'),t=S.turnoHist,data=S.histMes;
   if(!data.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';return;}
@@ -1103,10 +1169,11 @@ function drawDiaria(){
   s+=svgBase(W,H,M,maxY,data);
   if(t==='t3'||t==='all'){const y=M.t+h-(h*tgt3/maxY);s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#00c896" stroke-dasharray="3,3" opacity=".3"/>`;}
   if(t==='t1'||t==='all'){const y=M.t+h-(h*tgt1/maxY);s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#7c6fff" stroke-dasharray="3,3" opacity=".3"/>`;}
-  if(t==='t3'||t==='all')s+=linePath(v3,W,H,M,maxY,'#00c896',true);
-  if(t==='t1'||t==='all')s+=linePath(v1,W,H,M,maxY,'#7c6fff',true);
-  if(t==='all')s+=linePath(vg,W,H,M,maxY,'#e2e2f0',true);
-  s+='</svg>';wrap.innerHTML=s;
+  const fs=data.map(d=>d.fecha);
+  if(t==='t3'||t==='all')s+=linePath(v3,W,H,M,maxY,'#00c896',{fechas:fs,serie:'T3 Día · diaria',labelLast:t==='t3'});
+  if(t==='t1'||t==='all')s+=linePath(v1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · diaria',labelLast:t==='t1'});
+  if(t==='all')s+=linePath(vg,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · diaria'});
+  s+='</svg>';wrap.innerHTML=s;bindDots('wrap-diaria');
 }
 function drawAcumDiaria(){
   const wrap=$('wrap-acumd'),t=S.turnoHist,data=S.histMes;
@@ -1130,15 +1197,15 @@ function drawAcumDiaria(){
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=svgBase(W,H,M,maxY,data);
   if(t==='all'){const y=M.t+h-(h*objM/maxY);s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#ff9500" stroke-dasharray="4,3" opacity=".5"/><text x="${M.l+w+2}" y="${y+3}" font-family="JetBrains Mono" font-size="7" fill="#ff9500">obj</text>`;}
-  if(t==='t3'||t==='all')s+=linePath(a3,W,H,M,maxY,'#00c896',false);
-  if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',false);
-  if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',false);
-  s+='</svg>';wrap.innerHTML=s;
+  const fs=data.map(d=>d.fecha);
+  if(t==='t3'||t==='all')s+=linePath(a3,W,H,M,maxY,'#00c896',{fechas:fs,serie:'T3 Día · acumulada',labelLast:t==='t3'});
+  if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · acumulada',labelLast:t==='t1'});
+  if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · acumulada'});
+  s+='</svg>';wrap.innerHTML=s;bindDots('wrap-acumd');
 }
 function renderHistRows(){
   const c=$('hist-rows');
   if(!S.histMes.length){c.innerHTML='<div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos en este mes</div>';return;}
-  const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   c.innerHTML='';
   S.histMes.forEach(d=>{
     const td=tipoDia(d.fecha), dObj=new Date(d.fecha+'T12:00:00');
@@ -1148,30 +1215,30 @@ function renderHistRows(){
     const hef3=(+d.hp_t3||0)+(+d.ht_t3||0), hef1=(+d.hp_t1||0)+(+d.ht_t1||0);
     const div=document.createElement('div');
     div.innerHTML=`<div onclick="toggleHist('${id}')" style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr 36px;align-items:center;padding:11px 12px;cursor:pointer;border-bottom:1px solid var(--b1)${esHoy?';background:rgba(124,111,255,.05)':''}">
-      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600${esHoy?';color:var(--t1)':''}">${dias[dObj.getDay()]} ${dObj.getDate()}</div><div style="font-size:.6rem;color:${td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--tm)'}">${td==='feriado'?'Feriado':td==='finde'?'Finde':'Semana'}</div></div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600${esHoy?';color:var(--t1)':''}">${DN[dObj.getDay()]} ${dObj.getDate()}</div><div style="font-size:.6rem;color:${td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--tm)'}">${td==='feriado'?'Feriado':td==='finde'?'Finde':'Semana'}</div></div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)">${fmtI(d.folios_t3)}</div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)">${fmtI(d.folios_t1)}</div>
-      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t3)">${e3!=null?fmt(e3):'—'}</div>
-      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t1)">${e1!=null?fmt(e1):'—'}</div>
-      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;color:var(--tx)">${eg!=null?fmt(eg):'—'}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t3)">${e3!=null?fmtE(e3):'—'}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t1)">${e1!=null?fmtE(e1):'—'}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;color:var(--tx)">${eg!=null?fmtE(eg):'—'}</div>
       <div style="text-align:right;color:var(--ts);font-size:.75rem" id="chev-${id}">▾</div>
     </div>
     <div id="exp-${id}" style="display:none;border-bottom:1px solid var(--b1);padding:14px 12px;background:var(--s3)">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;font-size:.68rem">
         <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--b1)">T3 Día · real</div>
           ${['Despachos|'+fmtI(d.folios_t3),'HH planilla|'+fmt(d.hp_t3,2)+'h','HH terceros|'+fmt(d.ht_t3,2)+'h','HH capacit.|'+fmt(d.hc_t3,2)+'h','HH efectivas|'+fmt(hef3,2)+'h'].map(x=>{const[a,b]=x.split('|');return `<div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>${a}</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${b}</strong></div>`;}).join('')}
-          <div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t3)">${e3!=null?fmt(e3):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t3)">${e3!=null?fmtE(e3):'—'}</strong></div>
         </div>
         <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--b1)">T1 Noche · real</div>
           ${['Despachos|'+fmtI(d.folios_t1),'HH planilla|'+fmt(d.hp_t1,2)+'h','HH terceros|'+fmt(d.ht_t1,2)+'h','HH capacit.|'+fmt(d.hc_t1,2)+'h','HH efectivas|'+fmt(hef1,2)+'h'].map(x=>{const[a,b]=x.split('|');return `<div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>${a}</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${b}</strong></div>`;}).join('')}
-          <div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t1)">${e1!=null?fmt(e1):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t1)">${e1!=null?fmtE(e1):'—'}</strong></div>
         </div>
         <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--b1)">Proyección vs real</div>
           <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Modelo T3</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft3):'—'}</strong></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Modelo T1</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft1):'—'}</strong></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Real total</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmtI((+d.folios_t3||0)+(+d.folios_t1||0))}</strong></div>
           ${p?(()=>{const pt=p.ft3+p.ft1,rt=(+d.folios_t3||0)+(+d.folios_t1||0);const dv=pt>0?((rt-pt)/pt*100):0;return `<div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Desviación</span><strong style="font-family:'JetBrains Mono',monospace;color:${Math.abs(dv)<10?'var(--ok)':'var(--red)'}">${dv>=0?'+':''}${fmt(dv)}%</strong></div>`;})():''}
-          <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--tm)"><span>Efic. general</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${eg!=null?fmt(eg):'—'}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--tm)"><span>Efic. general</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${eg!=null?fmtE(eg):'—'}</strong></div>
         </div>
       </div>
     </div>`;
@@ -1184,6 +1251,58 @@ function toggleHist(id){
   const open=e.style.display==='none';
   e.style.display=open?'block':'none';
   if(ch)ch.style.transform=open?'rotate(180deg)':'';
+}
+
+/* ── Tarjeta: cómo cerró el mes (acumulado general) ── */
+function renderCierreMes(){
+  const box=$('cierre-mes'); if(!box) return;
+  const d=S.histMes;
+  if(!d.length){box.style.display='none';return;}
+  box.style.display='block';
+  const tF=d.reduce((s,x)=>s+(+x.folios_t3||0)+(+x.folios_t1||0),0);
+  const tH=d.reduce((s,x)=>s+(+x.hp_t3||0)+(+x.hp_t1||0)+(+x.ht_t3||0)+(+x.ht_t1||0),0);
+  const tHC=d.reduce((s,x)=>s+(+x.hc_t3||0)+(+x.hc_t1||0),0);
+  const ef=tH>0?tF/tH:0;
+  const efT=(tH+tHC)>0?tF/(tH+tHC):0;
+  const {a,m}=S.mesActivo||{};
+  const obj=objMes(a,m);
+  // ¿mes cerrado o en curso?
+  const hoyF=hoy();
+  const ultimoDia=fechaStr(new Date(a,m,0));
+  const enCurso=hoyF<=ultimoDia && hoyF>=`${a}-${String(m).padStart(2,'0')}-01`;
+  const cumple=ef>=obj;
+  const nm=new Date(a,m-1,1).toLocaleDateString('es-PE',{month:'long',year:'numeric'});
+  const col=ef===0?'var(--tm)':cumple?'var(--ok)':'var(--red)';
+  const bg=ef===0?'var(--s2)':cumple?'rgba(0,200,150,.07)':'rgba(255,77,109,.06)';
+  const bd=ef===0?'var(--b1)':cumple?'rgba(0,200,150,.25)':'rgba(255,77,109,.22)';
+  const estado=ef===0?'Sin datos':enCurso?'En curso':cumple?'Objetivo cumplido':'Bajo el objetivo';
+  const ico=ef===0?'📊':enCurso?'⏳':cumple?'✅':'❌';
+  box.style.background=bg; box.style.borderColor=bd;
+  box.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:190px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;color:var(--ts);margin-bottom:8px">Acumulado general · ${nm}</div>
+        <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+          <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:3rem;line-height:1;letter-spacing:-.04em;color:${col}">${fmtE(ef)}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--tm)">fol/h</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <span style="font-size:1.1rem">${ico}</span>
+          <span style="font-size:.8rem;font-weight:600;color:${col}">${estado}</span>
+          ${ef>0?`<span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm)">objetivo ${fmtE(obj)} · ${ef>=obj?'+':''}${fmtE(ef-obj)}</span>`:''}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,auto);gap:10px 20px;font-family:'JetBrains Mono',monospace;font-size:.7rem">
+        <div><div style="color:var(--ts);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px">Despachos</div><div style="color:var(--tx);font-weight:700;font-size:.9rem">${fmtI(tF)}</div></div>
+        <div><div style="color:var(--ts);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px">HH efectivas</div><div style="color:var(--tx);font-weight:700;font-size:.9rem">${fmt(tH,1)}h</div></div>
+        <div><div style="color:var(--ts);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px">HH capacit.</div><div style="color:var(--tm);font-weight:700;font-size:.9rem">${fmt(tHC,1)}h</div></div>
+        <div><div style="color:var(--ts);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px">Efic. c/capacit.</div><div style="color:var(--tm);font-weight:700;font-size:.9rem">${fmtE(efT)}</div></div>
+      </div>
+    </div>
+    <div style="margin-top:14px">
+      <div style="height:6px;background:var(--b1);border-radius:3px;overflow:hidden"><div style="height:100%;border-radius:3px;background:${cumple?'linear-gradient(90deg,var(--t1),var(--ok))':'linear-gradient(90deg,var(--ora),var(--red))'};width:${obj>0?Math.min(100,ef/obj*100):0}%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts)"><span>0</span><span>${obj>0?fmt(Math.min(100,ef/obj*100),1):'0'}% del objetivo</span><span>${fmtE(obj)}</span></div>
+    </div>`;
 }
 
 /* ═══ MES ═══ */
@@ -1200,24 +1319,24 @@ function renderMes(){
   const pre=`${a}-${String(m).padStart(2,'0')}`;
   $('mes-titulo').textContent=n.toLocaleDateString('es-PE',{month:'long',year:'numeric'});
   const obj=objMes(a,m);
-  $('mes-obj').textContent=fmt(obj);
+  $('mes-obj').textContent=fmtE(obj);
   const dm=S.dias.filter(d=>d.fecha.startsWith(pre)).sort((x,y)=>x.fecha.localeCompare(y.fecha));
   const tF=dm.reduce((s,d)=>s+(+d.folios_t3||0)+(+d.folios_t1||0),0);
   const tH=dm.reduce((s,d)=>s+(+d.hp_t3||0)+(+d.hp_t1||0)+(+d.ht_t3||0)+(+d.ht_t1||0),0);
   const efAc=tH>0?tF/tH:0;
   const eAc=$('mes-efic-acum');
-  eAc.textContent=efAc>0?fmt(efAc):'—';
+  eAc.textContent=efAc>0?fmtE(efAc):'—';
   eAc.className='kpi-v '+(efAc===0?'n':efAc>=obj?'ok':'w');
-  $('mes-efic-sub').textContent=tH>0?`${fmtI(tF)} fol ÷ ${fmt(tH,0)}h · ${dm.length}d`:'sin datos';
+  $('mes-efic-sub').textContent=tH>0?`${fmtI(tF)} fol ÷ ${fmt(tH,1)}h · ${dm.length}d`:'sin datos';
   const pct=obj>0&&efAc>0?Math.min(100,(efAc/obj)*100):0;
   $('mes-avance-pct').textContent=fmt(pct,1)+'%';
   $('mes-prog-bar').style.width=pct+'%';
   // Días restantes
-  const ultimo=new Date(a,m,0);
+  const totalDias=new Date(a,m,0).getDate();
   const rest=[];
-  const start=new Date(hoy()+'T12:00:00');
-  for(let d=new Date(start);d<=ultimo;d.setDate(d.getDate()+1)){
-    const f=d.toLocaleDateString('en-CA');
+  const hoyD=+hoy().slice(8,10);
+  for(let dia=hoyD;dia<=totalDias;dia++){
+    const f=`${a}-${String(m).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
     if(!dm.some(x=>x.fecha===f&&((+x.folios_t3||0)+(+x.folios_t1||0))>0))rest.push(f);
   }
   // Proyección de cierre
@@ -1231,7 +1350,7 @@ function renderMes(){
   });
   const efProy=(tH+pH)>0?(tF+pF)/(tH+pH):0;
   const eP=$('mes-efic-proy');
-  eP.textContent=efProy>0?fmt(efProy):'—';
+  eP.textContent=efProy>0?fmtE(efProy):'—';
   eP.className='kpi-v '+(efProy===0?'n':efProy>=obj?'ok':'b');
   drawCurvaMes(dm,obj);
   // Veredicto
@@ -1244,8 +1363,8 @@ function renderMes(){
     vd.style.background=ok?'rgba(0,200,150,.07)':'rgba(255,77,109,.07)';
     vd.style.borderColor=ok?'rgba(0,200,150,.2)':'rgba(255,77,109,.2)';
     ico.textContent=ok?'✅':'❌';
-    vt.textContent=ok?`Mes cerrado en ${fmt(efAc)} fol/h — objetivo cumplido`:`Mes cerrado en ${fmt(efAc)} fol/h — bajo el objetivo de ${fmt(obj)}`;
-    vs.textContent=`Diferencia: ${efAc>=obj?'+':''}${fmt(efAc-obj)} fol/h`;
+    vt.textContent=ok?`Mes cerrado en ${fmtE(efAc)} fol/h — objetivo cumplido`:`Mes cerrado en ${fmtE(efAc)} fol/h — bajo el objetivo de ${fmtE(obj)}`;
+    vs.textContent=`Diferencia: ${efAc>=obj?'+':''}${fmtE(efAc-obj)} fol/h`;
   } else {
     const efNec=pH>0?((obj*(tH+pH))-tF)/pH:obj;
     const mejor=dm.map(d=>efDia(d,'all')).filter(Boolean);
@@ -1254,15 +1373,14 @@ function renderMes(){
     vd.style.background=viable?'rgba(255,149,0,.07)':'rgba(255,77,109,.07)';
     vd.style.borderColor=viable?'rgba(255,149,0,.2)':'rgba(255,77,109,.2)';
     ico.textContent=efNec<=efAc?'✅':viable?'⚠️':'❌';
-    vt.textContent=`Para cerrar en ${fmt(obj)} fol/h necesitas ${fmt(Math.max(0,efNec))} fol/h los próximos ${rest.length} días`;
-    vs.textContent=efNec<=efAc?`Vas por encima — mantén el ritmo actual de ${fmt(efAc)}`
-      :viable?`Tu mejor día fue ${fmt(max)} fol/h · alcanzable con esfuerzo`
-      :`Tu mejor día fue ${fmt(max)} fol/h · requiere rendimiento excepcional`;
+    vt.textContent=`Para cerrar en ${fmtE(obj)} fol/h necesitas ${fmtE(Math.max(0,efNec))} fol/h los próximos ${rest.length} días`;
+    vs.textContent=efNec<=efAc?`Vas por encima — mantén el ritmo actual de ${fmtE(efAc)}`
+      :viable?`Tu mejor día fue ${fmtE(max)} fol/h · alcanzable con esfuerzo`
+      :`Tu mejor día fue ${fmtE(max)} fol/h · requiere rendimiento excepcional`;
   }
   // Lista días
   const c=$('dias-restantes');c.innerHTML='';
   if(!rest.length){c.innerHTML='<div style="padding:20px;text-align:center;color:var(--ts);font-size:.78rem">Mes completo — todos los días registrados</div>';return;}
-  const dnames=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   rest.forEach(f=>{
     const td=tipoDia(f),p=predecir(f),d=new Date(f+'T12:00:00');
     const c3=cfgOf(td,'t3'),c1=cfgOf(td,'t1');
@@ -1272,7 +1390,7 @@ function renderMes(){
     const el=document.createElement('div');
     el.style.cssText='background:var(--s2);border:1px solid '+(td==='feriado'?'rgba(255,77,109,.2)':'var(--b1)')+';border-radius:8px;overflow:hidden';
     el.innerHTML=`<div onclick="toggleDr('${id}')" style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 14px;cursor:pointer">
-      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600">${dnames[d.getDay()]} ${d.getDate()} ${d.toLocaleDateString('es-PE',{month:'short'})}</div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600">${DN[d.getDay()]} ${d.getDate()} ${d.toLocaleDateString('es-PE',{month:'short'})}</div>
       <div style="font-size:.62rem;margin-top:2px;color:${td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--ts)'}">${td==='feriado'?'🔴 Feriado':td==='finde'?'Fin de semana':'Semana'}</div></div>
       <div style="text-align:right"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--t1)">${p?fmtI(p.ft3+p.ft1):'—'}</div><div style="font-size:.55rem;color:var(--ts);text-transform:uppercase;letter-spacing:.06em">despachos pred.</div></div>
       <div style="text-align:right;min-width:60px"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--tx)">${p?fmt(hh3+hh1,0)+'h':'—'}</div><div style="font-size:.55rem;color:var(--ts);text-transform:uppercase;letter-spacing:.06em">HH nec.</div></div>
@@ -1282,17 +1400,17 @@ function renderMes(){
         <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:6px"><span class="pill t3">T3 Día</span></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Despachos</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft3):'—'}</strong></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Rango ±</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--ts)">${p?fmtI(p.i3):'—'}</strong></div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Objetivo</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(c3.productividad,0)}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Objetivo</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmtE(c3.productividad)}</strong></div>
           <div style="display:flex;justify-content:space-between;color:var(--tm)"><span>HH nec.</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t3)">${fmt(hh3,1)}h</strong></div></div>
         <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:6px"><span class="pill t1">T1 Noche</span></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Despachos</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft1):'—'}</strong></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Rango ±</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--ts)">${p?fmtI(p.i1):'—'}</strong></div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Objetivo</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(c1.productividad,0)}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Objetivo</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmtE(c1.productividad)}</strong></div>
           <div style="display:flex;justify-content:space-between;color:var(--tm)"><span>HH nec.</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t1)">${fmt(hh1,1)}h</strong></div></div>
         <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:6px">General</div>
           <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Total desp.</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${p?fmtI(p.ft3+p.ft1):'—'}</strong></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Total HH</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmt(hh3+hh1,1)}h</strong></div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Obj. diario</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--ora)">${fmt(S.objDia[td]||20)}</strong></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>Obj. diario</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--ora)">${fmtE(S.objDia[td]||20)}</strong></div>
           <div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Confianza</span><strong style="font-family:'JetBrains Mono',monospace;color:${p&&p.conf>=75?'var(--ok)':'var(--ora)'}">${p?p.conf+'%':'—'}</strong></div></div>
       </div>
     </div>`;
@@ -1313,9 +1431,9 @@ function drawCurvaMes(dm,obj){
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=svgBase(W,H,M,maxY,dm);
   const yO=M.t+h-(h*obj/maxY);
-  s+=`<line x1="${M.l}" y1="${yO}" x2="${M.l+w}" y2="${yO}" stroke="#ff9500" stroke-dasharray="4,3" opacity=".6"/><text x="${M.l+w+2}" y="${yO+3}" font-family="JetBrains Mono" font-size="7" fill="#ff9500">${fmt(obj)}</text>`;
-  s+=linePath(pts,W,H,M,maxY,'#7c6fff',false);
-  s+='</svg>';wrap.innerHTML=s;
+  s+=`<line x1="${M.l}" y1="${yO}" x2="${M.l+w}" y2="${yO}" stroke="#ff9500" stroke-dasharray="4,3" opacity=".6"/><text x="${M.l+w+2}" y="${yO+3}" font-family="JetBrains Mono" font-size="7" fill="#ff9500">${fmtE(obj)}</text>`;
+  s+=linePath(pts,W,H,M,maxY,'#7c6fff',{fechas:dm.map(x=>x.fecha),serie:'Acumulada del mes'});
+  s+='</svg>';wrap.innerHTML=s;bindDots('wrap-acum');
 }
 
 /* ═══ AJUSTES ═══ */
@@ -1324,12 +1442,12 @@ function renderConfig(){
   const turnos=[['t3','T3 Día'],['t1','T1 Noche']];
   // Objetivo diario general
   $('cfg-obj-dia').innerHTML=tipos.map(([td,tl])=>
-    `<div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">${tl}</label><input type="number" id="objd-${td}" value="${fmt(S.objDia[td]||20)}" step="0.1" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--ora)"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">fol/h general</div></div>`).join('');
+    `<div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">${tl}</label><input type="number" id="objd-${td}" value="${fmtE(S.objDia[td]||20)}" step="0.1" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--ora)"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">fol/h general</div></div>`).join('');
   // Targets por turno
   let ht='',hj='';
   tipos.forEach(([td,tl])=>{turnos.forEach(([tr,trl])=>{
     const c=cfgOf(td,tr);
-    ht+=`<div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px"><span class="pill ${tr}">${trl}</span> ${tl}</label><input type="number" id="cp-${td}-${tr}" value="${fmt(c.productividad,1)}" step="0.1" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">fol/h</div></div>`;
+    ht+=`<div><label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px"><span class="pill ${tr}">${trl}</span> ${tl}</label><input type="number" id="cp-${td}-${tr}" value="${fmtE(c.productividad)}" step="0.1" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx)"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">fol/h</div></div>`;
   });});
   turnos.forEach(([tr,trl])=>{
     const c=cfgOf('semana',tr);
@@ -1346,7 +1464,7 @@ function renderConfig(){
 function cargarObjMes(){
   const v=$('aj-mes').value;if(!v)return;
   const[a,m]=v.split('-').map(Number);
-  $('aj-obj').value=fmt(objMes(a,m));
+  $('aj-obj').value=fmtE(objMes(a,m));
 }
 function renderFeriados(){
   const c=$('feriados-lista');if(!c)return;
