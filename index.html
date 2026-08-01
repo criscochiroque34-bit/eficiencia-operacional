@@ -109,6 +109,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <button class="sb-btn a" onclick="showView('hoy',this)"><span class="ico">📊</span>Proyección</button>
     <button class="sb-btn" onclick="showView('mes',this)"><span class="ico">📅</span>Cierre de mes</button>
     <button class="sb-btn" onclick="showView('hist',this)"><span class="ico">📈</span>Histórico</button>
+    <button class="sb-btn" onclick="showView('ml',this)"><span class="ico">🧠</span>Modelo ML</button>
     <div style="height:1px;background:var(--b1);margin:10px 0"></div>
     <div class="sb-sec">Gestión</div>
     <button class="sb-btn" onclick="showView('datos',this)"><span class="ico">⬆️</span>Ingresar datos</button>
@@ -333,6 +334,38 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <!-- Selector mes -->
   <div class="sl">Mes</div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px" id="mes-sel"></div>
+  <!-- TARJETA CIERRE DE MES -->
+  <div id="cierre-mes" style="display:none;border:1px solid var(--b1);border-radius:12px;padding:20px;margin-bottom:18px;background:var(--s2)"></div>
+  <!-- CHART 1: eficiencia diaria -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Eficiencia diaria</div><div style="font-size:.65rem;color:var(--tm)">Cada día independiente · folios ÷ horas del día</div></div>
+      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)" id="leg-diaria"></div>
+    </div>
+    <div id="wrap-diaria"><svg id="chart-diaria" viewBox="0 0 580 180" style="width:100%;height:auto;display:block"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Selecciona un mes</text></svg></div>
+  </div>
+  <!-- CHART 2: eficiencia acumulada diaria -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Eficiencia acumulada diaria</div><div style="font-size:.65rem;color:var(--tm)">Progresiva · Σfolios ÷ Σhoras hasta ese día</div></div>
+      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)" id="leg-acumd"></div>
+    </div>
+    <div id="wrap-acumd"><svg id="chart-acumd" viewBox="0 0 580 180" style="width:100%;height:auto;display:block"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Selecciona un mes</text></svg></div>
+  </div>
+  <!-- Tabla -->
+  <div class="sl">Detalle del mes · click para expandir</div>
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
+    <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr 36px;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);font-weight:500">
+      <div>Día</div><div style="text-align:right;padding-right:12px">Fol T3</div><div style="text-align:right;padding-right:12px">Fol T1</div><div style="text-align:right;padding-right:12px">Ef T3</div><div style="text-align:right;padding-right:12px">Ef T1</div><div style="text-align:right;padding-right:12px">Ef Gral</div><div></div>
+    </div>
+    <div id="hist-rows"><div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</div></div>
+  </div>
+</div>
+<!-- ══ MODELO ML ══ -->
+<div class="view" id="v-ml">
+  <div class="ph">
+    <div><div class="ph-title">Modelo ML</div><div class="ph-sub">Diagnóstico y precisión del motor predictivo</div></div>
+  </div>
   <!-- PANEL DIAGNÓSTICO DEL MODELO -->
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:18px;margin-bottom:18px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px">
@@ -387,32 +420,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     </div>
   </div>
 
-  <!-- TARJETA CIERRE DE MES -->
-  <div id="cierre-mes" style="display:none;border:1px solid var(--b1);border-radius:12px;padding:20px;margin-bottom:18px;background:var(--s2)"></div>
-  <!-- CHART 1: eficiencia diaria -->
-  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Eficiencia diaria</div><div style="font-size:.65rem;color:var(--tm)">Cada día independiente · folios ÷ horas del día</div></div>
-      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)" id="leg-diaria"></div>
-    </div>
-    <div id="wrap-diaria"><svg id="chart-diaria" viewBox="0 0 580 180" style="width:100%;height:auto;display:block"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Selecciona un mes</text></svg></div>
-  </div>
-  <!-- CHART 2: eficiencia acumulada diaria -->
-  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Eficiencia acumulada diaria</div><div style="font-size:.65rem;color:var(--tm)">Progresiva · Σfolios ÷ Σhoras hasta ese día</div></div>
-      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)" id="leg-acumd"></div>
-    </div>
-    <div id="wrap-acumd"><svg id="chart-acumd" viewBox="0 0 580 180" style="width:100%;height:auto;display:block"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Selecciona un mes</text></svg></div>
-  </div>
-  <!-- Tabla -->
-  <div class="sl">Detalle del mes · click para expandir</div>
-  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
-    <div style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr 36px;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);font-weight:500">
-      <div>Día</div><div style="text-align:right;padding-right:12px">Fol T3</div><div style="text-align:right;padding-right:12px">Fol T1</div><div style="text-align:right;padding-right:12px">Ef T3</div><div style="text-align:right;padding-right:12px">Ef T1</div><div style="text-align:right;padding-right:12px">Ef Gral</div><div></div>
-    </div>
-    <div id="hist-rows"><div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</div></div>
-  </div>
+
 </div>
 <!-- ══ DATOS ══ -->
 <div class="view" id="v-datos">
@@ -565,6 +573,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <button class="bn a" onclick="showView('hoy',this,true)"><span class="ico">📊</span>Proy.</button>
   <button class="bn" onclick="showView('mes',this,true)"><span class="ico">📅</span>Mes</button>
   <button class="bn" onclick="showView('hist',this,true)"><span class="ico">📈</span>Hist.</button>
+  <button class="bn" onclick="showView('ml',this,true)"><span class="ico">🧠</span>ML</button>
   <button class="bn" onclick="showView('datos',this,true)"><span class="ico">⬆️</span>Datos</button>
   <button class="bn" onclick="showView('ajust',this,true)"><span class="ico">⚙️</span>Ajustes</button>
 </nav>
@@ -1361,7 +1370,6 @@ function renderHist(){
   $('hkpi-fol').textContent=fmtI(f1+f3);
   const prec=precisionModelo();
   $('hkpi-ml').textContent=prec!=null?fmt(prec,1)+'%':'—';
-  renderDiagnostico();
   renderCierreMes();
   // Leyendas
   const legs=[];
@@ -2094,6 +2102,7 @@ function showView(id,btn,mobile){
   window.scrollTo(0,0);
   if(id==='mes')renderMes();
   if(id==='hist')renderHist();
+  if(id==='ml')renderDiagnostico();
 }
 document.addEventListener('DOMContentLoaded',()=>{
   $('proy-fecha').value=hoy();
