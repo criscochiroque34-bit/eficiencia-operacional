@@ -15,6 +15,19 @@ const MODEL = "gemini-3.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 export default async function handler(req, res) {
+  // Modo diagnóstico: abre esta URL directo en el navegador (sin pasar por
+  // el chat) para confirmar qué modelo y variables están activas AHORA MISMO
+  // en el servidor. Bórralo cuando ya no lo necesites.
+  if (req.method === "GET") {
+    res.status(200).json({
+      diagnostico: true,
+      modelo_configurado: MODEL,
+      tiene_api_key: !!process.env.GEMINI_API_KEY,
+      hora_servidor: new Date().toISOString(),
+    });
+    return;
+  }
+
   if (req.method !== "POST") {
     res.status(405).json({ error: "Método no permitido" });
     return;
