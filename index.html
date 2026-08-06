@@ -146,6 +146,11 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 .chat-clear:hover{color:var(--red);border-color:var(--red)}
 .chat-setup{background:rgba(255,149,0,.07);border:1px solid rgba(255,149,0,.22);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:.76rem;color:var(--tm);line-height:1.6}
 .chat-setup strong{color:var(--ora)}
+
+/* ── Badge de uso diario del Consultor ── */
+.chat-uso-badge{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:4px 9px;white-space:nowrap}
+.chat-uso-badge.warn{color:var(--ora);border-color:rgba(255,149,0,.3)}
+.chat-uso-badge.danger{color:var(--red);border-color:rgba(255,77,109,.3)}
 </style>
 </head>
 <body>
@@ -634,7 +639,10 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 <div class="view" id="v-consultor">
   <div class="ph">
     <div><div class="ph-title">Consultor</div><div class="ph-sub">Pregúntale a tu operación · basado en tus datos reales</div></div>
-    <button class="chat-clear" onclick="limpiarChat()">🗑 Limpiar conversación</button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="chat-uso-badge" class="chat-uso-badge"></span>
+      <button class="chat-clear" onclick="limpiarChat()">🗑 Limpiar conversación</button>
+    </div>
   </div>
 
   <div id="chat-setup-warn" style="display:none" class="chat-setup">
@@ -2204,6 +2212,8 @@ function iniciarApp(){
   $('manual-fecha').value=hoy();
   $('ev-desde').addEventListener('change',calcRangoInfo);
   $('ev-hasta').addEventListener('change',calcRangoInfo);
+  restaurarChat();
+  renderUsoBadge();
   cargarTodo();
 }
 document.addEventListener('DOMContentLoaded',()=>{
@@ -2251,8 +2261,39 @@ function checkGate(){
 /* ═══════════════════════════════════════════════════════════
    CONSULTOR — Chat con Claude usando datos reales de la app
    ═══════════════════════════════════════════════════════════ */
-const CHAT={historial:[],enviando:false};
+const CHAT={historial:[],enviando:false,log:[]};
 const CONSULTOR_ENDPOINT='/api/consultor';
+const USO_KEY='eo_chat_uso';
+const LOG_KEY='eo_chat_log';
+
+/* ── Contador de uso diario ──
+   Se alinea con la hora del Pacífico (EE.UU.) porque ahí es donde
+   Google resetea la cuota gratuita de Gemini, no con la hora de Lima. */
+function fechaPacifico(){
+  return new Date().toLocaleDateString('en-CA',{timeZone:'America/Los_Angeles'});
+}
+function leerUso(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(USO_KEY)||'null');
+    if(raw&&raw.fecha===fechaPacifico())return raw;
+  }catch(e){}
+  return{fecha:fechaPacifico(),count:0};
+}
+function registrarUso(){
+  const u=leerUso();
+  u.count++;
+  localStorage.setItem(USO_KEY,JSON.stringify(u));
+  renderUsoBadge();
+}
+function renderUsoBadge(){
+  const el=$('chat-uso-badge');
+  if(!el)return;
+  const u=leerUso();
+  el.textContent=`${u.count} consulta${u.count===1?'':'s'} hoy`;
+  el.classList.remove('warn','danger');
+  if(u.count>=25)el.classList.add('danger');
+  else if(u.count>=15)el.classList.add('warn');
+}
 
 function autoGrow(el){el.style.height='auto';el.style.height=Math.min(100,el.scrollHeight)+'px';}
 function onChatKey(e){
@@ -2266,23 +2307,184 @@ function preguntaRapida(btn){
 /* Arma el snapshot de datos reales que se envía junto a la pregunta.
    Claude SOLO puede razonar sobre estos números — no tiene acceso
    a Supabase ni puede inventar cifras fuera de este objeto. */
-function construirContexto(){
+/* ═══════════════════════════════════════════════════════════
+   CAPA DE CONTEXTO PARA EL CONSULTOR
+   
+   PRINCIPIO DE ARQUITECTURA:
+   Esta capa SOLO LEE los resultados que ya produjo el motor ML
+   (predecirCached, evaluarModelo, precisionPorMes). No calcula
+   predicciones propias ni altera el estado del modelo.
+   Si mañana se elimina el Consultor, el ML queda intacto.
+   
+   ESTRATEGIA DE TOKENS (contexto en capas):
+   1. Snapshot ejecutivo — siempre
+   2. Series agregadas — siempre (barato, alta densidad informativa)
+   3. Detalle reciente — últimos 60 días comprimidos
+   4. Detalle bajo demanda — si la pregunta menciona un mes concreto
+   ═══════════════════════════════════════════════════════════ */
+
+const MESES_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MESES_AB=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const r2=v=>v==null||isNaN(v)?null:Math.round(v*100)/100;
+const r1=v=>v==null||isNaN(v)?null:Math.round(v*10)/10;
+
+function diasDeMes(a,m){
+  const pre=`${a}-${String(m).padStart(2,'0')}`;
+  return S.dias.filter(d=>d.fecha.startsWith(pre)).sort((x,y)=>x.fecha.localeCompare(y.fecha));
+}
+function agregarDias(arr){
+  const f3=arr.reduce((s,d)=>s+(+d.folios_t3||0),0);
+  const f1=arr.reduce((s,d)=>s+(+d.folios_t1||0),0);
+  const hp3=arr.reduce((s,d)=>s+(+d.hp_t3||0),0);
+  const hp1=arr.reduce((s,d)=>s+(+d.hp_t1||0),0);
+  const ht3=arr.reduce((s,d)=>s+(+d.ht_t3||0),0);
+  const ht1=arr.reduce((s,d)=>s+(+d.ht_t1||0),0);
+  const hc3=arr.reduce((s,d)=>s+(+d.hc_t3||0),0);
+  const hc1=arr.reduce((s,d)=>s+(+d.hc_t1||0),0);
+  const he3=hp3+ht3, he1=hp1+ht1, heGen=he3+he1;
+  return{
+    dias:arr.length, folios_t3:f3, folios_t1:f1, folios_total:f3+f1,
+    hh_planilla_t3:r1(hp3), hh_planilla_t1:r1(hp1),
+    hh_terceros_t3:r1(ht3), hh_terceros_t1:r1(ht1),
+    hh_capacitacion_t3:r1(hc3), hh_capacitacion_t1:r1(hc1),
+    hh_efectivas_t3:r1(he3), hh_efectivas_t1:r1(he1), hh_efectivas_total:r1(heGen),
+    eficiencia_t3:he3>0?r2(f3/he3):null,
+    eficiencia_t1:he1>0?r2(f1/he1):null,
+    eficiencia_general:heGen>0?r2((f3+f1)/heGen):null,
+    eficiencia_general_con_capacitacion:(heGen+hc3+hc1)>0?r2((f3+f1)/(heGen+hc3+hc1)):null,
+  };
+}
+/* Serie mensual completa de todo el histórico disponible */
+function serieMensual(){
+  const meses=new Set(S.dias.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0).map(d=>d.fecha.slice(0,7)));
+  return [...meses].sort().map(ym=>{
+    const [a,m]=ym.split('-').map(Number);
+    const arr=diasDeMes(a,m).filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+    if(!arr.length)return null;
+    const ag=agregarDias(arr);
+    const obj=objMes(a,m);
+    const cerrado=ym<hoy().slice(0,7);
+    return{
+      periodo:ym, mes:MESES_ES[m-1], anio:a, estado:cerrado?'cerrado':'en_curso',
+      dias_registrados:ag.dias,
+      folios_t3:ag.folios_t3, folios_t1:ag.folios_t1, folios_total:ag.folios_total,
+      hh_efectivas:ag.hh_efectivas_total,
+      eficiencia_acumulada:ag.eficiencia_general,
+      eficiencia_t3:ag.eficiencia_t3, eficiencia_t1:ag.eficiencia_t1,
+      objetivo:obj,
+      cumplio_objetivo:ag.eficiencia_general!=null?ag.eficiencia_general>=obj:null,
+      diferencia_vs_objetivo:ag.eficiencia_general!=null?r2(ag.eficiencia_general-obj):null,
+    };
+  }).filter(Boolean);
+}
+/* Patrón por día de semana, separado por tipo de día */
+function patronPorDiaSemana(){
+  const dn=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const out={};
+  for(let dow=0;dow<7;dow++){
+    const arr=S.dias.filter(d=>{
+      if(((+d.folios_t3||0)+(+d.folios_t1||0))<=0)return false;
+      if(_idx.eventos.get(d.fecha))return false;
+      return new Date(d.fecha+'T12:00:00').getDay()===dow;
+    });
+    if(!arr.length)continue;
+    const ag=agregarDias(arr);
+    out[dn[dow]]={
+      dias_registrados:ag.dias,
+      folios_t3_promedio:Math.round(ag.folios_t3/ag.dias),
+      folios_t1_promedio:Math.round(ag.folios_t1/ag.dias),
+      eficiencia_promedio_t3:ag.eficiencia_t3,
+      eficiencia_promedio_t1:ag.eficiencia_t1,
+      eficiencia_promedio_general:ag.eficiencia_general,
+    };
+  }
+  return out;
+}
+/* Comparativa por tipo de día */
+function patronPorTipoDia(){
+  const out={};
+  ['semana','finde','feriado'].forEach(td=>{
+    const arr=S.dias.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0
+      &&!_idx.eventos.get(d.fecha)&&tipoDia(d.fecha)===td);
+    if(!arr.length)return;
+    const ag=agregarDias(arr);
+    out[td]={
+      dias_registrados:ag.dias,
+      folios_promedio_dia:Math.round(ag.folios_total/ag.dias),
+      folios_t3_promedio:Math.round(ag.folios_t3/ag.dias),
+      folios_t1_promedio:Math.round(ag.folios_t1/ag.dias),
+      eficiencia_t3:ag.eficiencia_t3, eficiencia_t1:ag.eficiencia_t1,
+      eficiencia_general:ag.eficiencia_general,
+      target_t3:cfgOf(td,'t3').productividad, target_t1:cfgOf(td,'t1').productividad,
+      objetivo_diario_general:S.objDia?.[td]??null,
+    };
+  });
+  return out;
+}
+/* Historial de eventos con su impacto medido vs. días normales */
+function impactoEventos(){
+  const grupos={};
+  S.eventos.forEach(e=>{
+    const k=normEvento(e.nombre);
+    (grupos[k]=grupos[k]||{nombre:e.nombre,fechas:[]}).fechas.push(e.fecha);
+  });
+  const baseNormal=patronPorTipoDia().semana?.folios_promedio_dia||null;
+  return Object.values(grupos).map(g=>{
+    const dias=g.fechas.map(f=>_idx.dias.get(f))
+      .filter(d=>d&&((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+    if(!dias.length)return{evento:g.nombre,fechas:g.fechas.sort(),dias_con_datos:0,nota:'aún sin despachos registrados'};
+    const ag=agregarDias(dias);
+    const promEvento=Math.round(ag.folios_total/ag.dias);
+    return{
+      evento:g.nombre,
+      fechas:g.fechas.sort(),
+      dias_con_datos:ag.dias,
+      folios_promedio_dia:promEvento,
+      folios_total:ag.folios_total,
+      eficiencia_general:ag.eficiencia_general,
+      veces_vs_dia_semana_normal:baseNormal?r2(promEvento/baseNormal):null,
+    };
+  });
+}
+/* Detalle día por día, formato comprimido (ahorra ~70% de tokens vs JSON completo) */
+function detalleComprimido(arr){
+  return{
+    formato:'fecha|tipo|folios_t3|folios_t1|hh_efec_t3|hh_efec_t1|efic_t3|efic_t1|efic_gral',
+    filas:arr.map(d=>{
+      const he3=(+d.hp_t3||0)+(+d.ht_t3||0), he1=(+d.hp_t1||0)+(+d.ht_t1||0);
+      const ev=_idx.eventos.get(d.fecha);
+      const td=ev?('EV:'+ev.nombre):tipoDia(d.fecha).slice(0,3);
+      const e3=he3>0?(+d.folios_t3||0)/he3:null;
+      const e1=he1>0?(+d.folios_t1||0)/he1:null;
+      const eg=(he3+he1)>0?((+d.folios_t3||0)+(+d.folios_t1||0))/(he3+he1):null;
+      return [d.fecha,td,+d.folios_t3||0,+d.folios_t1||0,r1(he3),r1(he1),r2(e3),r2(e1),r2(eg)].join('|');
+    })
+  };
+}
+/* Detecta si la pregunta menciona un mes concreto → capa 4 bajo demanda */
+function mesMencionado(texto){
+  if(!texto)return null;
+  const t=texto.toLowerCase();
+  for(let i=0;i<12;i++){
+    if(t.includes(MESES_ES[i].toLowerCase())){
+      const anioMatch=t.match(/20\d{2}/);
+      const a=anioMatch?+anioMatch[0]:new Date(hoy()+'T12:00:00').getFullYear();
+      return{anio:a,mes:i+1};
+    }
+  }
+  return null;
+}
+
+function construirContexto(preguntaActual){
   const hoyF=hoy();
   const n=new Date(hoyF+'T12:00:00');
   const a=n.getFullYear(), m=n.getMonth()+1;
-  const pre=`${a}-${String(m).padStart(2,'0')}`;
-  const dm=S.dias.filter(d=>d.fecha.startsWith(pre));
-
-  const sum3=dm.reduce((s,d)=>s+(+d.folios_t3||0),0);
-  const sum1=dm.reduce((s,d)=>s+(+d.folios_t1||0),0);
-  const hh3=dm.reduce((s,d)=>s+(+d.hp_t3||0)+(+d.ht_t3||0),0);
-  const hh1=dm.reduce((s,d)=>s+(+d.hp_t1||0)+(+d.ht_t1||0),0);
-  const ef3=hh3>0?sum3/hh3:null;
-  const ef1=hh1>0?sum1/hh1:null;
-  const efGen=(hh3+hh1)>0?(sum3+sum1)/(hh3+hh1):null;
+  const dm=diasDeMes(a,m);
+  const dmConDatos=dm.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+  const agMes=dmConDatos.length?agregarDias(dmConDatos):null;
   const objMesActual=objMes(a,m);
 
-  // Días restantes con predicción
+  /* ── Días restantes: SOLO lee predicciones del motor ML ── */
   const totalDias=new Date(a,m,0).getDate();
   const hoyD=+hoyF.slice(8,10);
   const diasRest=[];
@@ -2290,60 +2492,158 @@ function construirContexto(){
     const f=`${a}-${String(m).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
     if(!dm.some(x=>x.fecha===f&&((+x.folios_t3||0)+(+x.folios_t1||0))>0))diasRest.push(f);
   }
+  const detalleRest=[];
   let predFol3=0,predFol1=0,predHH3=0,predHH1=0;
   diasRest.forEach(f=>{
     const p=predecirCached(f); if(!p)return;
     const td=tipoDia(f);
     const o3=cfgOf(td,'t3').productividad, o1=cfgOf(td,'t1').productividad;
-    predFol3+=p.ft3; predFol1+=p.ft1;
-    predHH3+=o3>0?p.ft3/o3:0; predHH1+=o1>0?p.ft1/o1:0;
+    const hh3=o3>0?p.ft3/o3:0, hh1=o1>0?p.ft1/o1:0;
+    predFol3+=p.ft3; predFol1+=p.ft1; predHH3+=hh3; predHH1+=hh1;
+    const ev=_idx.eventos.get(f);
+    detalleRest.push({
+      fecha:f, dia_semana:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][new Date(f+'T12:00:00').getDay()],
+      tipo:ev?`evento: ${ev.nombre}`:td,
+      folios_t3_pred:p.ft3, folios_t1_pred:p.ft1,
+      hh_necesarias_t3:r1(hh3), hh_necesarias_t1:r1(hh1),
+      confianza:p.conf, base_prediccion:p.nivel,
+    });
   });
 
-  const ev=evaluarModelo({ventana:30});
-  const objDiaGen=S.objDia||{};
+  /* ── Predicción específica de HOY ── */
+  const predHoy=predecirCached(hoyF);
+  const tdHoy=tipoDia(hoyF);
+  const evHoy=_idx.eventos.get(hoyF);
+  const datoHoy=_idx.dias.get(hoyF);
+  const yaHayDatoHoy=datoHoy&&((+datoHoy.folios_t3||0)+(+datoHoy.folios_t1||0))>0;
+
+  /* ── Diagnóstico del ML (solo lectura) ── */
+  const ev30=evaluarModelo({ventana:30});
+  const tendML=precisionPorMes(6);
+
+  /* ── Capa 4: si preguntan por un mes concreto, incluir su detalle ── */
+  let detalleSolicitado=null;
+  const mm=mesMencionado(preguntaActual);
+  if(mm){
+    const arr=diasDeMes(mm.anio,mm.mes).filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+    if(arr.length){
+      detalleSolicitado={
+        periodo:`${MESES_ES[mm.mes-1]} ${mm.anio}`,
+        resumen:agregarDias(arr),
+        objetivo:objMes(mm.anio,mm.mes),
+        detalle_diario:detalleComprimido(arr)
+      };
+    }
+  }
+
+  /* ── Capa 3: últimos 60 días ── */
+  const ultimos60=S.dias.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0).slice(-60);
+
+  const primerDato=S.dias.find(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+  const ultimoDato=[...S.dias].reverse().find(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0);
 
   return {
+    _instrucciones_de_lectura:
+      'Todos los números aquí fueron calculados por el motor de la app (JavaScript), no por ti. Úsalos tal cual. '+
+      'Puedes sumar, restar y comparar entre ellos para responder, pero nunca inventes cifras que no aparezcan. '+
+      'Eficiencia = folios ÷ horas hombre efectivas (planilla + terceros, SIN capacitación). '+
+      'La eficiencia acumulada del mes NO es el promedio de las eficiencias diarias: es Σfolios ÷ Σhoras del período.',
+
     fecha_hoy: hoyF,
-    mes_actual: n.toLocaleDateString('es-PE',{month:'long',year:'numeric'}),
-    dias_transcurridos: dm.length,
-    dias_restantes_mes: diasRest.length,
-    objetivo_mensual_general: objMesActual,
-    objetivo_diario_por_tipo: objDiaGen,
-    target_turno: {
-      t3_semana: cfgOf('semana','t3').productividad,
-      t1_semana: cfgOf('semana','t1').productividad,
-      t3_finde: cfgOf('finde','t3').productividad,
-      t1_finde: cfgOf('finde','t1').productividad,
-      t3_feriado: cfgOf('feriado','t3').productividad,
-      t1_feriado: cfgOf('feriado','t1').productividad,
+    dia_semana_hoy: ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][n.getDay()],
+    mes_en_curso: `${MESES_ES[m-1]} ${a}`,
+
+    cobertura_datos: {
+      total_dias_registrados: S.dias.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0).length,
+      primer_dia: primerDato?primerDato.fecha:null,
+      ultimo_dia: ultimoDato?ultimoDato.fecha:null,
     },
-    acumulado_mes_actual: {
-      folios_t3: sum3, folios_t1: sum1,
-      horas_efectivas_t3: Math.round(hh3*10)/10, horas_efectivas_t1: Math.round(hh1*10)/10,
-      eficiencia_t3: ef3!=null?Math.round(ef3*100)/100:null,
-      eficiencia_t1: ef1!=null?Math.round(ef1*100)/100:null,
-      eficiencia_general: efGen!=null?Math.round(efGen*100)/100:null,
+
+    configuracion: {
+      objetivo_acumulado_mes_en_curso: objMesActual,
+      objetivo_diario_por_tipo_dia: S.objDia||{},
+      targets_productividad: {
+        semana:{t3:cfgOf('semana','t3').productividad, t1:cfgOf('semana','t1').productividad},
+        finde:{t3:cfgOf('finde','t3').productividad, t1:cfgOf('finde','t1').productividad},
+        feriado:{t3:cfgOf('feriado','t3').productividad, t1:cfgOf('feriado','t1').productividad},
+      },
+      jornadas_horas: {
+        planilla_t3:cfgOf('semana','t3').jornada_planilla,
+        planilla_t1:cfgOf('semana','t1').jornada_planilla,
+        tercero_t3:cfgOf('semana','t3').jornada_tercero,
+        tercero_t1:cfgOf('semana','t1').jornada_tercero,
+      },
+      significado_turnos:'T3 = turno día · T1 = turno noche',
     },
-    proyeccion_dias_restantes: {
-      folios_t3_predichos: Math.round(predFol3),
-      folios_t1_predichos: Math.round(predFol1),
-      horas_hombre_necesarias_t3: Math.round(predHH3*10)/10,
-      horas_hombre_necesarias_t1: Math.round(predHH1*10)/10,
+
+    mes_en_curso_detalle: agMes ? {
+      ...agMes,
+      objetivo: objMesActual,
+      diferencia_vs_objetivo: agMes.eficiencia_general!=null?r2(agMes.eficiencia_general-objMesActual):null,
+      cumple_objetivo_hasta_ahora: agMes.eficiencia_general!=null?agMes.eficiencia_general>=objMesActual:null,
+      dias_restantes: diasRest.length,
+    } : {nota:'aún sin despachos registrados este mes'},
+
+    hoy: {
+      tipo_dia: evHoy?`evento: ${evHoy.nombre}`:tdHoy,
+      ya_cerrado: !!yaHayDatoHoy,
+      real_si_ya_cerro: yaHayDatoHoy ? {
+        folios_t3:+datoHoy.folios_t3||0, folios_t1:+datoHoy.folios_t1||0,
+        hh_efectivas_t3:r1((+datoHoy.hp_t3||0)+(+datoHoy.ht_t3||0)),
+        hh_efectivas_t1:r1((+datoHoy.hp_t1||0)+(+datoHoy.ht_t1||0)),
+      } : null,
+      prediccion_si_no_cerro: (!yaHayDatoHoy&&predHoy) ? {
+        folios_t3:predHoy.ft3, folios_t1:predHoy.ft1, folios_total:predHoy.ft3+predHoy.ft1,
+        rango_t3:`±${predHoy.i3}`, rango_t1:`±${predHoy.i1}`,
+        confianza_pct:predHoy.conf, base:predHoy.nivel,
+      } : null,
     },
-    calidad_del_modelo: ev ? {
-      precision_wape: Math.round((ev.precisionW||0)*10)/10,
-      precision_mape: Math.round((ev.precision||0)*10)/10,
-      sesgo_pct: Math.round(ev.sesgo*100)/100,
-      supera_baseline: ev.skill!=null ? ev.skill>0 : null,
-      dias_evaluados: ev.n,
-      nota: ev.precisionW<70 ? 'Precisión por debajo de lo normal este período — las proyecciones son menos confiables' : 'Precisión dentro de rango normal'
-    } : { nota: 'Sin datos suficientes aún para evaluar la precisión del modelo' },
-    feriados_proximos: S.feriados.filter(f=>f.fecha>=hoyF).slice(0,5).map(f=>f.fecha),
-    eventos_proximos: S.eventos.filter(e=>e.fecha>=hoyF).slice(0,5).map(e=>`${e.fecha}: ${e.nombre}`),
+
+    proyeccion_resto_del_mes: {
+      dias:diasRest.length,
+      folios_t3_predichos:Math.round(predFol3),
+      folios_t1_predichos:Math.round(predFol1),
+      folios_total_predichos:Math.round(predFol3+predFol1),
+      hh_necesarias_t3:r1(predHH3), hh_necesarias_t1:r1(predHH1),
+      hh_necesarias_total:r1(predHH3+predHH1),
+      eficiencia_proyectada_cierre_mes: agMes && (agMes.hh_efectivas_total+predHH3+predHH1)>0
+        ? r2((agMes.folios_total+predFol3+predFol1)/(agMes.hh_efectivas_total+predHH3+predHH1)) : null,
+      detalle_por_dia: detalleRest,
+    },
+
+    serie_mensual_historica: serieMensual(),
+    patron_por_dia_semana: patronPorDiaSemana(),
+    patron_por_tipo_dia: patronPorTipoDia(),
+    eventos_registrados: impactoEventos(),
+    feriados: {
+      proximos: S.feriados.filter(f=>f.fecha>=hoyF).sort((x,y)=>x.fecha.localeCompare(y.fecha)).slice(0,8).map(f=>`${f.fecha}${f.descripcion?' — '+f.descripcion:''}`),
+      total_registrados: S.feriados.length,
+    },
+
+    calidad_del_modelo_ml: ev30 ? {
+      _nota:'Métricas calculadas por el motor ML de la app mediante backtesting walk-forward. No las recalcules.',
+      precision_wape_pct: r1(ev30.precisionW),
+      precision_mape_pct: r1(ev30.precision),
+      cual_usar:'WAPE es la más representativa: pondera por volumen, así los días de bajo volumen no distorsionan.',
+      sesgo_pct: r2(ev30.sesgo),
+      interpretacion_sesgo: Math.abs(ev30.sesgo)<3?'equilibrado':ev30.sesgo>0?'el modelo tiende a sobreestimar':'el modelo tiende a subestimar',
+      supera_baseline: ev30.skill!=null?ev30.skill>0:null,
+      ventaja_sobre_baseline_pct: ev30.skill!=null?r1(ev30.skill):null,
+      cobertura_intervalo_pct: r1(ev30.cobertura),
+      dias_evaluados: ev30.n,
+      eventos_excluidos_del_calculo: ev30.nEventosExcluidos,
+      confiabilidad: (ev30.precisionW||0)>=85?'alta':(ev30.precisionW||0)>=70?'media':'baja — advierte al usuario al dar proyecciones',
+    } : {nota:'aún sin datos suficientes para evaluar el modelo'},
+
+    tendencia_precision_ml_por_mes: tendML.map(t=>({mes:t.label, precision_pct:t.precision!=null?r1(t.precision):null, dias:t.n})),
+
+    ultimos_60_dias: detalleComprimido(ultimos60),
+
+    detalle_mes_solicitado: detalleSolicitado,
   };
 }
 
-function pintarMensaje(rol,texto,meta){
+function pintarMensaje(rol,texto,meta,guardar){
   $('chat-empty')?.remove();
   const cont=$('chat-msgs');
   const div=document.createElement('div');
@@ -2352,7 +2652,35 @@ function pintarMensaje(rol,texto,meta){
   div.innerHTML=`<div class="msg-avatar">${avatar}</div><div class="msg-bubble">${escapeHtml(texto)}${meta?`<div class="msg-meta${meta.warn?' warn':''}">${meta.txt}</div>`:''}</div>`;
   cont.appendChild(div);
   cont.scrollTop=cont.scrollHeight;
+  if(guardar!==false){
+    CHAT.log.push({rol,texto,meta:meta||null});
+    guardarLog();
+  }
   return div;
+}
+function guardarLog(){
+  try{localStorage.setItem(LOG_KEY,JSON.stringify(CHAT.log.slice(-60)));}catch(e){}
+}
+/* Restaura la conversación guardada al abrir la app (sin gastar cuota) */
+function restaurarChat(){
+  try{
+    const log=JSON.parse(localStorage.getItem(LOG_KEY)||'[]');
+    if(!log.length)return;
+    CHAT.log=log;
+    log.forEach(m=>pintarMensaje(m.rol,m.texto,m.meta,false));
+    // Reconstruye el historial de API solo con pares user→bot que terminaron
+    // en éxito (bot sin meta.warn). Una pregunta que falló no debe quedar
+    // "huérfana" en el contexto que se envía la próxima vez.
+    const historialReconstruido=[];
+    for(let i=0;i<log.length;i++){
+      const cur=log[i], sig=log[i+1];
+      if(cur.rol==='user'&&sig&&sig.rol==='bot'&&sig.meta&&!sig.meta.warn){
+        historialReconstruido.push({role:'user',content:cur.texto});
+        historialReconstruido.push({role:'assistant',content:sig.texto});
+      }
+    }
+    CHAT.historial=historialReconstruido;
+  }catch(e){console.warn('No se pudo restaurar el chat',e);}
 }
 function escapeHtml(s){
   const d=document.createElement('div');d.textContent=s;return d.innerHTML.replace(/\n/g,'<br>');
@@ -2380,7 +2708,7 @@ async function enviarConsulta(){
   pintarTyping();
 
   try{
-    const contexto=construirContexto();
+    const contexto=construirContexto(texto);
     const res=await fetch(CONSULTOR_ENDPOINT,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -2390,7 +2718,13 @@ async function enviarConsulta(){
     if(!res.ok){
       if(res.status===404){
         $('chat-setup-warn').style.display='block';
-        pintarMensaje('bot','Aún no está conectada la función del servidor (/api/consultor). Configúrala en Vercel con tu API key de Anthropic para que pueda responder de verdad.',{warn:true,txt:'⚠ Servidor no configurado'});
+        pintarMensaje('bot','Aún no está conectada la función del servidor (/api/consultor). Configúrala en Vercel con tu API key para que pueda responder de verdad.',{warn:true,txt:'⚠ Servidor no configurado'});
+      } else if(res.status===429){
+        const body=await res.json().catch(()=>({}));
+        pintarMensaje('bot',body.mensaje||'Se acabaron las consultas gratuitas por hoy. Vuelve a intentarlo más tarde.',{warn:true,txt:'⏳ Cuota diaria agotada'});
+      } else if(res.status===500){
+        const body=await res.json().catch(()=>({}));
+        pintarMensaje('bot',body.error?.includes('GEMINI_API_KEY')?'Falta configurar la clave de Gemini en el servidor (variable GEMINI_API_KEY en Vercel).':'Hubo un problema interno del servidor.',{warn:true,txt:'Error de configuración'});
       } else {
         const errBody=await res.text().catch(()=>'');
         pintarMensaje('bot','Hubo un problema al consultar. Intenta de nuevo en un momento.',{warn:true,txt:'Error '+res.status});
@@ -2401,8 +2735,10 @@ async function enviarConsulta(){
     }
     const data=await res.json();
     const respuesta=data.respuesta||data.text||'(sin respuesta)';
-    pintarMensaje('bot',respuesta,{txt:`Precisión del modelo este período: ${fmt(contexto.calidad_del_modelo.precision_wape||0,1)}%`,warn:(contexto.calidad_del_modelo.precision_wape||100)<70});
+    const pw=contexto.calidad_del_modelo_ml?.precision_wape_pct;
+    pintarMensaje('bot',respuesta,{txt:pw!=null?`Precisión del modelo (WAPE): ${fmt(pw,1)}%`:'Modelo aún sin métricas suficientes',warn:pw!=null&&pw<70});
     CHAT.historial.push({role:'assistant',content:respuesta});
+    registrarUso();
   }catch(e){
     quitarTyping();
     pintarMensaje('bot','No se pudo conectar con el servidor. Revisa tu conexión o si la función /api/consultor está desplegada.',{warn:true,txt:'Error de conexión'});
@@ -2416,6 +2752,8 @@ async function enviarConsulta(){
 function limpiarChat(){
   if(CHAT.historial.length&&!confirm('¿Borrar toda la conversación?'))return;
   CHAT.historial=[];
+  CHAT.log=[];
+  localStorage.removeItem(LOG_KEY);
   $('chat-msgs').innerHTML=`<div class="chat-empty" id="chat-empty">
     <div class="ico">💬</div>
     <div class="t">Hazme una pregunta sobre tu operación</div>
