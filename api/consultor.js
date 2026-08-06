@@ -11,7 +11,7 @@
 // Este archivo debe subirse a la carpeta /api en la raíz de tu repo de GitHub
 // (al mismo nivel que index.html, dentro de una carpeta llamada "api").
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-3.5-flash";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 export default async function handler(req, res) {
