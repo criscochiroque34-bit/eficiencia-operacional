@@ -52,9 +52,31 @@ Hablas con el analista de operaciones responsable del indicador de eficiencia. C
 - No des recomendaciones de recursos humanos, contratación, despidos ni temas legales/laborales. Si la pregunta va por ahí, limítate al análisis numérico de horas y capacidad, sin opinar sobre las personas.
 - No inventes causas de un resultado si no están en los datos. Puedes señalar correlaciones visibles ("los tres días más bajos del mes fueron feriados"), no especular motivos que no puedes ver.`;
 
+// Mismo hash SHA-256 que valida el candado en index.html (de la clave
+// "Crossdock2026" por defecto). Si cambias la clave del candado, actualiza
+// este valor también — o mejor, defínelo como variable de entorno
+// APP_AUTH_HASH en Vercel para no tener que tocar el código.
+//
+// Por qué existe esto: sin esta verificación, cualquiera que descubra la
+// URL de esta función puede llamarla directo (con curl, Postman, etc.)
+// sin pasar nunca por el candado de la app, y gastar tu cuota gratuita
+// de Gemini sin que te enteres.
+const AUTH_HASH_DEFAULT = "c777f4f677d5c8fa33d6494ec851190c94b4a15a834bfe792989de6da761f58e";
+
+// Límites básicos para evitar abuso incluso desde una sesión autorizada
+const MAX_MENSAJES = 12;
+const MAX_LARGO_MENSAJE = 2000;
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Método no permitido" });
+    return;
+  }
+
+  const authHash = process.env.APP_AUTH_HASH || AUTH_HASH_DEFAULT;
+  const tokenRecibido = req.headers["x-eo-auth"];
+  if (!tokenRecibido || tokenRecibido !== authHash) {
+    res.status(401).json({ error: "No autorizado" });
     return;
   }
 
@@ -73,9 +95,13 @@ export default async function handler(req, res) {
       res.status(400).json({ error: "Falta el mensaje de la consulta" });
       return;
     }
+    if (mensajes.some((m) => typeof m.content !== "string" || m.content.length > MAX_LARGO_MENSAJE)) {
+      res.status(400).json({ error: "Mensaje demasiado largo o con formato inválido" });
+      return;
+    }
 
     // Últimos turnos para mantener memoria sin inflar el costo
-    const historialLimitado = mensajes.slice(-10);
+    const historialLimitado = mensajes.slice(-MAX_MENSAJES);
 
     const systemCompleto =
       SYSTEM_PROMPT +
@@ -112,6 +138,15 @@ export default async function handler(req, res) {
         res.status(429).json({
           error: "cuota_agotada",
           mensaje: "Se acabaron las consultas gratuitas por hoy. El límite se renueva automáticamente a medianoche (hora del Pacífico, EE.UU.) — intenta de nuevo más tarde.",
+        });
+        return;
+      }
+
+      // 400/403 casi siempre significan API key inválida o mal configurada
+      if (response.status === 400 || response.status === 403) {
+        res.status(502).json({
+          error: "Revisa que GEMINI_API_KEY en Vercel sea correcta y esté activa",
+          detalle: errText,
         });
         return;
       }
