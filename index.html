@@ -203,6 +203,15 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     </div>
   </div>
 
+  <div id="datos-faltantes-alerta" style="display:none;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.25);border-radius:10px;padding:12px 14px;margin-bottom:16px;align-items:center;gap:10px;cursor:pointer" onclick="irADatos()">
+    <span style="font-size:1.1rem">📋</span>
+    <div style="flex:1"><div style="font-size:.8rem;font-weight:600;color:var(--red)" id="datos-faltantes-txt">—</div><div style="font-size:.68rem;color:var(--tm);margin-top:2px">Click para ir a Ingresar datos</div></div>
+  </div>
+  <div id="sesgo-alerta" style="display:none;background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.25);border-radius:10px;padding:12px 14px;margin-bottom:16px;align-items:center;gap:10px">
+    <span style="font-size:1.1rem">⚠️</span>
+    <div><div style="font-size:.8rem;font-weight:600;color:var(--ora)" id="sesgo-alerta-txt">—</div><div style="font-size:.68rem;color:var(--tm);margin-top:2px" id="sesgo-alerta-sub">—</div></div>
+  </div>
+
   <!-- SELECTOR FECHA -->
   <div style="margin-bottom:16px">
     <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Fecha a proyectar</label>
@@ -283,6 +292,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       <div style="text-align:center;padding:8px 0">
         <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.4rem;line-height:1;color:var(--t3)" id="ter-t3">—</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">terceros necesarios</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--t3);margin-top:4px;opacity:.85" id="ter-t3-rango"></div>
       </div>
       <div style="background:var(--s3);border-radius:6px;padding:9px 11px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tm)">
         <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Efic. resultante</span><strong id="ef-res-t3" style="color:var(--t3)">—</strong></div>
@@ -306,6 +316,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       <div style="text-align:center;padding:8px 0">
         <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.4rem;line-height:1;color:var(--t1)" id="ter-t1">—</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">terceros necesarios</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--t1);margin-top:4px;opacity:.85" id="ter-t1-rango"></div>
       </div>
       <div style="background:var(--s3);border-radius:6px;padding:9px 11px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tm)">
         <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span>Efic. resultante</span><strong id="ef-res-t1" style="color:var(--t1)">—</strong></div>
@@ -922,9 +933,55 @@ function precisionPorMes(nMeses){
       &&!_idx.eventos.get(x.fecha));
     const ev=dias.length>=3?evaluarModelo({dias}):null;
     out.push({anio:a,mes:m,label:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][m-1],
-      precision:ev?ev.precision:null, precisionW:ev?ev.precisionW:null, n:dias.length});
+      precision:ev?ev.precision:null, precisionW:ev?ev.precisionW:null, sesgo:ev?ev.sesgo:null, n:dias.length});
   }
   return out;
+}
+/* Detecta si el modelo viene sobre/subestimando de forma sostenida
+   (no solo un mes malo aislado) — señal de que el patrón cambió y el
+   modelo aún no se ajustó del todo. Requiere al menos 2 meses seguidos
+   con datos suficientes y el sesgo apuntando consistentemente al mismo
+   lado, por encima de un umbral que ya no es ruido normal. */
+/* Detecta días recientes sin cierre registrado, retrocediendo desde ayer
+   hasta encontrar el último día que sí tiene datos. No cuenta como
+   "faltante" nada anterior al primer día que existe en el histórico
+   (antes de eso, la operación simplemente no se registraba aún). */
+function diasFaltantes(maxDiasAtras){
+  maxDiasAtras=maxDiasAtras||5;
+  const conDatos=S.dias.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+  if(!conDatos.length)return[];
+  const primeraFecha=conDatos[0].fecha;
+  const hoyF=hoy();
+  const faltantes=[];
+  for(let i=1;i<=maxDiasAtras;i++){
+    const d=new Date(hoyF+'T12:00:00'); d.setDate(d.getDate()-i);
+    const f=fechaStr(d);
+    if(f<primeraFecha)break;
+    const registro=_idx.dias.get(f);
+    const tieneDatos=registro&&((+registro.folios_t3||0)+(+registro.folios_t1||0))>0;
+    if(tieneDatos)break;
+    faltantes.push(f);
+  }
+  return faltantes.reverse();
+}
+function irADatos(){
+  (document.querySelector('.sb-btn[onclick*="\'datos\'"]')||document.querySelector('.bn[onclick*="\'datos\'"]'))?.click();
+}
+function detectarSesgoSostenido(){
+  const meses=precisionPorMes(3).filter(m=>m.sesgo!=null&&m.n>=5);
+  if(meses.length<2)return null;
+  const ultimos2=meses.slice(-2);
+  const [m1,m2]=ultimos2;
+  const mismoLado=(m1.sesgo>0&&m2.sesgo>0)||(m1.sesgo<0&&m2.sesgo<0);
+  const magnitudSuficiente=Math.abs(m1.sesgo)>=6&&Math.abs(m2.sesgo)>=6;
+  if(mismoLado&&magnitudSuficiente){
+    return{
+      direccion:m1.sesgo>0?'sobreestimando':'subestimando',
+      mes1:m1.label,sesgo1:m1.sesgo,
+      mes2:m2.label,sesgo2:m2.sesgo,
+    };
+  }
+  return null;
 }
 
 /* ═══ CALCULADORA HH ═══ */
@@ -973,6 +1030,19 @@ function recalc(){
     setT('ter-'+tr,c.folios>0?c.terceros:'—');
     setT('ef-res-'+tr,c.efic>0?fmtE(c.efic)+' fol/h':'—');
     setT('cap-'+tr,c.cap>0?fmtI(c.cap)+' fol':'—');
+    // Rango de terceros según la variabilidad real reciente (±intervalo de
+    // confianza del modelo), no solo el número puntual — más honesto con
+    // la incertidumbre real de la predicción.
+    const rangoEl=$('ter-'+tr+'-rango');
+    if(rangoEl){
+      const interv=tr==='t3'?S.predActual?.i3:S.predActual?.i1;
+      if(c.folios>0&&interv>0){
+        const cMin=calcHH(tr,Math.max(0,c.folios-interv),c.personas);
+        const cMax=calcHH(tr,c.folios+interv,c.personas);
+        const tMin=Math.min(cMin.terceros,cMax.terceros), tMax=Math.max(cMin.terceros,cMax.terceros);
+        rangoEl.textContent=tMin===tMax?'':`rango probable: ${tMin}–${tMax}`;
+      } else rangoEl.textContent='';
+    }
   });
 
   // Resumen general
@@ -1075,6 +1145,7 @@ function aplicarPrediccion(){
   $('jor-ter').value=fmt(S.proy?.jornada_tercero||c3.jornada_tercero||8,2);
   // Predicción
   const p=predecir(S.fecha);
+  S.predActual=p; // guardado para que la calculadora de HH pueda mostrar rango, no solo un numero
   const evBadge=$('hoy-evento-badge');
   if(p){
     $('pred-t3').textContent=fmtI(p.ft3);
@@ -1111,6 +1182,37 @@ function aplicarPrediccion(){
   } else {
     if(mlv)mlv.textContent='—';
     if(mls)mls.textContent=`${S.dias.length} días · faltan datos`;
+  }
+
+  // Aviso de días recientes sin cierre registrado
+  const dfEl=$('datos-faltantes-alerta');
+  if(dfEl){
+    const faltan=diasFaltantes(5);
+    if(faltan.length){
+      dfEl.style.display='flex';
+      const DNcorta=['dom','lun','mar','mié','jue','vie','sáb'];
+      const listado=faltan.map(f=>{const dd=new Date(f+'T12:00:00');return `${DNcorta[dd.getDay()]} ${dd.getDate()}`;}).join(', ');
+      $('datos-faltantes-txt').textContent=faltan.length===1
+        ?`Falta registrar el cierre de ayer (${listado})`
+        :`Faltan ${faltan.length} días sin registrar: ${listado}`;
+    } else {
+      dfEl.style.display='none';
+    }
+  }
+
+  // Alerta de sesgo sostenido (no un mes malo aislado, sino 2+ meses
+  // seguidos apuntando al mismo lado) — señal de que el patrón real
+  // cambió y el modelo aún no terminó de ajustarse.
+  const alertaEl=$('sesgo-alerta');
+  if(alertaEl){
+    const s=detectarSesgoSostenido();
+    if(s){
+      alertaEl.style.display='flex';
+      $('sesgo-alerta-txt').textContent=`El modelo viene ${s.direccion} de forma sostenida (${s.mes1}: ${s.sesgo1>=0?'+':''}${fmt(s.sesgo1,1)}% · ${s.mes2}: ${s.sesgo2>=0?'+':''}${fmt(s.sesgo2,1)}%)`;
+      $('sesgo-alerta-sub').textContent='Puede ser que el volumen o el patrón operativo cambió — revisa Modelo ML para más detalle.';
+    } else {
+      alertaEl.style.display='none';
+    }
   }
 }
 
@@ -1167,9 +1269,47 @@ async function cargarManualFecha(){
   }
   updateManualPreview();
 }
+/* ═══ DETECCIÓN DE ERRORES DE DIGITACIÓN ═══
+   Antes de guardar un dato manual, lo compara contra días similares
+   (mismo día de semana + tipo de día, o el grupo más cercano disponible)
+   y avisa si el valor está muy fuera de lo normal — mismo criterio
+   estadístico que ya usa el modelo ML, no una regla inventada aparte. */
+function estadisticasComparables(fecha){
+  const td=tipoDia(fecha);
+  const dow=new Date(fecha+'T12:00:00').getDay();
+  const otros=S.dias.filter(d=>d.fecha!==fecha&&((+d.folios_t3||0)+(+d.folios_t1||0))>0&&!(_idx.eventos.get(d.fecha)||eventoDe(d.fecha)));
+  let base=otros.filter(d=>new Date(d.fecha+'T12:00:00').getDay()===dow&&tipoDia(d.fecha)===td);
+  if(base.length<4)base=otros.filter(d=>tipoDia(d.fecha)===td);
+  if(base.length<4)base=otros;
+  if(base.length<4)return null; // sin suficiente historial aun para comparar
+  const m3=base.map(d=>+d.folios_t3||0), m1=base.map(d=>+d.folios_t1||0);
+  return{n:base.length,media_t3:media(m3),sd_t3:sdMuestral(m3,media(m3)),media_t1:media(m1),sd_t1:sdMuestral(m1,media(m1))};
+}
+function detectarAnomalia(fecha,v3,v1){
+  const est=estadisticasComparables(fecha);
+  if(!est)return null;
+  const problemas=[];
+  const chequear=(valor,med,sd,nombre)=>{
+    if(med<=0||valor<=0)return; // 0 puede ser normal (ej. T3 domingo)
+    const sdsFuera=sd>0?Math.abs(valor-med)/sd:null;
+    const ratio=valor/med;
+    if((sdsFuera!=null&&sdsFuera>=3)||ratio>2.8||ratio<0.35){
+      problemas.push(`${nombre}: ingresaste ${fmtI(valor)}, pero lo típico para este tipo de día ronda ${fmtI(med)} (basado en ${est.n} días similares)`);
+    }
+  };
+  chequear(v3,est.media_t3,est.sd_t3,'T3 Día');
+  chequear(v1,est.media_t1,est.sd_t1,'T1 Noche');
+  return problemas.length?problemas:null;
+}
 async function guardarManual(){
   const f=$('manual-fecha').value;
   if(!f){toast('Ingresa la fecha','error');return;}
+  const f3chk=num('m-ft3'), f1chk=num('m-ft1');
+  const problemas=detectarAnomalia(f,f3chk,f1chk);
+  if(problemas){
+    const seguro=confirm('Estos datos se ven muy distintos a lo normal:\n\n'+problemas.join('\n')+'\n\n¿Seguro que quieres guardarlos así?');
+    if(!seguro)return;
+  }
   loading(true);
   try{
     const row={fecha:f,tipo_dia:tipoDia(f),fuente:'manual',
@@ -2019,14 +2159,14 @@ function renderEventos(){
       const ocurrenciasPrevias=agruparEventos().filter(x=>normEvento(x.nombre)===normEvento(g.nombre)&&x.desde<g.desde).length;
       const el=document.createElement('div');
       el.style.cssText='display:flex;align-items:center;justify-content:space-between;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 12px;font-family:\'JetBrains Mono\',monospace;font-size:.75rem;gap:10px';
-      el.innerHTML=`<div><div style="font-weight:600">${rangoTxt} <span style="color:var(--ora)">· ${g.nombre}</span></div><div style="font-family:'Inter',sans-serif;font-size:.62rem;color:var(--tm);margin-top:1px">${ocurrenciasPrevias>0?`Ocurrencia ${ocurrenciasPrevias+1} de esta categoría`:'Primera vez registrado — sin histórico previo'}</div></div><button onclick='eliminarEventoGrupo(${JSON.stringify(g.ids)})' style="background:transparent;border:1px solid var(--b2);border-radius:4px;width:22px;height:22px;cursor:pointer;color:var(--ts);font-size:.8rem;flex-shrink:0">×</button>`;
+      el.innerHTML=`<div><div style="font-weight:600">${rangoTxt} <span style="color:var(--ora)">· ${escapeHtml(g.nombre)}</span></div><div style="font-family:'Inter',sans-serif;font-size:.62rem;color:var(--tm);margin-top:1px">${ocurrenciasPrevias>0?`Ocurrencia ${ocurrenciasPrevias+1} de esta categoría`:'Primera vez registrado — sin histórico previo'}</div></div><button onclick='eliminarEventoGrupo(${JSON.stringify(g.ids)})' style="background:transparent;border:1px solid var(--b2);border-radius:4px;width:22px;height:22px;cursor:pointer;color:var(--ts);font-size:.8rem;flex-shrink:0">×</button>`;
       c.appendChild(el);
     });
   }
   const dl=$('ev-sugeridos');
   if(dl){
     const nombresUnicos=[...new Set(S.eventos.map(e=>e.nombre))];
-    dl.innerHTML=nombresUnicos.map(n=>`<option value="${n}"></option>`).join('');
+    dl.innerHTML=nombresUnicos.map(n=>`<option value="${escapeHtml(n)}"></option>`).join('');
   }
 }
 function setEvModo(modo){
@@ -2104,7 +2244,7 @@ function renderFeriados(){
     const d=new Date(f.fecha+'T12:00:00');
     const el=document.createElement('div');
     el.style.cssText='display:flex;align-items:center;justify-content:space-between;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 12px;font-family:\'JetBrains Mono\',monospace;font-size:.75rem';
-    el.innerHTML=`<div><div style="font-weight:600">${d.toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'})}</div>${f.descripcion?`<div style="font-family:'Inter',sans-serif;font-size:.65rem;color:var(--tm);margin-top:1px">${f.descripcion}</div>`:''}</div><button onclick="eliminarFeriado(${f.id})" style="background:transparent;border:1px solid var(--b2);border-radius:4px;width:22px;height:22px;cursor:pointer;color:var(--ts);font-size:.8rem;flex-shrink:0">×</button>`;
+    el.innerHTML=`<div><div style="font-weight:600">${d.toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'})}</div>${f.descripcion?`<div style="font-family:'Inter',sans-serif;font-size:.65rem;color:var(--tm);margin-top:1px">${escapeHtml(f.descripcion)}</div>`:''}</div><button onclick="eliminarFeriado(${f.id})" style="background:transparent;border:1px solid var(--b2);border-radius:4px;width:22px;height:22px;cursor:pointer;color:var(--ts);font-size:.8rem;flex-shrink:0">×</button>`;
     c.appendChild(el);
   });
 }
@@ -2237,7 +2377,10 @@ async function intentarAcceso(){
   const val=$('gate-pass').value;
   const h=await sha256(val);
   if(h===GATE_HASH){
-    localStorage.setItem('eo_unlocked','1');
+    // Se guarda el HASH real, no una bandera '1' — así no se puede
+    // "abrir" el candado escribiendo un valor cualquiera en localStorage
+    // sin conocer la clave real.
+    localStorage.setItem('eo_unlocked',h);
     $('gate-overlay').style.display='none';
     iniciarApp();
   } else {
@@ -2251,10 +2394,12 @@ function cerrarSesion(){
   location.reload();
 }
 function checkGate(){
-  if(localStorage.getItem('eo_unlocked')==='1'){
+  const guardado=localStorage.getItem('eo_unlocked');
+  if(guardado===GATE_HASH){
     $('gate-overlay').style.display='none';
     iniciarApp();
   } else {
+    if(guardado)localStorage.removeItem('eo_unlocked'); // valor invalido/falsificado
     $('gate-overlay').style.display='flex';
     setTimeout(()=>$('gate-pass')?.focus(),200);
   }
@@ -2651,7 +2796,7 @@ function pintarMensaje(rol,texto,meta,guardar){
   const div=document.createElement('div');
   div.className='msg '+(rol==='user'?'user':'bot');
   const avatar=rol==='user'?'🧑':'🤖';
-  div.innerHTML=`<div class="msg-avatar">${avatar}</div><div class="msg-bubble">${escapeHtml(texto)}${meta?`<div class="msg-meta${meta.warn?' warn':''}">${meta.txt}</div>`:''}</div>`;
+  div.innerHTML=`<div class="msg-avatar">${avatar}</div><div class="msg-bubble">${escapeHtml(texto)}${meta?`<div class="msg-meta${meta.warn?' warn':''}">${escapeHtml(meta.txt||'')}</div>`:''}</div>`;
   cont.appendChild(div);
   cont.scrollTop=cont.scrollHeight;
   if(guardar!==false){
@@ -2709,18 +2854,24 @@ async function enviarConsulta(){
   CHAT.historial.push({role:'user',content:texto});
   pintarTyping();
 
+  const controlador=new AbortController();
+  const timeoutId=setTimeout(()=>controlador.abort(),25000);
   try{
     const contexto=construirContexto(texto);
     const res=await fetch(CONSULTOR_ENDPOINT,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({mensajes:CHAT.historial,contexto})
+      headers:{'Content-Type':'application/json','x-eo-auth':localStorage.getItem('eo_unlocked')||''},
+      body:JSON.stringify({mensajes:CHAT.historial,contexto}),
+      signal:controlador.signal
     });
+    clearTimeout(timeoutId);
     quitarTyping();
     if(!res.ok){
       if(res.status===404){
         $('chat-setup-warn').style.display='block';
         pintarMensaje('bot','Aún no está conectada la función del servidor (/api/consultor). Configúrala en Vercel con tu API key para que pueda responder de verdad.',{warn:true,txt:'⚠ Servidor no configurado'});
+      } else if(res.status===401){
+        pintarMensaje('bot','Tu sesión no es válida para consultar al servidor. Cierra sesión y vuelve a ingresar la clave.',{warn:true,txt:'🔒 No autorizado'});
       } else if(res.status===429){
         const body=await res.json().catch(()=>({}));
         pintarMensaje('bot',body.mensaje||'Se acabaron las consultas gratuitas por hoy. Vuelve a intentarlo más tarde.',{warn:true,txt:'⏳ Cuota diaria agotada'});
@@ -2742,8 +2893,13 @@ async function enviarConsulta(){
     CHAT.historial.push({role:'assistant',content:respuesta});
     registrarUso();
   }catch(e){
+    clearTimeout(timeoutId);
     quitarTyping();
-    pintarMensaje('bot','No se pudo conectar con el servidor. Revisa tu conexión o si la función /api/consultor está desplegada.',{warn:true,txt:'Error de conexión'});
+    if(e.name==='AbortError'){
+      pintarMensaje('bot','La consulta tardó demasiado en responder. Intenta de nuevo.',{warn:true,txt:'⏱ Tiempo de espera agotado'});
+    } else {
+      pintarMensaje('bot','No se pudo conectar con el servidor. Revisa tu conexión o si la función /api/consultor está desplegada.',{warn:true,txt:'Error de conexión'});
+    }
     CHAT.historial.pop();
     console.error(e);
   }finally{
