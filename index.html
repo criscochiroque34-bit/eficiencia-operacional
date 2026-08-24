@@ -501,7 +501,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   </div>
 
   <!-- Tabla resumen mensual -->
-  <div class="sl">Resumen mensual · eficiencia acumulada (Σfolios÷Σhoras), reinicia cada enero</div>
+  <div class="sl">Resumen mensual</div>
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
     <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);font-weight:500">
       <div>Mes</div><div style="text-align:right;padding-right:12px">Despachos</div><div style="text-align:right;padding-right:12px">HH Planilla</div><div style="text-align:right;padding-right:12px">HH Terceros</div><div style="text-align:right;padding-right:12px">HH Total</div><div style="text-align:right;padding-right:12px">Efic. Acumulada</div>
@@ -892,6 +892,23 @@ function svgGridBase(W,H,M,maxY,nDivisiones){
 /* Línea vertical sutil donde cambia el año, solo quando el filtro es
    'Todos los años' — para poder distinguir 2025 de 2026 sin que
    sea un elemento gritón en el gráfico. */
+/* Elige que indices mostrar en el eje X sin que dos etiquetas
+   queden pegadas — el bug anterior mostraba SIEMPRE el ultimo mes
+   ademas del patron periodico, aunque cayeran uno al lado del otro
+   (ej. "Jul '26" y "Ago '26" superpuestos con 20 meses). */
+function indicesEtiquetas(n,maxLabels){
+  maxLabels=maxLabels||14;
+  if(n<=maxLabels)return Array.from({length:n},(_,i)=>i);
+  const step=Math.ceil(n/maxLabels);
+  const idxs=[];
+  for(let i=0;i<n;i+=step)idxs.push(i);
+  const ultimo=idxs[idxs.length-1];
+  if(ultimo!==n-1){
+    if((n-1-ultimo)<step)idxs[idxs.length-1]=n-1;
+    else idxs.push(n-1);
+  }
+  return idxs;
+}
 function svgDivisoresAnio(datos,W,H,M){
   let s='';
   for(let i=1;i<datos.length;i++){
@@ -927,11 +944,12 @@ function drawRepDespachosTotal(datos){
     path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);
   });
   s+=`<path d="${path}" stroke="#e2e2f0" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const etiquetas1=new Set(indicesEtiquetas(n));
   datos.forEach((d,i)=>{
     const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*d.folios_tot/maxY);
     s+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="9" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d.folios_tot)}" data-s="Despachos totales" data-c="#e2e2f0"/>`;
     s+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="#07070f" stroke="#e2e2f0" stroke-width="1.8" pointer-events="none"/>`;
-    if(n<=14||i%Math.ceil(n/14)===0||i===n-1)
+    if(etiquetas1.has(i))
       s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
   });
   if(reg){
@@ -980,8 +998,9 @@ function drawRepPorTurno(datos){
       s+=`<rect x="${(cx+1).toFixed(1)}" y="${(M.t+h-h1).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,h1).toFixed(1)}" fill="#7c6fff" rx="2" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d.folios_t1)}" data-s="T1 Noche" data-c="#7c6fff"/>`;
     });
   }
+  const etiquetas2=new Set(indicesEtiquetas(n));
   datos.forEach((d,i)=>{
-    if(n<=14||i%Math.ceil(n/14)===0||i===n-1){
+    if(etiquetas2.has(i)){
       const cx=M.l+(w*(i+0.5)/n);
       s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
     }
@@ -1012,8 +1031,9 @@ function drawRepHoras(datos){
   };
   s+=linea('hh_plan','#60a5fa','HH Planilla');
   s+=linea('hh_terc','#fbbf24','HH Terceros');
+  const etiquetas3=new Set(indicesEtiquetas(n));
   datos.forEach((d,i)=>{
-    if(n<=14||i%Math.ceil(n/14)===0||i===n-1){
+    if(etiquetas3.has(i)){
       const cx=M.l+(w*(i+0.5)/n);
       s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
     }
