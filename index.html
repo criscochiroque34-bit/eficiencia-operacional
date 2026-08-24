@@ -16,6 +16,7 @@
   --tx:#e2e2f0;--tm:#9090b8;--ts:#4a4a6a;
   --t1:#7c6fff;--t3:#00c896;
   --red:#ff4d6d;--ora:#ff9500;--ok:#00c896;
+  --plan:#60a5fa;--terc:#fbbf24;
   --nav:62px;
 }
 html,body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh;font-size:14px}
@@ -175,6 +176,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <button class="sb-btn a" onclick="showView('hoy',this)"><span class="ico">📊</span>Proyección</button>
     <button class="sb-btn" onclick="showView('mes',this)"><span class="ico">📅</span>Cierre de mes</button>
     <button class="sb-btn" onclick="showView('hist',this)"><span class="ico">📈</span>Histórico</button>
+    <button class="sb-btn" onclick="showView('reportes',this)"><span class="ico">🗂️</span>Reportes anuales</button>
     <button class="sb-btn" onclick="showView('ml',this)"><span class="ico">🧠</span>Modelo ML</button>
     <button class="sb-btn" onclick="showView('consultor',this)"><span class="ico">💬</span>Consultor</button>
     <div style="height:1px;background:var(--b1);margin:10px 0"></div>
@@ -410,7 +412,9 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div class="kpi"><div class="kpi-l">Total despachado</div><div class="kpi-v n" id="hkpi-fol">—</div><div class="kpi-s">folios del mes</div></div>
     <div class="kpi"><div class="kpi-l">Precisión modelo</div><div class="kpi-v ok" id="hkpi-ml">—</div><div class="kpi-s">MAPE últ. 30d</div></div>
   </div>
-  <!-- Selector mes -->
+  <!-- Selector año + mes -->
+  <div class="sl">Año</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px" id="anio-sel"></div>
   <div class="sl">Mes</div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px" id="mes-sel"></div>
   <!-- TARJETA CIERRE DE MES -->
@@ -440,6 +444,68 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div id="hist-rows"><div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</div></div>
   </div>
 </div>
+
+<!-- ══ REPORTES ANUALES ══ -->
+<div class="view" id="v-reportes">
+  <div class="ph">
+    <div><div class="ph-title">Reportes anuales</div><div class="ph-sub">Todo el histórico, para ver tendencias y tomar decisiones</div></div>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:20px" id="rep-anio-sel"></div>
+
+  <!-- 3. Despachos mensuales + tendencia -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Despachos totales por mes</div><div style="font-size:.65rem;color:var(--tm);margin-top:2px">T3 + T1 combinados · con línea de tendencia</div></div>
+      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
+        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--tx);display:inline-block;margin-right:4px"></span>Despachos</span>
+        <span><span style="width:8px;height:8px;border-radius:50%;background:var(--ora);display:inline-block;margin-right:4px"></span>Tendencia</span>
+      </div>
+    </div>
+    <div id="rep-wrap-total"><svg viewBox="0 0 640 200" style="width:100%;height:auto;display:block"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
+  </div>
+
+  <!-- 4. Despacho por turno por mes -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Despachos por turno, mes a mes</div><div style="font-size:.65rem;color:var(--tm);margin-top:2px">Comparando T3 vs T1</div></div>
+      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
+        <span><span class="ld" style="width:8px;height:8px;border-radius:2px;background:var(--t3);display:inline-block;margin-right:4px"></span>T3 Día</span>
+        <span><span class="ld" style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:4px"></span>T1 Noche</span>
+      </div>
+    </div>
+    <div id="rep-wrap-turno"><svg viewBox="0 0 640 200" style="width:100%;height:auto;display:block"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
+  </div>
+
+  <!-- 6. HH planilla vs terceros -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Horas totales por mes</div><div style="font-size:.65rem;color:var(--tm);margin-top:2px">Planilla vs. terceros</div></div>
+      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
+        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--plan);display:inline-block;margin-right:4px"></span>Planilla</span>
+        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--terc);display:inline-block;margin-right:4px"></span>Terceros</span>
+      </div>
+    </div>
+    <div id="rep-wrap-horas"><svg viewBox="0 0 640 200" style="width:100%;height:auto;display:block"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
+  </div>
+
+  <!-- 5. % T3/T1 por año -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem;margin-bottom:4px">Participación T3 vs T1 por año</div>
+    <div style="font-size:.65rem;color:var(--tm);margin-bottom:14px">Comparando cada año registrado</div>
+    <div id="rep-split-anios" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
+  </div>
+
+  <!-- Tabla resumen mensual -->
+  <div class="sl">Resumen mensual · para comparar horas vs despachos</div>
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
+    <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);font-weight:500">
+      <div>Mes</div><div style="text-align:right;padding-right:12px">Despachos</div><div style="text-align:right;padding-right:12px">HH Planilla</div><div style="text-align:right;padding-right:12px">HH Terceros</div><div style="text-align:right;padding-right:12px">HH Total</div><div style="text-align:right;padding-right:12px">Eficiencia</div>
+    </div>
+    <div id="rep-tabla-mensual"><div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Cargando…</div></div>
+  </div>
+</div>
+
 <!-- ══ MODELO ML ══ -->
 <div class="view" id="v-ml">
   <div class="ph">
@@ -685,6 +751,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <button class="bn a" onclick="showView('hoy',this,true)"><span class="ico">📊</span>Proy.</button>
   <button class="bn" onclick="showView('mes',this,true)"><span class="ico">📅</span>Mes</button>
   <button class="bn" onclick="showView('hist',this,true)"><span class="ico">📈</span>Hist.</button>
+  <button class="bn" onclick="showView('reportes',this,true)"><span class="ico">🗂️</span>Rep.</button>
   <button class="bn" onclick="showView('ml',this,true)"><span class="ico">🧠</span>ML</button>
   <button class="bn" onclick="showView('consultor',this,true)"><span class="ico">💬</span>Chat</button>
   <button class="bn" onclick="showView('datos',this,true)"><span class="ico">⬆️</span>Datos</button>
@@ -698,7 +765,8 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const db=supabase.createClient(SUPA_URL,SUPA_KEY);
 
 const S={turno:'t1',turnoHist:'t1',fecha:hoy(),cfg:{},objDia:{},feriados:[],objetivos:[],eventos:[],
-  dias:[],proy:null,calc:{},excelData:null,excelName:'',histMes:[],mesActivo:null,importaciones:[]};
+  dias:[],proy:null,calc:{},excelData:null,excelName:'',histMes:[],mesActivo:null,importaciones:[],
+  histAnio:null,repAnio:'all'};
 
 function hoy(){return new Date().toLocaleDateString('en-CA',{timeZone:'America/Lima'});}
 function tipoDia(f){if(S.feriados.some(x=>x.fecha===f))return 'feriado';const d=new Date(f+'T12:00:00').getDay();return(d===0||d===6)?'finde':'semana';}
@@ -732,6 +800,221 @@ function reindexar(){
   _mem.evalCache=null;
 }
 const _mem={evalCache:null};
+
+/* ═══════════════════════════════════════════════════════════
+   REPORTES ANUALES — agregación mensual sobre TODO el histórico,
+   para detectar tendencias (ej. "T3 viene cayendo con las mismas
+   horas → la eficiencia futura va a caer"). Solo lee S.dias, no
+   toca el motor ML ni sus predicciones.
+   ═══════════════════════════════════════════════════════════ */
+const MESES_CORTO=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+/* Un punto por mes con datos reales, para el año(s) pedido.
+   anio puede ser un numero o 'all' (todo el historico junto). */
+function agregadoMensual(anio){
+  const porMes={}; // 'YYYY-MM' -> acumulador
+  S.dias.forEach(d=>{
+    if(((+d.folios_t3||0)+(+d.folios_t1||0))<=0)return;
+    const a=+d.fecha.slice(0,4);
+    if(anio!=='all'&&a!==anio)return;
+    const key=d.fecha.slice(0,7);
+    if(!porMes[key])porMes[key]={key,anio:a,mes:+d.fecha.slice(5,7),folios_t3:0,folios_t1:0,hp_t3:0,hp_t1:0,ht_t3:0,ht_t1:0};
+    const p=porMes[key];
+    p.folios_t3+=+d.folios_t3||0; p.folios_t1+=+d.folios_t1||0;
+    p.hp_t3+=+d.hp_t3||0; p.hp_t1+=+d.hp_t1||0;
+    p.ht_t3+=+d.ht_t3||0; p.ht_t1+=+d.ht_t1||0;
+  });
+  return Object.values(porMes).sort((x,y)=>x.key.localeCompare(y.key)).map(p=>{
+    const hh_plan=p.hp_t3+p.hp_t1, hh_terc=p.ht_t3+p.ht_t1, hh_tot=hh_plan+hh_terc;
+    const folios_tot=p.folios_t3+p.folios_t1;
+    return{...p,folios_tot,hh_plan,hh_terc,hh_tot,
+      eficiencia:hh_tot>0?folios_tot/hh_tot:null,
+      label:MESES_CORTO[p.mes-1]+(anio==='all'?" '"+String(p.anio).slice(2):'')};
+  });
+}
+/* Regresión lineal simple (mínimos cuadrados) — usada solo para
+   dibujar la línea de tendencia, no alimenta el modelo ML. */
+function regresionLineal(valores){
+  const n=valores.length; if(n<2)return null;
+  const sumX=n*(n-1)/2, sumX2=(n-1)*n*(2*n-1)/6;
+  let sumY=0,sumXY=0;
+  valores.forEach((y,x)=>{sumY+=y;sumXY+=x*y;});
+  const denom=n*sumX2-sumX*sumX;
+  if(denom===0)return null;
+  const slope=(n*sumXY-sumX*sumY)/denom;
+  const intercept=(sumY-slope*sumX)/n;
+  return{slope,intercept,puntos:valores.map((_,x)=>intercept+slope*x)};
+}
+function anioActivoReportes(){
+  return S.repAnio==='all'?'all':+S.repAnio;
+}
+function renderRepAnioSel(){
+  const c=$('rep-anio-sel');if(!c)return;
+  const anios=aniosDisponibles();
+  if(!anios.length){c.innerHTML='';return;}
+  if(!S.repAnio||(S.repAnio!=='all'&&!anios.includes(+S.repAnio)))S.repAnio=anios[0];
+  const opciones=[...anios,'all'];
+  c.innerHTML='';
+  opciones.forEach(op=>{
+    const activo=String(op)===String(S.repAnio);
+    const b=document.createElement('button');
+    b.textContent=op==='all'?'Todos los años':op;
+    b.style.cssText='border:1px solid '+(activo?'rgba(124,111,255,.4)':'var(--b1)')+';background:'+(activo?'rgba(124,111,255,.15)':'var(--s2)')+';border-radius:7px;padding:7px 16px;font-family:\'JetBrains Mono\',monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;color:'+(activo?'var(--t1)':'var(--tm)');
+    b.onclick=()=>{S.repAnio=op;renderReportes();};
+    c.appendChild(b);
+  });
+}
+function svgGridBase(W,H,M,maxY,nDivisiones){
+  nDivisiones=nDivisiones||4;
+  const w=W-M.l-M.r,h=H-M.t-M.b;
+  let s='';
+  for(let i=0;i<=nDivisiones;i++){
+    const y=M.t+(h*i/nDivisiones), v=maxY*(1-i/nDivisiones);
+    s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#1e1e32"${i===nDivisiones?'':' stroke-dasharray="2,4"'}/>`;
+    s+=`<text x="${M.l-6}" y="${y+3}" text-anchor="end" font-family="JetBrains Mono" font-size="8" fill="#4a4a6a">${v>=1000?(v/1000).toFixed(1)+'k':Math.round(v)}</text>`;
+  }
+  return s;
+}
+function drawRepDespachosTotal(datos){
+  const wrap=$('rep-wrap-total');if(!wrap)return;
+  if(!datos.length){wrap.innerHTML='<svg viewBox="0 0 640 200" style="width:100%;height:auto"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos suficientes</text></svg>';return;}
+  const W=640,H=210,M={t:15,r:16,b:36,l:44};
+  const w=W-M.l-M.r,h=H-M.t-M.b,n=datos.length;
+  const vals=datos.map(d=>d.folios_tot);
+  const maxY=Math.max(...vals)*1.15;
+  const reg=regresionLineal(vals);
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  s+=svgGridBase(W,H,M,maxY);
+  const barW=Math.min(30,(w/n)*0.55);
+  datos.forEach((d,i)=>{
+    const cx=M.l+(w*(i+0.5)/n);
+    const bh=h*d.folios_tot/maxY;
+    s+=`<rect x="${(cx-barW/2).toFixed(1)}" y="${(M.t+h-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="#e2e2f0" opacity=".85" rx="3"/>`;
+    if(n<=14||i%Math.ceil(n/14)===0||i===n-1)
+      s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
+  });
+  if(reg){
+    let path='';
+    reg.puntos.forEach((y,i)=>{
+      const cx=M.l+(w*(i+0.5)/n);
+      const cy=M.t+h-(h*Math.max(0,y)/maxY);
+      path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);
+    });
+    s+=`<path d="${path}" stroke="#ff9500" stroke-width="2.5" fill="none" stroke-dasharray="6,4" stroke-linecap="round"/>`;
+  }
+  s+='</svg>';
+  wrap.innerHTML=s;
+}
+function drawRepPorTurno(datos){
+  const wrap=$('rep-wrap-turno');if(!wrap)return;
+  if(!datos.length){wrap.innerHTML='<svg viewBox="0 0 640 200" style="width:100%;height:auto"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos suficientes</text></svg>';return;}
+  const W=640,H=210,M={t:15,r:16,b:36,l:44};
+  const w=W-M.l-M.r,h=H-M.t-M.b,n=datos.length;
+  const maxY=Math.max(...datos.map(d=>Math.max(d.folios_t3,d.folios_t1)))*1.15;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  s+=svgGridBase(W,H,M,maxY);
+  const grupoW=w/n, barW=Math.min(16,grupoW*0.32);
+  datos.forEach((d,i)=>{
+    const cx=M.l+(grupoW*(i+0.5));
+    const h3=h*d.folios_t3/maxY, h1=h*d.folios_t1/maxY;
+    s+=`<rect x="${(cx-barW-1).toFixed(1)}" y="${(M.t+h-h3).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,h3).toFixed(1)}" fill="#00c896" rx="2"/>`;
+    s+=`<rect x="${(cx+1).toFixed(1)}" y="${(M.t+h-h1).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,h1).toFixed(1)}" fill="#7c6fff" rx="2"/>`;
+    if(n<=14||i%Math.ceil(n/14)===0||i===n-1)
+      s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
+  });
+  s+='</svg>';
+  wrap.innerHTML=s;
+}
+function drawRepHoras(datos){
+  const wrap=$('rep-wrap-horas');if(!wrap)return;
+  if(!datos.length){wrap.innerHTML='<svg viewBox="0 0 640 200" style="width:100%;height:auto"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos suficientes</text></svg>';return;}
+  const W=640,H=210,M={t:15,r:16,b:36,l:44};
+  const w=W-M.l-M.r,h=H-M.t-M.b,n=datos.length;
+  const maxY=Math.max(...datos.map(d=>Math.max(d.hh_plan,d.hh_terc)),1)*1.2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  s+=svgGridBase(W,H,M,maxY);
+  const linea=(campo,color)=>{
+    let path='';
+    datos.forEach((d,i)=>{
+      const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*d[campo]/maxY);
+      path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);
+    });
+    let out=`<path d="${path}" stroke="${color}" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const last=datos[datos.length-1];
+    const lx=M.l+(w*(n-0.5)/n), ly=M.t+h-(h*last[campo]/maxY);
+    out+=`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="4" fill="#07070f" stroke="${color}" stroke-width="2"/>`;
+    return out;
+  };
+  s+=linea('hh_plan','#60a5fa');
+  s+=linea('hh_terc','#fbbf24');
+  datos.forEach((d,i)=>{
+    if(n<=14||i%Math.ceil(n/14)===0||i===n-1){
+      const cx=M.l+(w*(i+0.5)/n);
+      s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
+    }
+  });
+  s+='</svg>';
+  wrap.innerHTML=s;
+}
+function drawRepSplitAnios(){
+  const cont=$('rep-split-anios');if(!cont)return;
+  const anios=aniosDisponibles();
+  if(!anios.length){cont.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--ts);font-size:.78rem;padding:20px">Sin datos suficientes</div>';return;}
+  const circ=2*Math.PI*46; // circunferencia del donut, r=46
+  cont.innerHTML='';
+  [...anios].sort((a,b)=>b-a).slice(0,2).reverse().forEach(a=>{
+    const dias=S.dias.filter(d=>d.fecha.startsWith(String(a))&&((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+    const f3=dias.reduce((s,d)=>s+(+d.folios_t3||0),0), f1=dias.reduce((s,d)=>s+(+d.folios_t1||0),0);
+    const tot=f3+f1;
+    const p3=tot>0?f3/tot:0, p1=tot>0?f1/tot:0;
+    const largo3=circ*p3, restante3=circ-largo3;
+    const largo1=circ*p1, offset1=-largo3;
+    const div=document.createElement('div');
+    div.style.cssText='background:var(--s3);border-radius:8px;padding:14px;text-align:center';
+    div.innerHTML=`
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tm);margin-bottom:10px">${a}${dias.length<28?' · parcial':' · completo'}</div>
+      <div style="display:flex;justify-content:center;margin-bottom:10px">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#1e1e32" stroke-width="16"/>
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#00c896" stroke-width="16" stroke-dasharray="${largo3.toFixed(1)} ${restante3.toFixed(1)}" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+          <circle cx="60" cy="60" r="46" fill="none" stroke="#7c6fff" stroke-width="16" stroke-dasharray="${largo1.toFixed(1)} ${(circ-largo1).toFixed(1)}" stroke-dashoffset="${offset1.toFixed(1)}" transform="rotate(-90 60 60)"/>
+          <text x="60" y="56" text-anchor="middle" font-family="Syne" font-weight="800" font-size="16" fill="#e2e2f0">${Math.round(p3*100)}/${Math.round(p1*100)}</text>
+          <text x="60" y="72" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">T3 / T1</text>
+        </svg>
+      </div>
+      <div style="display:flex;justify-content:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:.68rem">
+        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--t3);display:inline-block;margin-right:5px"></span>T3 <strong style="color:var(--tx)">${Math.round(p3*100)}%</strong></span>
+        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:5px"></span>T1 <strong style="color:var(--tx)">${Math.round(p1*100)}%</strong></span>
+      </div>`;
+    cont.appendChild(div);
+  });
+}
+function renderRepTablaMensual(datos){
+  const c=$('rep-tabla-mensual');if(!c)return;
+  if(!datos.length){c.innerHTML='<div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos suficientes</div>';return;}
+  c.innerHTML='';
+  [...datos].reverse().forEach(d=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr;padding:9px 12px;border-bottom:1px solid var(--b1);font-size:.78rem;align-items:center';
+    row.innerHTML=`
+      <div style="font-family:'JetBrains Mono',monospace;font-weight:600">${d.label}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace">${fmtI(d.folios_tot)}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--plan)">${fmt(d.hh_plan,0)}h</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--terc)">${fmt(d.hh_terc,0)}h</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--tm)">${fmt(d.hh_tot,0)}h</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-weight:600">${d.eficiencia!=null?fmtE(d.eficiencia):'—'}</div>`;
+    c.appendChild(row);
+  });
+}
+function renderReportes(){
+  renderRepAnioSel();
+  const datos=agregadoMensual(anioActivoReportes());
+  drawRepDespachosTotal(datos);
+  drawRepPorTurno(datos);
+  drawRepHoras(datos);
+  drawRepSplitAnios();
+  renderRepTablaMensual(datos);
+}
 function predecirCached(fecha){
   if(_idx.pred.has(fecha))return _idx.pred.get(fecha);
   const p=predecir(fecha);
@@ -1562,15 +1845,41 @@ function setTurnoHist(t,btn){
   btn.classList.add('a','f'+(t==='all'?'all':t));
   renderHist();
 }
+/* Años disponibles según lo que realmente hay cargado en eo_dias, no
+   una lista fija — así funciona igual si más adelante hay 2024 o 2027 */
+function aniosDisponibles(){
+  const anios=new Set(S.dias.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0).map(d=>+d.fecha.slice(0,4)));
+  return[...anios].sort((a,b)=>b-a); // mas reciente primero
+}
+function renderAnioSel(){
+  const c=$('anio-sel');if(!c)return;
+  const anios=aniosDisponibles();
+  const now=new Date(hoy()+'T12:00:00');
+  if(!S.histAnio||!anios.includes(S.histAnio))S.histAnio=anios.includes(now.getFullYear())?now.getFullYear():(anios[0]||now.getFullYear());
+  c.innerHTML='';
+  anios.forEach(a=>{
+    const b=document.createElement('button');
+    b.textContent=a;
+    const activo=a===S.histAnio;
+    b.style.cssText='background:'+(activo?'rgba(124,111,255,.15)':'var(--s2)')+';border:1px solid '+(activo?'rgba(124,111,255,.4)':'var(--b1)')+';border-radius:6px;padding:6px 16px;font-family:\'Syne\',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;color:'+(activo?'var(--t1)':'var(--tm)')+';transition:all .15s';
+    b.onclick=()=>{S.histAnio=a;renderAnioSel();renderMesSel();};
+    c.appendChild(b);
+  });
+}
 function renderMesSel(){
   const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   const c=$('mes-sel');if(!c)return;
+  renderAnioSel();
   const now=new Date(hoy()+'T12:00:00');
-  const anio=now.getFullYear(), mesAct=now.getMonth()+1;
+  const anio=S.histAnio||now.getFullYear();
+  const esAnioActual=anio===now.getFullYear();
+  const mesAct=esAnioActual?now.getMonth()+1:12;
   c.innerHTML='';
+  let primerConDatos=null;
   for(let m=1;m<=12;m++){
-    const tiene=S.dias.some(d=>d.fecha.startsWith(`${anio}-${String(m).padStart(2,'0')}`));
-    if(!tiene&&m>mesAct)continue;
+    const tiene=S.dias.some(d=>d.fecha.startsWith(`${anio}-${String(m).padStart(2,'0')}`)&&((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+    if(!tiene&&(esAnioActual?m>mesAct:true))continue; // años pasados: solo meses con datos reales
+    if(tiene&&primerConDatos==null)primerConDatos=m;
     const b=document.createElement('button');
     b.textContent=meses[m-1];
     b.dataset.mes=m;
@@ -1581,8 +1890,12 @@ function renderMesSel(){
       cargarHistMes(anio,m);
     };
     c.appendChild(b);
-    if(m===mesAct){b.style.background='rgba(124,111,255,.15)';b.style.borderColor='rgba(124,111,255,.4)';b.style.color='var(--t1)';}
+    const marcar=esAnioActual?m===mesAct:m===(S.mesActivo&&S.mesActivo.a===anio?S.mesActivo.m:primerConDatos);
+    if(marcar){b.style.background='rgba(124,111,255,.15)';b.style.borderColor='rgba(124,111,255,.4)';b.style.color='var(--t1)';}
   }
+  // Al cambiar de año, carga automaticamente el mes marcado
+  const mesInicial=esAnioActual?mesAct:(S.mesActivo&&S.mesActivo.a===anio?S.mesActivo.m:primerConDatos);
+  if(mesInicial)cargarHistMes(anio,mesInicial);
 }
 function cargarHistMes(a,m){
   S.mesActivo={a,m};
@@ -2328,12 +2641,10 @@ async function cargarTodo(){
     if(!Object.keys(S.objDia).length)S.objDia={semana:20,finde:17,feriado:15};
     reindexar();
     renderConfig();
-    renderMesSel();
+    renderMesSel(); // ya carga el mes correcto internamente segun el anio activo
     await cargarProyFecha();
     aplicarPrediccion();
     recalc();
-    const n=new Date(hoy()+'T12:00:00');
-    cargarHistMes(n.getFullYear(),n.getMonth()+1);
   }catch(e){toast('Error cargando datos','error');console.error(e);}
   finally{loading(false);}
 }
@@ -2346,6 +2657,7 @@ function showView(id,btn,mobile){
   window.scrollTo(0,0);
   if(id==='mes')renderMes();
   if(id==='hist')renderHist();
+  if(id==='reportes')renderReportes();
   if(id==='ml')renderDiagnostico();
   if(id==='consultor')setTimeout(()=>$('chat-input')?.focus(),150);
 }
