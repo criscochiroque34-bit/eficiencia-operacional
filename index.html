@@ -24,6 +24,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;mi
 .sb{width:230px;min-width:230px;background:var(--s1);border-right:1px solid var(--b1);padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
 .main{flex:1;min-width:0;padding:30px 36px;overflow-x:hidden}
 @media(max-width:960px){.sb{display:none}.main{padding:16px 14px;padding-bottom:calc(var(--nav)+12px)}.bnav{display:flex!important}}
+@media(max-width:640px){#sim-inputs-grid{grid-template-columns:1fr!important}#sim-caminos{grid-template-columns:1fr!important}}
 .bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:var(--s1);border-top:1px solid var(--b1);z-index:50}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:transparent;color:var(--ts);font-family:'Inter',sans-serif;font-size:.5rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;padding:8px 2px;transition:color .15s}
 .bn .ico{font-size:1.15rem;line-height:1}
@@ -177,6 +178,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <button class="sb-btn" onclick="showView('mes',this)"><span class="ico">📅</span>Cierre de mes</button>
     <button class="sb-btn" onclick="showView('hist',this)"><span class="ico">📈</span>Histórico</button>
     <button class="sb-btn" onclick="showView('reportes',this)"><span class="ico">🗂️</span>Reportes anuales</button>
+    <button class="sb-btn" onclick="showView('simulador',this)"><span class="ico">🎯</span>Simulador</button>
     <button class="sb-btn" onclick="showView('ml',this)"><span class="ico">🧠</span>Modelo ML</button>
     <button class="sb-btn" onclick="showView('consultor',this)"><span class="ico">💬</span>Consultor</button>
     <div style="height:1px;background:var(--b1);margin:10px 0"></div>
@@ -497,6 +499,37 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   </div>
 </div>
 
+<!-- ══ SIMULADOR DE OBJETIVOS ══ -->
+<div class="view" id="v-simulador">
+  <div class="ph">
+    <div><div class="ph-title">Simulador de objetivos</div><div class="ph-sub">¿Qué necesito para llegar a cierta eficiencia?</div></div>
+  </div>
+
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px" id="sim-inputs-grid">
+      <div>
+        <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Mes objetivo</label>
+        <input type="month" id="sim-mes" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx);color-scheme:dark">
+      </div>
+      <div>
+        <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Eficiencia objetivo</label>
+        <input type="number" id="sim-objetivo" step="0.1" value="20" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--ora)">
+      </div>
+      <div>
+        <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Alcance</label>
+        <select id="sim-alcance" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;color:var(--tx)">
+          <option value="general">General (T3+T1)</option>
+          <option value="t3">Solo T3 Día</option>
+          <option value="t1">Solo T1 Noche</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-p btn-w" onclick="ejecutarSimulador()">Calcular escenario →</button>
+  </div>
+
+  <div id="sim-resultado"></div>
+</div>
+
 <!-- ══ MODELO ML ══ -->
 <div class="view" id="v-ml">
   <div class="ph">
@@ -743,6 +776,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <button class="bn" onclick="showView('mes',this,true)"><span class="ico">📅</span>Mes</button>
   <button class="bn" onclick="showView('hist',this,true)"><span class="ico">📈</span>Hist.</button>
   <button class="bn" onclick="showView('reportes',this,true)"><span class="ico">🗂️</span>Rep.</button>
+  <button class="bn" onclick="showView('simulador',this,true)"><span class="ico">🎯</span>Simul.</button>
   <button class="bn" onclick="showView('ml',this,true)"><span class="ico">🧠</span>ML</button>
   <button class="bn" onclick="showView('consultor',this,true)"><span class="ico">💬</span>Chat</button>
   <button class="bn" onclick="showView('datos',this,true)"><span class="ico">⬆️</span>Datos</button>
@@ -802,6 +836,175 @@ const MESES_CORTO=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','
 
 /* Un punto por mes con datos reales, para el año(s) pedido.
    anio puede ser un numero o 'all' (todo el historico junto). */
+/* ═══════════════════════════════════════════════════════════
+   SIMULADOR DE ESCENARIOS — "¿qué necesito para llegar a X?"
+   
+   Despeja la ecuación de eficiencia hacia atrás:
+       eficiencia = folios / horas
+   Fijando la eficiencia objetivo, calcula qué hace falta en
+   folios (si las horas se mantienen) o en horas (si los folios
+   se mantienen). Todo con matemática exacta — el ML solo aporta
+   la predicción de folios de los días que faltan.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Horas promedio reales por tipo de día, de los últimos N días
+   comparables. Se usa para estimar cuántas horas se van a gastar
+   en los días que faltan, si sigues programando igual que ahora. */
+function horasPromedioPorTipo(td,alcance,nUltimos){
+  nUltimos=nUltimos||8;
+  const comparables=S.dias.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0
+    &&tipoDia(d.fecha)===td&&!_idx.eventos.get(d.fecha)).slice(-nUltimos);
+  if(!comparables.length)return null;
+  const hh=comparables.map(d=>{
+    if(alcance==='t3')return (+d.hp_t3||0)+(+d.ht_t3||0);
+    if(alcance==='t1')return (+d.hp_t1||0)+(+d.ht_t1||0);
+    return (+d.hp_t3||0)+(+d.ht_t3||0)+(+d.hp_t1||0)+(+d.ht_t1||0);
+  });
+  return media(hh);
+}
+function foliosDe(d,alcance){
+  if(alcance==='t3')return +d.folios_t3||0;
+  if(alcance==='t1')return +d.folios_t1||0;
+  return (+d.folios_t3||0)+(+d.folios_t1||0);
+}
+function horasDe(d,alcance){
+  if(alcance==='t3')return (+d.hp_t3||0)+(+d.ht_t3||0);
+  if(alcance==='t1')return (+d.hp_t1||0)+(+d.ht_t1||0);
+  return (+d.hp_t3||0)+(+d.ht_t3||0)+(+d.hp_t1||0)+(+d.ht_t1||0);
+}
+/* alcance: 'general' | 't3' | 't1' */
+function simularEscenario(anio,mes,eficienciaObjetivo,alcance){
+  alcance=alcance||'general';
+  const pre=`${anio}-${String(mes).padStart(2,'0')}`;
+  const totalDias=new Date(anio,mes,0).getDate();
+  const hoyF=hoy();
+
+  // ── Lo ya cerrado de ese mes ──
+  const cerrados=S.dias.filter(d=>d.fecha.startsWith(pre)&&foliosDe(d,alcance)>0);
+  const folAcum=cerrados.reduce((s,d)=>s+foliosDe(d,alcance),0);
+  const hhAcum=cerrados.reduce((s,d)=>s+horasDe(d,alcance),0);
+  const eficActual=hhAcum>0?folAcum/hhAcum:null;
+
+  // ── Días que faltan del mes ──
+  const restantes=[];
+  for(let dia=1;dia<=totalDias;dia++){
+    const f=`${pre}-${String(dia).padStart(2,'0')}`;
+    if(f<hoyF)continue; // ya pasó (y si tenía datos, entró en cerrados)
+    const yaTiene=cerrados.some(d=>d.fecha===f);
+    if(yaTiene)continue;
+    restantes.push(f);
+  }
+
+  // ── Predicción ML de folios + estimación de horas para esos días ──
+  const detalle=[];
+  let folPred=0, hhEsperadas=0;
+  const porTipo={semana:{dias:0,folios:0,horas:0},finde:{dias:0,folios:0,horas:0},feriado:{dias:0,folios:0,horas:0}};
+  restantes.forEach(f=>{
+    const p=predecirCached(f);
+    const td=tipoDia(f);
+    const folios=p?(alcance==='t3'?p.ft3:alcance==='t1'?p.ft1:p.ft3+p.ft1):0;
+    const horas=horasPromedioPorTipo(td,alcance)||0;
+    folPred+=folios; hhEsperadas+=horas;
+    if(porTipo[td]){porTipo[td].dias++;porTipo[td].folios+=folios;porTipo[td].horas+=horas;}
+    detalle.push({fecha:f,tipo_dia:td,folios_pred:Math.round(folios),horas_esperadas:r1(horas),
+      dia_semana:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][new Date(f+'T12:00:00').getDay()],
+      confianza:p?p.conf:null});
+  });
+
+  const E=eficienciaObjetivo;
+  // Proyección si todo sigue igual (sin ajustar nada)
+  const eficProyectada=(hhAcum+hhEsperadas)>0?(folAcum+folPred)/(hhAcum+hhEsperadas):null;
+
+  // ── ESCENARIO A: mantener las horas, ¿cuántos folios hacen falta? ──
+  const foliosNecesarios=E*(hhAcum+hhEsperadas)-folAcum;
+  const foliosFaltantes=foliosNecesarios-folPred;
+  const pctMasFolios=folPred>0?(foliosFaltantes/folPred*100):null;
+
+  // ── ESCENARIO B: mantener los folios predichos, ¿cuántas horas máximo? ──
+  const horasMaximas=E>0?((folAcum+folPred)/E)-hhAcum:null;
+  const horasSobrantes=horasMaximas!=null?hhEsperadas-horasMaximas:null; // >0 = hay que recortar
+
+  // ── Equivalencia en personas ──
+  const jT=alcance==='t3'?cfgOf('semana','t3').jornada_tercero:alcance==='t1'?cfgOf('semana','t1').jornada_tercero:8;
+  const jP3=cfgOf('semana','t3').jornada_planilla, jP1=cfgOf('semana','t1').jornada_planilla;
+  const jPromPlanilla=alcance==='t3'?jP3:alcance==='t1'?jP1:(jP3+jP1)/2;
+  const nDias=restantes.length||1;
+  const personasAjuste=horasSobrantes!=null?{
+    terceros_a_reducir_total:horasSobrantes>0?Math.ceil(horasSobrantes/jT):0,
+    terceros_a_reducir_por_dia:horasSobrantes>0?Math.round((horasSobrantes/nDias/jT)*10)/10:0,
+    horas_a_recortar_por_dia:horasSobrantes>0?r1(horasSobrantes/nDias):0,
+    holgura_horas:horasSobrantes<0?r1(-horasSobrantes):0,
+  }:null;
+
+  // ── Referencia: mismo mes del año anterior ──
+  const preRef=`${anio-1}-${String(mes).padStart(2,'0')}`;
+  const diasRef=S.dias.filter(d=>d.fecha.startsWith(preRef)&&foliosDe(d,alcance)>0);
+  let referencia=null;
+  if(diasRef.length){
+    const fRef=diasRef.reduce((s,d)=>s+foliosDe(d,alcance),0);
+    const hRef=diasRef.reduce((s,d)=>s+horasDe(d,alcance),0);
+    referencia={anio:anio-1,dias:diasRef.length,folios:fRef,horas:r1(hRef),
+      eficiencia:hRef>0?r2(fRef/hRef):null};
+  }
+
+  // ── Desglose por tipo de día: qué eficiencia hace falta en cada uno ──
+  const desgloseTipo=Object.entries(porTipo).filter(([,v])=>v.dias>0).map(([td,v])=>({
+    tipo_dia:td, dias:v.dias,
+    folios_pred:Math.round(v.folios), horas_esperadas:r1(v.horas),
+    eficiencia_esperada:v.horas>0?r2(v.folios/v.horas):null,
+    // Si TODOS los días restantes tuvieran que rendir parejo para llegar al objetivo:
+    horas_max_para_objetivo:E>0?r1(v.folios/E):null,
+    ajuste_horas:E>0?r1(v.horas-(v.folios/E)):null,
+  }));
+
+  const brecha=E-(eficProyectada||0);
+  const mejorHistorico=(()=>{
+    const meses=agregadoMensual('all');
+    const vals=meses.map(m=>alcance==='t3'?(m.hp_t3+m.ht_t3>0?m.folios_t3/(m.hp_t3+m.ht_t3):null)
+      :alcance==='t1'?(m.hp_t1+m.ht_t1>0?m.folios_t1/(m.hp_t1+m.ht_t1):null)
+      :m.eficiencia_mes).filter(v=>v!=null);
+    return vals.length?Math.max(...vals):null;
+  })();
+
+  return{
+    mes_objetivo:`${MESES_CORTO[mes-1]} ${anio}`, anio, mes,
+    alcance, alcance_label:alcance==='t3'?'T3 Día':alcance==='t1'?'T1 Noche':'General (T3+T1)',
+    eficiencia_objetivo:E,
+    situacion_actual:{
+      dias_cerrados:cerrados.length, folios:folAcum, horas:r1(hhAcum),
+      eficiencia_acumulada:eficActual!=null?r2(eficActual):null,
+    },
+    dias_restantes:restantes.length,
+    proyeccion_sin_ajustes:{
+      folios_predichos:Math.round(folPred), horas_esperadas:r1(hhEsperadas),
+      eficiencia_al_cierre:eficProyectada!=null?r2(eficProyectada):null,
+      brecha_vs_objetivo:r2(brecha),
+      alcanza:eficProyectada!=null?eficProyectada>=E:null,
+    },
+    escenario_mas_pedidos:{
+      folios_totales_necesarios:Math.round(foliosNecesarios),
+      folios_adicionales_a_los_predichos:Math.round(foliosFaltantes),
+      pct_sobre_lo_predicho:pctMasFolios!=null?r1(pctMasFolios):null,
+      viable:foliosFaltantes<=0?true:null, // null = depende de si llegan mas pedidos
+    },
+    escenario_menos_horas:{
+      horas_maximas_disponibles:horasMaximas!=null?r1(horasMaximas):null,
+      horas_a_recortar:horasSobrantes!=null&&horasSobrantes>0?r1(horasSobrantes):0,
+      holgura_si_sobra:horasSobrantes!=null&&horasSobrantes<0?r1(-horasSobrantes):0,
+      equivalente_personas:personasAjuste,
+    },
+    desglose_por_tipo_dia:desgloseTipo,
+    referencia_anio_anterior:referencia,
+    mejor_eficiencia_mensual_historica:mejorHistorico!=null?r2(mejorHistorico):null,
+    veredicto:(()=>{
+      if(eficProyectada==null)return'Sin datos suficientes para proyectar';
+      if(eficProyectada>=E)return'Vas en camino a cumplir el objetivo sin ajustes';
+      if(mejorHistorico!=null&&E>mejorHistorico)return'El objetivo supera tu mejor mes histórico — muy exigente';
+      return'Requiere ajustar horas o recibir más pedidos';
+    })(),
+    detalle_dias_restantes:detalle,
+  };
+}
 function agregadoMensual(anio){
   const porMes={}; // 'YYYY-MM' -> acumulador
   S.dias.forEach(d=>{
@@ -1061,6 +1264,94 @@ function drawRepSplitAnios(){
       </div>`;
     cont.appendChild(div);
   });
+}
+/* ── Pantalla del simulador ── */
+function ejecutarSimulador(){
+  const mv=$('sim-mes').value;
+  if(!mv){toast('Selecciona un mes','error');return;}
+  const[a,m]=mv.split('-').map(Number);
+  const E=+$('sim-objetivo').value;
+  if(!E||E<=0){toast('Ingresa una eficiencia objetivo válida','error');return;}
+  const alcance=$('sim-alcance').value;
+  const s=simularEscenario(a,m,E,alcance);
+  renderSimResultado(s);
+}
+function renderSimResultado(s){
+  const c=$('sim-resultado');if(!c)return;
+  const p=s.proyeccion_sin_ajustes, ea=s.escenario_mas_pedidos, eh=s.escenario_menos_horas;
+  const alcanza=p.alcanza===true;
+  const colorEstado=alcanza?'var(--ok)':'var(--red)';
+  const pers=eh.equivalente_personas||{};
+
+  const bloqueTipo=s.desglose_por_tipo_dia.map(t=>`
+    <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:8px;padding:9px 12px;border-bottom:1px solid var(--b1);font-size:.74rem;align-items:center">
+      <div style="font-family:'JetBrains Mono',monospace;font-weight:600;text-transform:capitalize">${t.tipo_dia}</div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;color:var(--tm)">${t.dias}d · ${fmtI(t.folios_pred)} fol</div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;color:var(--tx)">${t.eficiencia_esperada!=null?fmtE(t.eficiencia_esperada):'—'} esperada</div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;color:${t.ajuste_horas>0?'var(--red)':'var(--ok)'}">${t.ajuste_horas>0?'−':'+'}${fmt(Math.abs(t.ajuste_horas),0)}h</div>
+    </div>`).join('');
+
+  c.innerHTML=`
+    <!-- Estado actual y proyección -->
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.95rem">${s.mes_objetivo} · ${s.alcance_label}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ts)">objetivo ${fmtE(s.eficiencia_objetivo)} fol/h</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div style="background:var(--s3);border-radius:8px;padding:12px">
+          <div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:5px">Hoy va en</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--tx)">${s.situacion_actual.eficiencia_acumulada!=null?fmtE(s.situacion_actual.eficiencia_acumulada):'—'}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:4px">${s.situacion_actual.dias_cerrados} días cerrados</div>
+        </div>
+        <div style="background:var(--s3);border-radius:8px;padding:12px">
+          <div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:5px">Cerraría en</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:${colorEstado}">${p.eficiencia_al_cierre!=null?fmtE(p.eficiencia_al_cierre):'—'}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:4px">si nada cambia</div>
+        </div>
+        <div style="background:var(--s3);border-radius:8px;padding:12px">
+          <div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:5px">Brecha</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:${colorEstado}">${p.brecha_vs_objetivo>0?'−':'+'}${fmtE(Math.abs(p.brecha_vs_objetivo))}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:4px">${s.dias_restantes} días restantes</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;background:${alcanza?'rgba(0,200,150,.07)':'rgba(255,77,109,.07)'};border:1px solid ${alcanza?'rgba(0,200,150,.25)':'rgba(255,77,109,.25)'};border-radius:8px;padding:11px 13px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.1rem">${alcanza?'✅':'⚠️'}</span>
+        <div style="font-size:.78rem;color:${colorEstado};font-weight:600">${s.veredicto}</div>
+      </div>
+    </div>
+
+    ${!alcanza?`
+    <div class="sl">Dos caminos para llegar</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px" id="sim-caminos">
+      <div style="background:var(--s2);border:1px solid rgba(0,200,150,.25);border-radius:10px;padding:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:1.05rem">📦</span><span style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts)">Camino A · Más pedidos</span></div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--t3);line-height:1">+${fmtI(ea.folios_adicionales_a_los_predichos)}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--tm);margin-top:6px;line-height:1.5">folios adicionales a lo que el modelo espera<br>= ${ea.pct_sobre_lo_predicho!=null?fmt(ea.pct_sobre_lo_predicho,1):'—'}% más de volumen<br><span style="color:var(--ts)">manteniendo las horas actuales</span></div>
+      </div>
+      <div style="background:var(--s2);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:1.05rem">⏱️</span><span style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts)">Camino B · Menos horas</span></div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--terc);line-height:1">−${fmt(eh.horas_a_recortar,0)}h</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--tm);margin-top:6px;line-height:1.5">a recortar en total (${fmt(pers.horas_a_recortar_por_dia||0,1)}h/día)<br>≈ <strong style="color:var(--tx)">${pers.terceros_a_reducir_por_dia||0} terceros menos por día</strong><br><span style="color:var(--ts)">manteniendo los pedidos previstos</span></div>
+      </div>
+    </div>`:`
+    <div style="background:var(--s2);border:1px solid rgba(0,200,150,.25);border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="font-size:.78rem;color:var(--tm)">Tienes <strong style="color:var(--ok)">${fmt(eh.holgura_si_sobra,0)}h de holgura</strong> — podrías usar hasta esas horas extra y aun así cumplir el objetivo.</div>
+    </div>`}
+
+    <div class="sl">Desglose por tipo de día</div>
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden;margin-bottom:14px">
+      <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:8px;padding:9px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts)">
+        <div>Tipo</div><div style="text-align:right">Predicho</div><div style="text-align:right">Efic. esperada</div><div style="text-align:right">Ajuste horas</div>
+      </div>
+      ${bloqueTipo||'<div style="padding:20px;text-align:center;color:var(--ts);font-size:.78rem">Sin días restantes en el mes</div>'}
+    </div>
+
+    ${s.referencia_anio_anterior?`
+    <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm)">
+      Referencia ${s.referencia_anio_anterior.anio}: cerró en <strong style="color:var(--tx)">${fmtE(s.referencia_anio_anterior.eficiencia)}</strong> con ${fmtI(s.referencia_anio_anterior.folios)} folios y ${fmt(s.referencia_anio_anterior.horas,0)}h · Mejor mes histórico: <strong style="color:var(--tx)">${s.mejor_eficiencia_mensual_historica!=null?fmtE(s.mejor_eficiencia_mensual_historica):'—'}</strong>
+    </div>`:''}
+  `;
 }
 function renderReportes(){
   renderRepAnioSel();
@@ -2300,7 +2591,7 @@ function renderDiagnostico(){
 }
 function drawTendenciaML(){
   const wrap=$('wrap-tendml');if(!wrap)return;
-  const datos=precisionPorMes(6);
+  const datos=precisionPorMes(12);
   const conVal=datos.filter(d=>d.precision!=null);
   if(conVal.length<2){
     wrap.innerHTML='<svg viewBox="0 0 580 130" style="width:100%;height:auto"><text x="290" y="70" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Se necesitan al menos 2 meses con datos</text></svg>';
@@ -2713,6 +3004,12 @@ function showView(id,btn,mobile){
   if(id==='mes')renderMes();
   if(id==='hist')renderHist();
   if(id==='reportes')renderReportes();
+  if(id==='simulador'){
+    const mv=$('sim-mes');
+    if(mv&&!mv.value){const n=new Date(hoy()+'T12:00:00');mv.value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;}
+    const ob=$('sim-objetivo');
+    if(ob&&!ob.dataset.init){const n=new Date(hoy()+'T12:00:00');ob.value=fmtE(objMes(n.getFullYear(),n.getMonth()+1));ob.dataset.init='1';}
+  }
   if(id==='ml')renderDiagnostico();
   if(id==='consultor')setTimeout(()=>$('chat-input')?.focus(),150);
 }
@@ -2989,6 +3286,35 @@ function mesMencionado(texto){
   return null;
 }
 
+/* Detecta si la pregunta plantea un objetivo de eficiencia y, de ser
+   así, corre el simulador. Ej: "quiero llegar a 25 en el turno noche
+   en agosto". El cálculo lo hace JavaScript (exacto); Gemini solo
+   redacta el resultado. */
+function objetivoMencionado(texto){
+  if(!texto)return null;
+  const t=texto.toLowerCase();
+  // Palabras que indican que se está planteando una meta, no solo consultando
+  const esObjetivo=/(llegar|alcanzar|lograr|cerrar|necesito|qué necesito|que necesito|para tener|subir a|meta|objetivo)/.test(t);
+  if(!esObjetivo)return null;
+  // Buscar un número que parezca eficiencia (entre 5 y 60, con o sin decimales)
+  const nums=[...t.matchAll(/(\d{1,2}(?:[.,]\d{1,2})?)/g)].map(m=>parseFloat(m[1].replace(',','.')));
+  const candidatos=nums.filter(v=>v>=5&&v<=60);
+  if(!candidatos.length)return null;
+  const eficiencia=candidatos[0];
+  // Alcance: turno mencionado explícitamente
+  let alcance='general';
+  if(/\bt3\b|turno d[íi]a|del d[íi]a|en el d[íi]a/.test(t))alcance='t3';
+  else if(/\bt1\b|turno noche|de noche|en la noche/.test(t))alcance='t1';
+  // Mes: si lo menciona, ese; si no, el mes en curso
+  const mm=mesMencionado(texto);
+  const n=new Date(hoy()+'T12:00:00');
+  return{
+    eficiencia,
+    alcance,
+    anio:mm?mm.anio:n.getFullYear(),
+    mes:mm?mm.mes:n.getMonth()+1,
+  };
+}
 function construirContexto(preguntaActual){
   const hoyF=hoy();
   const n=new Date(hoyF+'T12:00:00');
@@ -3033,7 +3359,7 @@ function construirContexto(preguntaActual){
 
   /* ── Diagnóstico del ML (solo lectura) ── */
   const ev30=evaluarModelo({ventana:30});
-  const tendML=precisionPorMes(6);
+  const tendML=precisionPorMes(12);
 
   /* ── Capa 4: si preguntan por un mes concreto, incluir su detalle ── */
   let detalleSolicitado=null;
@@ -3154,6 +3480,18 @@ function construirContexto(preguntaActual){
     ultimos_60_dias: detalleComprimido(ultimos60),
 
     detalle_mes_solicitado: detalleSolicitado,
+    simulacion_de_objetivo: (()=>{
+      const obj=objetivoMencionado(preguntaActual);
+      if(!obj)return null;
+      try{
+        const sim=simularEscenario(obj.anio,obj.mes,obj.eficiencia,obj.alcance);
+        return{
+          _nota:'El usuario planteó un objetivo. Este bloque YA trae el cálculo exacto hecho por la app — úsalo tal cual, no recalcules. Explica los dos caminos (más pedidos o menos horas) y menciona el equivalente en personas.',
+          ...sim,
+          detalle_dias_restantes:sim.detalle_dias_restantes.slice(0,10),
+        };
+      }catch(e){return null;}
+    })(),
   };
 }
 
