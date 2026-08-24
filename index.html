@@ -24,7 +24,6 @@ html,body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;mi
 .sb{width:230px;min-width:230px;background:var(--s1);border-right:1px solid var(--b1);padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
 .main{flex:1;min-width:0;padding:30px 36px;overflow-x:hidden}
 @media(max-width:960px){.sb{display:none}.main{padding:16px 14px;padding-bottom:calc(var(--nav)+12px)}.bnav{display:flex!important}}
-@media(max-width:640px){#rep-insights{grid-template-columns:1fr!important}}
 .bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:var(--s1);border-top:1px solid var(--b1);z-index:50}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:transparent;color:var(--ts);font-family:'Inter',sans-serif;font-size:.5rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;padding:8px 2px;transition:color .15s}
 .bn .ico{font-size:1.15rem;line-height:1}
@@ -454,9 +453,6 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 
   <div style="display:flex;gap:6px;margin-bottom:20px" id="rep-anio-sel"></div>
 
-  <div class="sl">Lecturas automáticas del período</div>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px" id="rep-insights"></div>
-
   <!-- 3. Despachos mensuales + tendencia -->
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
@@ -498,15 +494,6 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem;margin-bottom:4px">Participación T3 vs T1 por año</div>
     <div style="font-size:.65rem;color:var(--tm);margin-bottom:14px">Comparando cada año registrado</div>
     <div id="rep-split-anios" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
-  </div>
-
-  <!-- Tabla resumen mensual -->
-  <div class="sl">Resumen mensual</div>
-  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
-    <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);font-weight:500">
-      <div>Mes</div><div style="text-align:right;padding-right:12px">Despachos</div><div style="text-align:right;padding-right:12px">HH Planilla</div><div style="text-align:right;padding-right:12px">HH Terceros</div><div style="text-align:right;padding-right:12px">HH Total</div><div style="text-align:right;padding-right:12px">Efic. Acumulada</div>
-    </div>
-    <div id="rep-tabla-mensual"><div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Cargando…</div></div>
   </div>
 </div>
 
@@ -1075,89 +1062,13 @@ function drawRepSplitAnios(){
     cont.appendChild(div);
   });
 }
-function renderRepTablaMensual(datos){
-  const c=$('rep-tabla-mensual');if(!c)return;
-  if(!datos.length){c.innerHTML='<div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos suficientes</div>';return;}
-  c.innerHTML='';
-  [...datos].reverse().forEach(d=>{
-    const row=document.createElement('div');
-    row.style.cssText='display:grid;grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr;padding:9px 12px;border-bottom:1px solid var(--b1);font-size:.78rem;align-items:center';
-    row.innerHTML=`
-      <div style="font-family:'JetBrains Mono',monospace;font-weight:600">${d.label}</div>
-      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace">${fmtI(d.folios_tot)}</div>
-      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--plan)">${fmt(d.hh_plan,0)}h</div>
-      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--terc)">${fmt(d.hh_terc,0)}h</div>
-      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--tm)">${fmt(d.hh_tot,0)}h</div>
-      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-weight:700">${d.eficiencia_acum!=null?fmtE(d.eficiencia_acum):'—'}</div>`;
-    c.appendChild(row);
-  });
-}
-/* ── Tarjetas de insight automático ── */
-function renderRepInsights(datos){
-  const cont=$('rep-insights');if(!cont)return;
-  if(datos.length<3){cont.innerHTML='';return;}
-  const vals=datos.map(d=>d.folios_tot);
-  const reg=regresionLineal(vals);
-  const cambioTotalPct=reg&&vals[0]>0?((reg.puntos[reg.puntos.length-1]-reg.puntos[0])/Math.abs(reg.puntos[0])*100):null;
-
-  const depTerc=datos.map(d=>d.hh_tot>0?d.hh_terc/d.hh_tot*100:null).filter(v=>v!=null);
-  const depIni=depTerc[0], depFin=depTerc[depTerc.length-1];
-  const depCambio=depIni!=null&&depFin!=null?depFin-depIni:null;
-
-  let rachaActual=0, mejorRacha=0;
-  datos.forEach(d=>{
-    const obj=objMes(d.anio,d.mes);
-    const cumple=d.eficiencia_mes!=null&&d.eficiencia_mes>=obj;
-    rachaActual=cumple?rachaActual+1:0;
-    if(rachaActual>mejorRacha)mejorRacha=rachaActual;
-  });
-  const ultimoCumple=datos.length&&datos[datos.length-1].eficiencia_mes!=null&&datos[datos.length-1].eficiencia_mes>=objMes(datos[datos.length-1].anio,datos[datos.length-1].mes);
-
-  const tarjetas=[];
-  if(cambioTotalPct!=null){
-    const cae=cambioTotalPct<-3;
-    tarjetas.push({
-      ico:cae?'📉':cambioTotalPct>3?'📈':'➡️',
-      titulo:'Tendencia de despachos',
-      valor:(cambioTotalPct>=0?'+':'')+fmt(cambioTotalPct,1)+'%',
-      sub:cae?'Cayendo en el período — si las horas no bajan igual, la eficiencia futura va a caer':cambioTotalPct>3?'Creciendo en el período':'Estable en el período',
-      color:cae?'var(--red)':cambioTotalPct>3?'var(--ok)':'var(--tm)'
-    });
-  }
-  if(depCambio!=null){
-    const sube=depCambio>3;
-    tarjetas.push({
-      ico:sube?'⚠️':'👥',
-      titulo:'Dependencia de terceros',
-      valor:fmt(depFin,1)+'%',
-      sub:sube?`Subió ${fmt(depCambio,1)} pts desde el inicio del período`:`Cambió ${fmt(depCambio,1)} pts en el período`,
-      color:sube?'var(--ora)':'var(--tm)'
-    });
-  }
-  tarjetas.push({
-    ico:ultimoCumple?'✅':'🔻',
-    titulo:'Racha cumpliendo objetivo',
-    valor:mejorRacha+' meses',
-    sub:ultimoCumple?'El último mes cerrado cumplió su objetivo':'El último mes cerrado NO cumplió su objetivo',
-    color:ultimoCumple?'var(--ok)':'var(--red)'
-  });
-
-  cont.innerHTML=tarjetas.map(t=>`
-    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:1.05rem">${t.ico}</span><span style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts)">${t.titulo}</span></div>
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:${t.color};line-height:1">${t.valor}</div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--tm);margin-top:6px;line-height:1.4">${t.sub}</div>
-    </div>`).join('');
-}
 function renderReportes(){
   renderRepAnioSel();
   const datos=agregadoMensual(anioActivoReportes());
-  renderRepInsights(datos);
   drawRepDespachosTotal(datos);
   drawRepPorTurno(datos);
   drawRepHoras(datos);
   drawRepSplitAnios();
-  renderRepTablaMensual(datos);
 }
 function predecirCached(fecha){
   if(_idx.pred.has(fecha))return _idx.pred.get(fecha);
