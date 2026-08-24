@@ -24,6 +24,7 @@ html,body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;mi
 .sb{width:230px;min-width:230px;background:var(--s1);border-right:1px solid var(--b1);padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
 .main{flex:1;min-width:0;padding:30px 36px;overflow-x:hidden}
 @media(max-width:960px){.sb{display:none}.main{padding:16px 14px;padding-bottom:calc(var(--nav)+12px)}.bnav{display:flex!important}}
+@media(max-width:640px){#rep-insights{grid-template-columns:1fr!important}}
 .bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:var(--s1);border-top:1px solid var(--b1);z-index:50}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:transparent;color:var(--ts);font-family:'Inter',sans-serif;font-size:.5rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;padding:8px 2px;transition:color .15s}
 .bn .ico{font-size:1.15rem;line-height:1}
@@ -453,6 +454,9 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 
   <div style="display:flex;gap:6px;margin-bottom:20px" id="rep-anio-sel"></div>
 
+  <div class="sl">Lecturas automáticas del período</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px" id="rep-insights"></div>
+
   <!-- 3. Despachos mensuales + tendencia -->
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
@@ -497,10 +501,10 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   </div>
 
   <!-- Tabla resumen mensual -->
-  <div class="sl">Resumen mensual · para comparar horas vs despachos</div>
+  <div class="sl">Resumen mensual · eficiencia acumulada (Σfolios÷Σhoras), reinicia cada enero</div>
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
     <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);font-weight:500">
-      <div>Mes</div><div style="text-align:right;padding-right:12px">Despachos</div><div style="text-align:right;padding-right:12px">HH Planilla</div><div style="text-align:right;padding-right:12px">HH Terceros</div><div style="text-align:right;padding-right:12px">HH Total</div><div style="text-align:right;padding-right:12px">Eficiencia</div>
+      <div>Mes</div><div style="text-align:right;padding-right:12px">Despachos</div><div style="text-align:right;padding-right:12px">HH Planilla</div><div style="text-align:right;padding-right:12px">HH Terceros</div><div style="text-align:right;padding-right:12px">HH Total</div><div style="text-align:right;padding-right:12px">Efic. Acumulada</div>
     </div>
     <div id="rep-tabla-mensual"><div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Cargando…</div></div>
   </div>
@@ -824,13 +828,23 @@ function agregadoMensual(anio){
     p.hp_t3+=+d.hp_t3||0; p.hp_t1+=+d.hp_t1||0;
     p.ht_t3+=+d.ht_t3||0; p.ht_t1+=+d.ht_t1||0;
   });
-  return Object.values(porMes).sort((x,y)=>x.key.localeCompare(y.key)).map(p=>{
+  const lista=Object.values(porMes).sort((x,y)=>x.key.localeCompare(y.key)).map(p=>{
     const hh_plan=p.hp_t3+p.hp_t1, hh_terc=p.ht_t3+p.ht_t1, hh_tot=hh_plan+hh_terc;
     const folios_tot=p.folios_t3+p.folios_t1;
     return{...p,folios_tot,hh_plan,hh_terc,hh_tot,
-      eficiencia:hh_tot>0?folios_tot/hh_tot:null,
+      eficiencia_mes:hh_tot>0?folios_tot/hh_tot:null, // solo ese mes, aislado
       label:MESES_CORTO[p.mes-1]+(anio==='all'?" '"+String(p.anio).slice(2):'')};
   });
+  // Eficiencia ACUMULADA: se arrastra mes a mes (Σfolios÷Σhoras), reinicia
+  // en enero de cada año — la misma lógica de acumulado que ya usa la app
+  // en la vista Mes, extendida a una serie de 12 meses en vez de días.
+  let accF=0,accH=0,anioPrevio=null;
+  lista.forEach(p=>{
+    if(p.anio!==anioPrevio){accF=0;accH=0;anioPrevio=p.anio;}
+    accF+=p.folios_tot; accH+=p.hh_tot;
+    p.eficiencia_acum=accH>0?accF/accH:null;
+  });
+  return lista;
 }
 /* Regresión lineal simple (mínimos cuadrados) — usada solo para
    dibujar la línea de tendencia, no alimenta el modelo ML. */
@@ -875,6 +889,25 @@ function svgGridBase(W,H,M,maxY,nDivisiones){
   }
   return s;
 }
+/* Línea vertical sutil donde cambia el año, solo quando el filtro es
+   'Todos los años' — para poder distinguir 2025 de 2026 sin que
+   sea un elemento gritón en el gráfico. */
+function svgDivisoresAnio(datos,W,H,M){
+  let s='';
+  for(let i=1;i<datos.length;i++){
+    if(datos[i].anio===datos[i-1].anio)continue;
+    const w=W-M.l-M.r,h=H-M.t-M.b,n=datos.length;
+    const x=M.l+(w*i/n);
+    s+=`<line x1="${x.toFixed(1)}" y1="${M.t}" x2="${x.toFixed(1)}" y2="${M.t+h}" stroke="#3a3a5a" stroke-width="1" stroke-dasharray="3,3" opacity=".55"/>`;
+    s+=`<text x="${(x+4).toFixed(1)}" y="${M.t+11}" font-family="JetBrains Mono" font-size="7.5" fill="#6a6a90">${datos[i].anio}</text>`;
+  }
+  return s;
+}
+/* ¿Cuántos meses hay que mostrar? decide barras vs líneas para que
+   nunca se amontonen: barras se leen bien hasta ~10 puntos, más que
+   eso una línea es más limpia y sigue siendo perfectamente legible. */
+function usarLineasPorVolumen(n){ return n>10; }
+
 function drawRepDespachosTotal(datos){
   const wrap=$('rep-wrap-total');if(!wrap)return;
   if(!datos.length){wrap.innerHTML='<svg viewBox="0 0 640 200" style="width:100%;height:auto"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos suficientes</text></svg>';return;}
@@ -885,25 +918,33 @@ function drawRepDespachosTotal(datos){
   const reg=regresionLineal(vals);
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=svgGridBase(W,H,M,maxY);
-  const barW=Math.min(30,(w/n)*0.55);
+  s+=svgDivisoresAnio(datos,W,H,M);
+  // Siempre en línea (no barras) — así nunca hay amontonamiento sin
+  // importar cuántos meses se muestren, y combina mejor con la tendencia.
+  let path='';
   datos.forEach((d,i)=>{
-    const cx=M.l+(w*(i+0.5)/n);
-    const bh=h*d.folios_tot/maxY;
-    s+=`<rect x="${(cx-barW/2).toFixed(1)}" y="${(M.t+h-bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,bh).toFixed(1)}" fill="#e2e2f0" opacity=".85" rx="3"/>`;
+    const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*d.folios_tot/maxY);
+    path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);
+  });
+  s+=`<path d="${path}" stroke="#e2e2f0" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  datos.forEach((d,i)=>{
+    const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*d.folios_tot/maxY);
+    s+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="9" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d.folios_tot)}" data-s="Despachos totales" data-c="#e2e2f0"/>`;
+    s+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="#07070f" stroke="#e2e2f0" stroke-width="1.8" pointer-events="none"/>`;
     if(n<=14||i%Math.ceil(n/14)===0||i===n-1)
       s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
   });
   if(reg){
-    let path='';
+    let tpath='';
     reg.puntos.forEach((y,i)=>{
-      const cx=M.l+(w*(i+0.5)/n);
-      const cy=M.t+h-(h*Math.max(0,y)/maxY);
-      path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);
+      const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*Math.max(0,y)/maxY);
+      tpath+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);
     });
-    s+=`<path d="${path}" stroke="#ff9500" stroke-width="2.5" fill="none" stroke-dasharray="6,4" stroke-linecap="round"/>`;
+    s+=`<path d="${tpath}" stroke="#ff9500" stroke-width="2.5" fill="none" stroke-dasharray="6,4" stroke-linecap="round"/>`;
   }
   s+='</svg>';
   wrap.innerHTML=s;
+  bindDots('rep-wrap-total');
 }
 function drawRepPorTurno(datos){
   const wrap=$('rep-wrap-turno');if(!wrap)return;
@@ -913,17 +954,41 @@ function drawRepPorTurno(datos){
   const maxY=Math.max(...datos.map(d=>Math.max(d.folios_t3,d.folios_t1)))*1.15;
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=svgGridBase(W,H,M,maxY);
-  const grupoW=w/n, barW=Math.min(16,grupoW*0.32);
+  s+=svgDivisoresAnio(datos,W,H,M);
+  if(usarLineasPorVolumen(n)){
+    // Muchos meses: dos líneas, nunca se amontonan
+    const linea=(campo,color,nombre)=>{
+      let path='';
+      datos.forEach((d,i)=>{const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);});
+      let out=`<path d="${path}" stroke="${color}" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+      datos.forEach((d,i)=>{
+        const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);
+        out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d[campo])}" data-s="${nombre}" data-c="${color}"/>`;
+        out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="2.6" fill="#07070f" stroke="${color}" stroke-width="1.6" pointer-events="none"/>`;
+      });
+      return out;
+    };
+    s+=linea('folios_t3','#00c896','T3 Día');
+    s+=linea('folios_t1','#7c6fff','T1 Noche');
+  } else {
+    // Pocos meses: barras agrupadas, se leen mejor lado a lado
+    const grupoW=w/n, barW=Math.min(16,grupoW*0.32);
+    datos.forEach((d,i)=>{
+      const cx=M.l+(grupoW*(i+0.5));
+      const h3=h*d.folios_t3/maxY, h1=h*d.folios_t1/maxY;
+      s+=`<rect x="${(cx-barW-1).toFixed(1)}" y="${(M.t+h-h3).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,h3).toFixed(1)}" fill="#00c896" rx="2" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d.folios_t3)}" data-s="T3 Día" data-c="#00c896"/>`;
+      s+=`<rect x="${(cx+1).toFixed(1)}" y="${(M.t+h-h1).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,h1).toFixed(1)}" fill="#7c6fff" rx="2" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d.folios_t1)}" data-s="T1 Noche" data-c="#7c6fff"/>`;
+    });
+  }
   datos.forEach((d,i)=>{
-    const cx=M.l+(grupoW*(i+0.5));
-    const h3=h*d.folios_t3/maxY, h1=h*d.folios_t1/maxY;
-    s+=`<rect x="${(cx-barW-1).toFixed(1)}" y="${(M.t+h-h3).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,h3).toFixed(1)}" fill="#00c896" rx="2"/>`;
-    s+=`<rect x="${(cx+1).toFixed(1)}" y="${(M.t+h-h1).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,h1).toFixed(1)}" fill="#7c6fff" rx="2"/>`;
-    if(n<=14||i%Math.ceil(n/14)===0||i===n-1)
+    if(n<=14||i%Math.ceil(n/14)===0||i===n-1){
+      const cx=M.l+(w*(i+0.5)/n);
       s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
+    }
   });
   s+='</svg>';
   wrap.innerHTML=s;
+  bindDots('rep-wrap-turno');
 }
 function drawRepHoras(datos){
   const wrap=$('rep-wrap-horas');if(!wrap)return;
@@ -933,20 +998,20 @@ function drawRepHoras(datos){
   const maxY=Math.max(...datos.map(d=>Math.max(d.hh_plan,d.hh_terc)),1)*1.2;
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=svgGridBase(W,H,M,maxY);
-  const linea=(campo,color)=>{
+  s+=svgDivisoresAnio(datos,W,H,M);
+  const linea=(campo,color,nombre)=>{
     let path='';
-    datos.forEach((d,i)=>{
-      const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*d[campo]/maxY);
-      path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);
-    });
+    datos.forEach((d,i)=>{const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);});
     let out=`<path d="${path}" stroke="${color}" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
-    const last=datos[datos.length-1];
-    const lx=M.l+(w*(n-0.5)/n), ly=M.t+h-(h*last[campo]/maxY);
-    out+=`<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="4" fill="#07070f" stroke="${color}" stroke-width="2"/>`;
+    datos.forEach((d,i)=>{
+      const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);
+      out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="9" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmt(d[campo],0)}h" data-s="${nombre}" data-c="${color}"/>`;
+      out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="#07070f" stroke="${color}" stroke-width="1.8" pointer-events="none"/>`;
+    });
     return out;
   };
-  s+=linea('hh_plan','#60a5fa');
-  s+=linea('hh_terc','#fbbf24');
+  s+=linea('hh_plan','#60a5fa','HH Planilla');
+  s+=linea('hh_terc','#fbbf24','HH Terceros');
   datos.forEach((d,i)=>{
     if(n<=14||i%Math.ceil(n/14)===0||i===n-1){
       const cx=M.l+(w*(i+0.5)/n);
@@ -955,6 +1020,7 @@ function drawRepHoras(datos){
   });
   s+='</svg>';
   wrap.innerHTML=s;
+  bindDots('rep-wrap-horas');
 }
 function drawRepSplitAnios(){
   const cont=$('rep-split-anios');if(!cont)return;
@@ -1002,13 +1068,71 @@ function renderRepTablaMensual(datos){
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--plan)">${fmt(d.hh_plan,0)}h</div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--terc)">${fmt(d.hh_terc,0)}h</div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--tm)">${fmt(d.hh_tot,0)}h</div>
-      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-weight:600">${d.eficiencia!=null?fmtE(d.eficiencia):'—'}</div>`;
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-weight:700">${d.eficiencia_acum!=null?fmtE(d.eficiencia_acum):'—'}</div>`;
     c.appendChild(row);
   });
+}
+/* ── Tarjetas de insight automático ── */
+function renderRepInsights(datos){
+  const cont=$('rep-insights');if(!cont)return;
+  if(datos.length<3){cont.innerHTML='';return;}
+  const vals=datos.map(d=>d.folios_tot);
+  const reg=regresionLineal(vals);
+  const cambioTotalPct=reg&&vals[0]>0?((reg.puntos[reg.puntos.length-1]-reg.puntos[0])/Math.abs(reg.puntos[0])*100):null;
+
+  const depTerc=datos.map(d=>d.hh_tot>0?d.hh_terc/d.hh_tot*100:null).filter(v=>v!=null);
+  const depIni=depTerc[0], depFin=depTerc[depTerc.length-1];
+  const depCambio=depIni!=null&&depFin!=null?depFin-depIni:null;
+
+  let rachaActual=0, mejorRacha=0;
+  datos.forEach(d=>{
+    const obj=objMes(d.anio,d.mes);
+    const cumple=d.eficiencia_mes!=null&&d.eficiencia_mes>=obj;
+    rachaActual=cumple?rachaActual+1:0;
+    if(rachaActual>mejorRacha)mejorRacha=rachaActual;
+  });
+  const ultimoCumple=datos.length&&datos[datos.length-1].eficiencia_mes!=null&&datos[datos.length-1].eficiencia_mes>=objMes(datos[datos.length-1].anio,datos[datos.length-1].mes);
+
+  const tarjetas=[];
+  if(cambioTotalPct!=null){
+    const cae=cambioTotalPct<-3;
+    tarjetas.push({
+      ico:cae?'📉':cambioTotalPct>3?'📈':'➡️',
+      titulo:'Tendencia de despachos',
+      valor:(cambioTotalPct>=0?'+':'')+fmt(cambioTotalPct,1)+'%',
+      sub:cae?'Cayendo en el período — si las horas no bajan igual, la eficiencia futura va a caer':cambioTotalPct>3?'Creciendo en el período':'Estable en el período',
+      color:cae?'var(--red)':cambioTotalPct>3?'var(--ok)':'var(--tm)'
+    });
+  }
+  if(depCambio!=null){
+    const sube=depCambio>3;
+    tarjetas.push({
+      ico:sube?'⚠️':'👥',
+      titulo:'Dependencia de terceros',
+      valor:fmt(depFin,1)+'%',
+      sub:sube?`Subió ${fmt(depCambio,1)} pts desde el inicio del período`:`Cambió ${fmt(depCambio,1)} pts en el período`,
+      color:sube?'var(--ora)':'var(--tm)'
+    });
+  }
+  tarjetas.push({
+    ico:ultimoCumple?'✅':'🔻',
+    titulo:'Racha cumpliendo objetivo',
+    valor:mejorRacha+' meses',
+    sub:ultimoCumple?'El último mes cerrado cumplió su objetivo':'El último mes cerrado NO cumplió su objetivo',
+    color:ultimoCumple?'var(--ok)':'var(--red)'
+  });
+
+  cont.innerHTML=tarjetas.map(t=>`
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:1.05rem">${t.ico}</span><span style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts)">${t.titulo}</span></div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:${t.color};line-height:1">${t.valor}</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--tm);margin-top:6px;line-height:1.4">${t.sub}</div>
+    </div>`).join('');
 }
 function renderReportes(){
   renderRepAnioSel();
   const datos=agregadoMensual(anioActivoReportes());
+  renderRepInsights(datos);
   drawRepDespachosTotal(datos);
   drawRepPorTurno(datos);
   drawRepHoras(datos);
