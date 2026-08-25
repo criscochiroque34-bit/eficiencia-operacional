@@ -25,6 +25,29 @@ html,body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;mi
 .main{flex:1;min-width:0;padding:30px 36px;overflow-x:hidden}
 @media(max-width:960px){.sb{display:none}.main{padding:16px 14px;padding-bottom:calc(var(--nav)+12px)}.bnav{display:flex!important}}
 @media(max-width:640px){#sim-inputs-grid{grid-template-columns:1fr!important}#sim-caminos{grid-template-columns:1fr!important}}
+.tab-sim{border:1px solid var(--b1);background:var(--s2);border-radius:7px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;color:var(--tm)}
+.tab-sim.a{background:rgba(124,111,255,.15);border-color:rgba(124,111,255,.4);color:var(--t1)}
+.sim-panel{display:none}
+.sim-panel.a{display:block}
+
+/* Tabla diaria tipo spreadsheet del Simulador */
+#sim-panel-dia table th,#sim-panel-dia table td{padding:7px 10px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.72rem;white-space:nowrap;border-bottom:1px solid var(--b1)}
+#sim-panel-dia table th.rowlbl,#sim-panel-dia table td.rowlbl{text-align:left;position:sticky;left:0;background:var(--s2);z-index:2;min-width:66px}
+#sim-panel-dia table th.grouplbl,#sim-panel-dia table td.grouplbl{text-align:left;position:sticky;left:66px;background:var(--s2);z-index:2;min-width:60px;border-right:1px solid var(--b1)}
+#sim-panel-dia table thead th{background:var(--s3);color:var(--tm);font-weight:600;position:sticky;top:0;z-index:1}
+#sim-panel-dia table thead th.rowlbl,#sim-panel-dia table thead th.grouplbl{z-index:3}
+#sim-panel-dia table thead .dow{display:block;font-size:.58rem;color:var(--ts);font-weight:400}
+#sim-panel-dia table thead th.col-proy{color:#5b6b8c}
+#sim-panel-dia table thead th.col-proy .dow{color:#5b6b8c}
+#sim-panel-dia .grupo-head td{background:var(--s3);color:var(--tx);font-family:'Syne',sans-serif;font-weight:700;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;padding-top:8px;padding-bottom:8px}
+#sim-panel-dia .grupo-head td.rowlbl,#sim-panel-dia .grupo-head td.grouplbl{background:var(--s3)}
+#sim-panel-dia .celda-proy{color:#8a97b8;font-style:italic;border-bottom-style:dashed}
+#sim-panel-dia .acum-row td{background:rgba(124,111,255,.08);font-weight:700;border-top:2px solid rgba(124,111,255,.3)}
+#sim-panel-dia .acum-row td.grouplbl,#sim-panel-dia .acum-row td.rowlbl{background:rgba(124,111,255,.1);color:var(--t1)}
+#sim-panel-dia .efic-cell{border-radius:4px;font-weight:700}
+#sim-panel-dia .efic-red{background:rgba(255,77,109,.18);color:#ffb3c0}
+#sim-panel-dia .efic-ora{background:rgba(255,149,0,.16);color:#ffd199}
+#sim-panel-dia .efic-ok{background:rgba(0,200,150,.16);color:#7fe8c9}
 .bnav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:var(--s1);border-top:1px solid var(--b1);z-index:50}
 .bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:transparent;color:var(--ts);font-family:'Inter',sans-serif;font-size:.5rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;padding:8px 2px;transition:color .15s}
 .bn .ico{font-size:1.15rem;line-height:1}
@@ -505,29 +528,37 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div><div class="ph-title">Simulador de objetivos</div><div class="ph-sub">¿Qué necesito para llegar a cierta eficiencia?</div></div>
   </div>
 
-  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px" id="sim-inputs-grid">
+  <div style="background:var(--s2);border:1px solid rgba(255,149,0,.3);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:4px" id="sim-inputs-grid">
       <div>
-        <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Mes objetivo</label>
-        <input type="month" id="sim-mes" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx);color-scheme:dark">
+        <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ora);margin-bottom:5px">Mes objetivo</label>
+        <input type="month" id="sim-mes" oninput="ejecutarSimulador()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--tx);color-scheme:dark">
       </div>
       <div>
-        <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Eficiencia objetivo</label>
-        <input type="number" id="sim-objetivo" step="0.1" value="20" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:var(--ora)">
+        <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ora);margin-bottom:5px">Eficiencia que busco</label>
+        <input type="number" id="sim-objetivo" step="0.1" value="20" oninput="ejecutarSimulador()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:var(--ora)">
       </div>
       <div>
-        <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Alcance</label>
-        <select id="sim-alcance" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;color:var(--tx)">
+        <label style="display:block;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ora);margin-bottom:5px">Alcance</label>
+        <select id="sim-alcance" onchange="ejecutarSimulador()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;color:var(--tx)">
           <option value="general">General (T3+T1)</option>
           <option value="t3">Solo T3 Día</option>
           <option value="t1">Solo T1 Noche</option>
         </select>
       </div>
     </div>
-    <button class="btn btn-p btn-w" onclick="ejecutarSimulador()">Calcular escenario →</button>
+    <div style="font-size:.66rem;color:var(--tm);margin-top:8px">Este número controla las 3 pestañas de abajo — cámbialo y se actualiza todo en vivo.</div>
   </div>
 
-  <div id="sim-resultado"></div>
+  <div style="display:flex;gap:6px;margin-bottom:18px" id="sim-tabs">
+    <button class="tab-sim a" onclick="showSimTab('mes',this)">Vista Mes</button>
+    <button class="tab-sim" onclick="showSimTab('semana',this)">Vista Semana</button>
+    <button class="tab-sim" onclick="showSimTab('dia',this)">Vista Día</button>
+  </div>
+
+  <div id="sim-panel-mes" class="sim-panel a"></div>
+  <div id="sim-panel-semana" class="sim-panel"></div>
+  <div id="sim-panel-dia" class="sim-panel"></div>
 </div>
 
 <!-- ══ MODELO ML ══ -->
@@ -873,6 +904,97 @@ function horasDe(d,alcance){
   return (+d.hp_t3||0)+(+d.ht_t3||0)+(+d.hp_t1||0)+(+d.ht_t1||0);
 }
 /* alcance: 'general' | 't3' | 't1' */
+/* Semanas calendario (lunes a domingo) recortadas a los límites del mes.
+   Si el mes empieza jueves, la primera "semana" va de jueves a domingo. */
+function semanasDelMes(anio,mes){
+  const totalDias=new Date(anio,mes,0).getDate();
+  const primero=new Date(anio,mes-1,1);
+  const semanas=[];
+  let cursor=new Date(primero);
+  while(cursor.getMonth()===mes-1){
+    const dowLunes=(cursor.getDay()+6)%7; // 0=lunes
+    const inicioSemana=new Date(cursor);
+    const finSemanaCal=new Date(cursor); finSemanaCal.setDate(finSemanaCal.getDate()+(6-dowLunes));
+    const finMes=new Date(anio,mes,0);
+    const fin=finSemanaCal<=finMes?finSemanaCal:finMes;
+    const dias=[];
+    for(let d=new Date(inicioSemana);d<=fin;d.setDate(d.getDate()+1))dias.push(fechaStr(d));
+    semanas.push({dias,inicio:fechaStr(inicioSemana),fin:fechaStr(fin),
+      parcial:dowLunes!==0||fin.getDate()!==finSemanaCal.getDate()});
+    cursor=new Date(fin); cursor.setDate(cursor.getDate()+1);
+  }
+  return semanas;
+}
+/* ¿Ese día ya tiene dato real cargado, o hay que usar la predicción? */
+function esDiaReal(fecha){
+  const d=_idx.dias.get(fecha);
+  return !!(d&&((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+}
+/* Un día, con el valor correcto según sea real o proyectado.
+   Real: usa hp/ht separados tal como se cargaron.
+   Proyectado: SOLO horas totales (nunca se inventa el split planilla/terceros
+   de un día que aún no pasó — eso lo decide el operador día a día). */
+function statsDia(fecha,alcance){
+  const real=esDiaReal(fecha);
+  const td=tipoDia(fecha);
+  if(real){
+    const d=_idx.dias.get(fecha);
+    const folios=foliosDe(d,alcance);
+    const horas=horasDe(d,alcance);
+    return{fecha,real:true,tipo_dia:td,folios:Math.round(folios),horas:r1(horas),
+      eficiencia:horas>0?r2(folios/horas):null};
+  }
+  const p=predecirCached(fecha);
+  const folios=p?(alcance==='t3'?p.ft3:alcance==='t1'?p.ft1:p.ft3+p.ft1):0;
+  const horas=horasPromedioPorTipo(td,alcance)||0;
+  return{fecha,real:false,tipo_dia:td,folios:Math.round(folios),horas:r1(horas),
+    eficiencia:horas>0?r2(folios/horas):null,confianza:p?p.conf:null};
+}
+/* Agregación semanal del mes: cada semana con su estado (real / mixta /
+   proyectada) y sus totales — para la vista Semana del simulador. */
+function simularSemanal(anio,mes,alcance){
+  return semanasDelMes(anio,mes).map((sem,i)=>{
+    const stats=sem.dias.map(f=>statsDia(f,alcance));
+    const nReales=stats.filter(s=>s.real).length;
+    const estado=nReales===0?'proyectada':nReales===stats.length?'real':'mixta';
+    const folios=stats.reduce((s,d)=>s+d.folios,0);
+    const horas=stats.reduce((s,d)=>s+d.horas,0);
+    const dIni=new Date(sem.inicio+'T12:00:00'), dFin=new Date(sem.fin+'T12:00:00');
+    const fmt=d=>d.toLocaleDateString('es-PE',{day:'numeric',month:'short'});
+    return{
+      semana:i+1, inicio:sem.inicio, fin:sem.fin, parcial:sem.parcial,
+      rango_label:`${fmt(dIni)} – ${fmt(dFin)}`,
+      dias:stats.length, estado,
+      folios, horas:r1(horas), eficiencia:horas>0?r2(folios/horas):null,
+      folios_reales:stats.filter(s=>s.real).reduce((s,d)=>s+d.folios,0),
+      folios_proyectados:stats.filter(s=>!s.real).reduce((s,d)=>s+d.folios,0),
+    };
+  });
+}
+/* Detalle día por día de TODO el mes (no solo lo que falta), marcando
+   real vs proyectado y con la eficiencia acumulada combinando ambos —
+   para la tabla tipo spreadsheet de la vista Día. */
+function simularDiario(anio,mes,alcance){
+  const totalDias=new Date(anio,mes,0).getDate();
+  const pre=`${anio}-${String(mes).padStart(2,'0')}`;
+  let accF=0,accH=0;
+  const out=[];
+  for(let dia=1;dia<=totalDias;dia++){
+    const f=`${pre}-${String(dia).padStart(2,'0')}`;
+    const s=statsDia(f,alcance);
+    accF+=s.folios; accH+=s.horas;
+    const dObj=new Date(f+'T12:00:00');
+    out.push({...s,
+      dia_semana:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][dObj.getDay()],
+      dia_num:dia,
+      eficiencia_acumulada:accH>0?r2(accF/accH):null,
+      es_hoy:f===hoy(),
+      evento:_idx.eventos.get(f)?.nombre||null,
+      feriado:_idx.feriados.has(f),
+    });
+  }
+  return out;
+}
 function simularEscenario(anio,mes,eficienciaObjetivo,alcance){
   alcance=alcance||'general';
   const pre=`${anio}-${String(mes).padStart(2,'0')}`;
@@ -966,6 +1088,68 @@ function simularEscenario(anio,mes,eficienciaObjetivo,alcance){
     return vals.length?Math.max(...vals):null;
   })();
 
+  // ── Matriz turno × tipo de día: cuánto necesita CADA turno, no solo el
+  //    total combinado. El reparto del ajuste entre T3 y T1 es proporcional
+  //    a lo que el modelo/histórico predice que mueve cada uno — el turno
+  //    que ya mueve más volumen absorbe más del ajuste. ──
+  const turnosMatriz=alcance==='general'?['t3','t1']:[alcance];
+  const bucketsRaw={};
+  restantes.forEach(f=>{
+    const p=predecirCached(f); if(!p)return;
+    const td=tipoDia(f);
+    turnosMatriz.forEach(tr=>{
+      const key=td+'_'+tr;
+      if(!bucketsRaw[key])bucketsRaw[key]={tipo_dia:td,turno:tr,dias:0,folios:0,horas:0};
+      const fol=tr==='t3'?p.ft3:p.ft1;
+      const hrs=horasPromedioPorTipo(td,tr)||0;
+      bucketsRaw[key].dias++; bucketsRaw[key].folios+=fol; bucketsRaw[key].horas+=hrs;
+    });
+  });
+  const totalFolBuckets=Object.values(bucketsRaw).reduce((s,b)=>s+b.folios,0);
+  const totalExtra=alcance==='general'?foliosFaltantes:foliosFaltantes; // ya viene del alcance elegido
+  const matrizTurnoTipo=Object.values(bucketsRaw).map(b=>{
+    const participacion=totalFolBuckets>0?b.folios/totalFolBuckets:0;
+    const extraAsignado=Math.round(totalExtra*participacion);
+    const pctExtra=b.folios>0?r1(extraAsignado/b.folios*100):null;
+    return{
+      tipo_dia:b.tipo_dia, turno:b.turno, dias:b.dias,
+      folios_pred:Math.round(b.folios), horas_esperadas:r1(b.horas),
+      eficiencia_esperada:b.horas>0?r2(b.folios/b.horas):null,
+      folios_extra_asignados:extraAsignado,
+      pct_extra:pctExtra,
+      alcanza:extraAsignado<=0,
+    };
+  });
+
+  // ── Personas equivalentes necesarias por turno, para el resto del mes.
+  //    La planilla "típica" se infiere del histórico reciente (no hay un
+  //    conteo de planilla configurado en la app) — el resto se lee como
+  //    terceros estimados. ──
+  const horasEsperadasTotalTurnos=Object.values(bucketsRaw).reduce((s,b)=>s+b.horas,0);
+  function personasNecesarias(tr){
+    const jP=cfgOf('semana',tr).jornada_planilla;
+    const comparables=S.dias.filter(d=>((+d.folios_t3||0)+(+d.folios_t1||0))>0).slice(-14);
+    const hpProm=comparables.length?media(comparables.map(d=>tr==='t3'?(+d.hp_t3||0):(+d.hp_t1||0))):0;
+    const planillaEstimada=jP>0?Math.round(hpProm/jP):0;
+    const horasTr=Object.values(bucketsRaw).filter(b=>b.turno===tr).reduce((s,b)=>s+b.horas,0);
+    const diasTr=Object.values(bucketsRaw).filter(b=>b.turno===tr).reduce((s,b)=>s+b.dias,0)||1;
+    // El recorte/aumento de horas que ya calculamos a nivel del alcance completo
+    // (horasSobrantes) se reparte entre turnos proporcional a cuántas horas
+    // esperaba cada uno — mismo criterio que la matriz de folios.
+    const participacionHoras=horasEsperadasTotalTurnos>0?horasTr/horasEsperadasTotalTurnos:0;
+    const ajusteHorasTr=(horasSobrantes||0)*participacionHoras; // >0 recortar, <0 holgura
+    const horasAjustadasTr=Math.max(0,horasTr-ajusteHorasTr);
+    const totalNecesarias=jP>0?Math.round((horasAjustadasTr/diasTr)/jP):0;
+    return{
+      turno:tr, jornada_referencia:jP,
+      personas_totales_necesarias_por_dia:totalNecesarias,
+      planilla_estimada_actual:planillaEstimada,
+      terceros_estimados:Math.max(0,totalNecesarias-planillaEstimada),
+      nota:E>0&&eficProyectada!=null&&eficProyectada<E?'Ajustado al objetivo (vía menos horas)':'Sin ajuste — ya alcanza con lo esperado',
+    };
+  }
+  const personasPorTurno=turnosMatriz.map(personasNecesarias);
+
   return{
     mes_objetivo:`${MESES_CORTO[mes-1]} ${anio}`, anio, mes,
     alcance, alcance_label:alcance==='t3'?'T3 Día':alcance==='t1'?'T1 Noche':'General (T3+T1)',
@@ -1003,6 +1187,8 @@ function simularEscenario(anio,mes,eficienciaObjetivo,alcance){
       return'Requiere ajustar horas o recibir más pedidos';
     })(),
     detalle_dias_restantes:detalle,
+    matriz_turno_tipo:matrizTurnoTipo,
+    personas_por_turno:personasPorTurno,
   };
 }
 function agregadoMensual(anio){
@@ -1266,22 +1452,37 @@ function drawRepSplitAnios(){
   });
 }
 /* ── Pantalla del simulador ── */
+let SIM_ULTIMO=null;
+function showSimTab(id,btn){
+  document.querySelectorAll('.sim-panel').forEach(p=>p.classList.remove('a'));
+  $('sim-panel-'+id).classList.add('a');
+  document.querySelectorAll('.tab-sim').forEach(t=>t.classList.remove('a'));
+  btn.classList.add('a');
+}
 function ejecutarSimulador(){
   const mv=$('sim-mes').value;
-  if(!mv){toast('Selecciona un mes','error');return;}
+  if(!mv)return;
   const[a,m]=mv.split('-').map(Number);
   const E=+$('sim-objetivo').value;
-  if(!E||E<=0){toast('Ingresa una eficiencia objetivo válida','error');return;}
+  if(!E||E<=0)return;
   const alcance=$('sim-alcance').value;
   const s=simularEscenario(a,m,E,alcance);
-  renderSimResultado(s);
+  const semanal=simularSemanal(a,m,alcance);
+  const diario=simularDiario(a,m,alcance);
+  SIM_ULTIMO={s,semanal,diario,E,alcance};
+  renderSimMes(s);
+  renderSimSemana(semanal,E);
+  renderSimDia(diario,E,alcance);
 }
-function renderSimResultado(s){
-  const c=$('sim-resultado');if(!c)return;
+
+/* ═══ VISTA MES ═══ */
+function renderSimMes(s){
+  const c=$('sim-panel-mes');if(!c)return;
   const p=s.proyeccion_sin_ajustes, ea=s.escenario_mas_pedidos, eh=s.escenario_menos_horas;
   const alcanza=p.alcanza===true;
   const colorEstado=alcanza?'var(--ok)':'var(--red)';
-  const pers=eh.equivalente_personas||{};
+  const tieneReal=s.situacion_actual.dias_cerrados>0;
+  const tieneProy=s.dias_restantes>0;
 
   const bloqueTipo=s.desglose_por_tipo_dia.map(t=>`
     <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:8px;padding:9px 12px;border-bottom:1px solid var(--b1);font-size:.74rem;align-items:center">
@@ -1291,37 +1492,66 @@ function renderSimResultado(s){
       <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;color:${t.ajuste_horas>0?'var(--red)':'var(--ok)'}">${t.ajuste_horas>0?'−':'+'}${fmt(Math.abs(t.ajuste_horas),0)}h</div>
     </div>`).join('');
 
+  const matrizHtml=s.matriz_turno_tipo.length?`
+    <div class="sl">Qué necesita cada turno, por tipo de día</div>
+    <div style="display:grid;grid-template-columns:${s.matriz_turno_tipo.some(b=>b.tipo_dia==='finde')&&s.matriz_turno_tipo.some(b=>b.tipo_dia==='semana')?'1fr 1fr':'1fr'};gap:12px;margin-bottom:14px">
+      ${['semana','finde','feriado'].filter(td=>s.matriz_turno_tipo.some(b=>b.tipo_dia===td)).map(td=>`
+        <div style="background:var(--s2);border:1px solid ${td==='semana'?'rgba(255,149,0,.2)':td==='finde'?'rgba(124,111,255,.2)':'rgba(255,77,109,.2)'};border-radius:10px;padding:14px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:10px;text-transform:capitalize">${td==='semana'?'📅':td==='finde'?'🏖️':'🔴'} ${td} <span style="font-weight:400;color:var(--tm);font-size:.68rem">· ${s.matriz_turno_tipo.find(b=>b.tipo_dia===td).dias} días</span></div>
+          ${s.matriz_turno_tipo.filter(b=>b.tipo_dia===td).map(b=>`
+            <div style="padding:8px 0;border-bottom:1px dashed var(--b1)">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;align-items:center;gap:8px"><span class="pill ${b.turno}" style="padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;background:${b.turno==='t3'?'rgba(0,200,150,.12)':'rgba(124,111,255,.15)'};color:${b.turno==='t3'?'var(--t3)':'var(--t1)'}">${b.turno.toUpperCase()}</span><span style="font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--tm)">predicho <strong style="color:var(--tx)">${fmtI(b.folios_pred)}</strong></span></div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:2px 7px;border-radius:4px;font-weight:700;background:${b.alcanza?'rgba(0,200,150,.1)':'rgba(255,77,109,.1)'};color:${b.alcanza?'var(--ok)':'var(--red)'}">${b.alcanza?'✓ alcanza':'+'+fmt(b.pct_extra,1)+'%'}</span>
+              </div>
+              ${!b.alcanza?`<div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:3px">≈ <strong style="color:var(--tm)">${fmtI(b.folios_extra_asignados)} folios más</strong> en estos ${b.dias} días (~${Math.round(b.folios_extra_asignados/b.dias)}/día)</div>`:''}
+            </div>`).join('')}
+        </div>`).join('')}
+    </div>
+    <div style="background:rgba(124,111,255,.05);border:1px solid rgba(124,111,255,.15);border-radius:8px;padding:10px 13px;font-size:.68rem;color:var(--tm);margin-bottom:14px">
+      El reparto entre T3 y T1 es proporcional a lo que el modelo predice que mueve cada turno — no un 50/50 fijo.
+    </div>`:'';
+
+  const personasHtml=s.personas_por_turno.length?`
+    <div class="sl">Personas necesarias por turno</div>
+    <div style="display:grid;grid-template-columns:${s.personas_por_turno.length>1?'1fr 1fr':'1fr'};gap:12px;margin-bottom:14px">
+      ${s.personas_por_turno.map(pt=>`
+        <div style="background:var(--s2);border:1px solid ${pt.turno==='t3'?'rgba(0,200,150,.25)':'rgba(124,111,255,.25)'};border-radius:10px;padding:16px;text-align:center">
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;line-height:1;color:${pt.turno==='t3'?'var(--t3)':'var(--t1)'}">${pt.personas_totales_necesarias_por_dia}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:4px">personas equivalentes · ${pt.turno.toUpperCase()}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm);margin-top:10px;padding-top:10px;border-top:1px dashed var(--b1);line-height:1.5">Planilla estimada actual: <strong style="color:var(--tx)">${pt.planilla_estimada_actual}</strong><br>Terceros estimados: <strong style="color:var(--tx)">${pt.terceros_estimados}</strong><br><span style="color:var(--ts)">${pt.nota}</span></div>
+        </div>`).join('')}
+    </div>`:'';
+
   c.innerHTML=`
-    <!-- Estado actual y proyección -->
     <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:8px">
         <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.95rem">${s.mes_objetivo} · ${s.alcance_label}</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--ts)">objetivo ${fmtE(s.eficiencia_objetivo)} fol/h</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <div style="background:var(--s3);border-radius:8px;padding:12px">
-          <div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:5px">Hoy va en</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--tx)">${s.situacion_actual.eficiencia_acumulada!=null?fmtE(s.situacion_actual.eficiencia_acumulada):'—'}</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:4px">${s.situacion_actual.dias_cerrados} días cerrados</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div style="background:${tieneReal?'linear-gradient(135deg,rgba(0,200,150,.1),rgba(0,200,150,.02))':'var(--s3)'};border:1px solid ${tieneReal?'rgba(0,200,150,.25)':'var(--b1)'};border-radius:10px;padding:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:${tieneReal?'var(--ok)':'var(--ts)'};margin-bottom:8px">✓ Real · ${s.situacion_actual.dias_cerrados} días cerrados</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--tx)">${s.situacion_actual.eficiencia_acumulada!=null?fmtE(s.situacion_actual.eficiencia_acumulada):'—'}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:4px">${fmtI(s.situacion_actual.folios)} fol · ${fmt(s.situacion_actual.horas,0)}h</div>
         </div>
-        <div style="background:var(--s3);border-radius:8px;padding:12px">
-          <div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:5px">Cerraría en</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:${colorEstado}">${p.eficiencia_al_cierre!=null?fmtE(p.eficiencia_al_cierre):'—'}</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:4px">si nada cambia</div>
-        </div>
-        <div style="background:var(--s3);border-radius:8px;padding:12px">
-          <div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:5px">Brecha</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:${colorEstado}">${p.brecha_vs_objetivo>0?'−':'+'}${fmtE(Math.abs(p.brecha_vs_objetivo))}</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:4px">${s.dias_restantes} días restantes</div>
+        <div style="background:var(--s3);border:1px dashed var(--b2);border-radius:10px;padding:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:8px">◌ Proyectado · ${s.dias_restantes} días</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--tm)">${p.eficiencia_al_cierre!=null&&tieneProy?fmtE(p.folios_predichos>0?p.folios_predichos/p.horas_esperadas:0):(tieneProy?'—':'sin días')}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--tm);margin-top:4px">${tieneProy?`${fmtI(p.folios_predichos)} fol · ${fmt(p.horas_esperadas,0)}h`:'mes ya cerrado'}</div>
         </div>
       </div>
-      <div style="margin-top:12px;background:${alcanza?'rgba(0,200,150,.07)':'rgba(255,77,109,.07)'};border:1px solid ${alcanza?'rgba(0,200,150,.25)':'rgba(255,77,109,.25)'};border-radius:8px;padding:11px 13px;display:flex;align-items:center;gap:10px">
+      <div style="background:var(--s3);border-radius:8px;padding:12px;text-align:center;margin-bottom:12px">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:${colorEstado}">${p.eficiencia_al_cierre!=null?fmtE(p.eficiencia_al_cierre):'—'}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:3px">eficiencia proyectada al cierre (real + proyectado combinado)</div>
+      </div>
+      <div style="background:${alcanza?'rgba(0,200,150,.07)':'rgba(255,77,109,.07)'};border:1px solid ${alcanza?'rgba(0,200,150,.25)':'rgba(255,77,109,.25)'};border-radius:8px;padding:11px 13px;display:flex;align-items:center;gap:10px">
         <span style="font-size:1.1rem">${alcanza?'✅':'⚠️'}</span>
         <div style="font-size:.78rem;color:${colorEstado};font-weight:600">${s.veredicto}</div>
       </div>
     </div>
 
-    ${!alcanza?`
+    ${!alcanza&&tieneProy?`
     <div class="sl">Dos caminos para llegar</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px" id="sim-caminos">
       <div style="background:var(--s2);border:1px solid rgba(0,200,150,.25);border-radius:10px;padding:16px">
@@ -1332,14 +1562,17 @@ function renderSimResultado(s){
       <div style="background:var(--s2);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:16px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><span style="font-size:1.05rem">⏱️</span><span style="font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts)">Camino B · Menos horas</span></div>
         <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--terc);line-height:1">−${fmt(eh.horas_a_recortar,0)}h</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--tm);margin-top:6px;line-height:1.5">a recortar en total (${fmt(pers.horas_a_recortar_por_dia||0,1)}h/día)<br>≈ <strong style="color:var(--tx)">${pers.terceros_a_reducir_por_dia||0} terceros menos por día</strong><br><span style="color:var(--ts)">manteniendo los pedidos previstos</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--tm);margin-top:6px;line-height:1.5">a recortar en total (${fmt(eh.equivalente_personas?.horas_a_recortar_por_dia||0,1)}h/día)<br>≈ <strong style="color:var(--tx)">${eh.equivalente_personas?.terceros_a_reducir_por_dia||0} terceros menos por día</strong><br><span style="color:var(--ts)">manteniendo los pedidos previstos</span></div>
       </div>
-    </div>`:`
+    </div>`:tieneProy?`
     <div style="background:var(--s2);border:1px solid rgba(0,200,150,.25);border-radius:10px;padding:16px;margin-bottom:14px">
       <div style="font-size:.78rem;color:var(--tm)">Tienes <strong style="color:var(--ok)">${fmt(eh.holgura_si_sobra,0)}h de holgura</strong> — podrías usar hasta esas horas extra y aun así cumplir el objetivo.</div>
-    </div>`}
+    </div>`:''}
 
-    <div class="sl">Desglose por tipo de día</div>
+    ${matrizHtml}
+    ${personasHtml}
+
+    <div class="sl">Desglose por tipo de día (vista simple)</div>
     <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden;margin-bottom:14px">
       <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr;gap:8px;padding:9px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts)">
         <div>Tipo</div><div style="text-align:right">Predicho</div><div style="text-align:right">Efic. esperada</div><div style="text-align:right">Ajuste horas</div>
@@ -1353,6 +1586,60 @@ function renderSimResultado(s){
     </div>`:''}
   `;
 }
+
+/* ═══ VISTA SEMANA ═══ */
+function renderSimSemana(semanal,E){
+  const c=$('sim-panel-semana');if(!c)return;
+  if(!semanal.length){c.innerHTML='<div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</div>';return;}
+  const estadoPill=e=>e==='real'?'<span class="pill" style="background:rgba(0,200,150,.12);color:var(--ok);border:1px solid rgba(0,200,150,.3);padding:2px 8px;border-radius:4px;font-family:\'JetBrains Mono\',monospace;font-size:.6rem;font-weight:700;text-transform:uppercase">Real</span>'
+    :e==='mixta'?'<span class="pill" style="background:rgba(255,149,0,.12);color:var(--ora);border:1px solid rgba(255,149,0,.3);padding:2px 8px;border-radius:4px;font-family:\'JetBrains Mono\',monospace;font-size:.6rem;font-weight:700;text-transform:uppercase">Mixta</span>'
+    :'<span class="pill" style="background:rgba(91,107,140,.2);color:#a8b3d1;border:1px dashed #5b6b8c;padding:2px 8px;border-radius:4px;font-family:\'JetBrains Mono\',monospace;font-size:.6rem;font-weight:700;text-transform:uppercase">Proy.</span>';
+  const claseColor=v=>v==null?'var(--tm)':v>=E?'var(--ok)':v>=E*0.9?'var(--ora)':'var(--red)';
+
+  c.innerHTML=`
+    <div class="sl">Semana calendario (lunes a domingo, recortada al mes)</div>
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:130px 1fr 1fr 1fr 80px;padding:9px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts)">
+        <div>Semana</div><div style="text-align:right">Folios</div><div style="text-align:right">Horas</div><div style="text-align:right">Eficiencia</div><div style="text-align:right">Estado</div>
+      </div>
+      ${semanal.map(s=>`
+        <div style="display:grid;grid-template-columns:130px 1fr 1fr 1fr 80px;padding:11px 12px;border-bottom:1px solid var(--b1);font-size:.76rem;align-items:center;background:${s.estado==='mixta'?'rgba(255,149,0,.04)':s.estado==='proyectada'?'rgba(91,107,140,.05)':'transparent'}">
+          <div style="font-family:'JetBrains Mono',monospace;font-weight:600">Sem ${s.semana}<span style="display:block;font-size:.6rem;color:var(--ts);font-weight:400">${s.rango_label}${s.parcial?' · parcial':''}</span></div>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;padding-right:10px">${fmtI(s.folios)}</div>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;padding-right:10px;color:var(--tm)">${fmt(s.horas,0)}h</div>
+          <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;color:${claseColor(s.eficiencia)}">${s.eficiencia!=null?fmtE(s.eficiencia):'—'}</div>
+          <div style="text-align:right">${estadoPill(s.estado)}</div>
+        </div>`).join('')}
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:10px">En semanas mixtas o proyectadas, las horas van como total — no se parte en planilla/terceros hasta que el día se vuelva real.</div>
+  `;
+}
+
+/* ═══ VISTA DÍA (tabla tipo spreadsheet) ═══ */
+function renderSimDia(diario,E,alcance){
+  const c=$('sim-panel-dia');if(!c)return;
+  if(!diario.length){c.innerHTML='<div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</div>';return;}
+  const clase=v=>v==null?'':v>=E?'efic-ok':v>=E*0.9?'efic-ora':'efic-red';
+
+  const thead=diario.map(d=>`<th class="${!d.real?'col-proy':''}">${d.dia_semana}${d.es_hoy?' <span style="color:var(--ora)">●</span>':''}<span class="dow">${d.dia_num}${d.feriado?' 🔴':d.evento?' ⭐':''}${d.real?'':' · proy.'}</span></th>`).join('');
+
+  const rowFolios=`<tr class="grupo-head"><td class="rowlbl">DESPACHOS</td><td class="grouplbl">Total</td>${diario.map(d=>`<td class="${!d.real?'celda-proy':''}">${fmtI(d.folios)}</td>`).join('')}</tr>`;
+  const rowHoras=`<tr><td class="rowlbl">HORAS</td><td class="grouplbl">${alcance==='general'?'T3+T1':alcance.toUpperCase()}</td>${diario.map(d=>`<td class="${!d.real?'celda-proy':''}">${fmt(d.horas,0)}h</td>`).join('')}</tr>`;
+  const rowEfic=`<tr class="grupo-head"><td class="rowlbl">EFICIENCIA</td><td class="grouplbl" style="color:var(--tx)">Del día</td>${diario.map(d=>`<td class="efic-cell ${clase(d.eficiencia)} ${!d.real?'celda-proy':''}">${d.eficiencia!=null?fmtE(d.eficiencia):'—'}</td>`).join('')}</tr>`;
+  const rowAcum=`<tr class="acum-row"><td class="rowlbl">EFICIENCIA</td><td class="grouplbl">Acumulada</td>${diario.map(d=>`<td class="efic-cell ${clase(d.eficiencia_acumulada)}">${d.eficiencia_acumulada!=null?fmtE(d.eficiencia_acumulada):'—'}</td>`).join('')}</tr>`;
+
+  c.innerHTML=`
+    <div class="sl">Día a día · ${diario.length} días · objetivo ${fmtE(E)}</div>
+    <div style="overflow-x:auto;border:1px solid var(--b1);border-radius:10px;background:var(--s2)">
+      <table style="border-collapse:collapse;width:100%;min-width:${diario.length*72+180}px">
+        <thead><tr><th class="rowlbl">Folios</th><th class="grouplbl">Turno</th>${thead}</tr></thead>
+        <tbody>${rowFolios}${rowHoras}${rowEfic}${rowAcum}</tbody>
+      </table>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:10px">Días con borde punteado = predicción del modelo. El día de hoy se trata como proyectado hasta que cierres el dato real.</div>
+  `;
+}
+
 function renderReportes(){
   renderRepAnioSel();
   const datos=agregadoMensual(anioActivoReportes());
@@ -3009,6 +3296,7 @@ function showView(id,btn,mobile){
     if(mv&&!mv.value){const n=new Date(hoy()+'T12:00:00');mv.value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;}
     const ob=$('sim-objetivo');
     if(ob&&!ob.dataset.init){const n=new Date(hoy()+'T12:00:00');ob.value=fmtE(objMes(n.getFullYear(),n.getMonth()+1));ob.dataset.init='1';}
+    ejecutarSimulador();
   }
   if(id==='ml')renderDiagnostico();
   if(id==='consultor')setTimeout(()=>$('chat-input')?.focus(),150);
