@@ -482,15 +482,11 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <div style="background:linear-gradient(160deg,rgba(124,111,255,.09),rgba(0,200,150,.03) 60%);border:1px solid rgba(124,111,255,.22);border-radius:14px;padding:20px;margin-bottom:28px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap;gap:10px">
       <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.02rem">Eficiencia, despachos y horas por mes</div><div style="font-size:.68rem;color:var(--tm);margin-top:2px">Cierre real de cada mes — el mismo número que ves en Histórico</div></div>
+      <button class="btn btn-s btn-sm" onclick="descargarExcelEficienciaMensual()">⬇ Excel</button>
     </div>
     <div id="rep-hero-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0"></div>
-    <div style="display:flex;gap:14px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm);margin-bottom:10px;flex-wrap:wrap">
-      <span><span style="width:9px;height:3px;border-radius:2px;background:#7c6fff;display:inline-block;margin-right:5px;vertical-align:middle"></span>Eficiencia acumulada</span>
-      <span><span style="width:9px;height:9px;border-radius:2px;background:rgba(0,200,150,.35);display:inline-block;margin-right:5px;vertical-align:middle"></span>Despachos (referencia)</span>
-      <span><span style="width:9px;height:9px;border-radius:2px;background:rgba(251,191,36,.35);display:inline-block;margin-right:5px;vertical-align:middle"></span>Horas (referencia)</span>
-    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm);margin-bottom:10px">Pasa el mouse (o toca) sobre cada punto para ver despachos y horas de ese mes.</div>
     <div id="rep-wrap-eficacum"><svg viewBox="0 0 640 220" style="width:100%;height:auto;display:block"><text x="320" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:8px">Despachos y horas se muestran a escala relativa (de fondo) para comparar la forma de la tendencia — sus valores exactos están en el tooltip de cada punto.</div>
   </div>
 
   <div class="sl" style="margin-bottom:14px">Detalle por turno</div>
@@ -1440,6 +1436,30 @@ function drawRepHoras(datos){
 /* Eficiencia acumulada (Σfolios÷Σhoras, se reinicia cada enero) que
    quedó al CERRAR cada mes — junto a la línea del objetivo de ese mes,
    para ver de un vistazo en qué meses se cumplió y en cuáles no. */
+/* Descarga a Excel exactamente los mismos datos que muestra el gráfico
+   hero — el mismo campo eficiencia_mes (no el acumulado que se corrigió),
+   respetando el filtro de año activo en la vista. */
+function descargarExcelEficienciaMensual(){
+  const datos=agregadoMensual(anioActivoReportes());
+  if(!datos.length){toast('No hay datos para descargar','error');return;}
+  const filas=[['Mes','Año','Despachos totales','Horas totales','Eficiencia (cierre de mes)']];
+  datos.forEach(d=>{
+    filas.push([d.label.replace(/ '\\d\\d$/,''),d.anio,d.folios_tot,r1(d.hh_tot),d.eficiencia_mes!=null?r2(d.eficiencia_mes):'']);
+  });
+  const nombreArchivo=`Eficiencia_mensual_${S.repAnio==='all'?'todos_los_anios':S.repAnio}.xlsx`;
+  if(typeof XLSX!=='undefined'){
+    const ws=XLSX.utils.aoa_to_sheet(filas);
+    ws['!cols']=[{wch:10},{wch:8},{wch:18},{wch:14},{wch:22}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Eficiencia mensual');
+    XLSX.writeFile(wb,nombreArchivo);
+  } else {
+    const csv=filas.map(r=>r.join(',')).join('\\n');
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob(['\\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
+    a.download=nombreArchivo.replace('.xlsx','.csv');a.click();
+  }
+}
 function renderRepHeroStats(datos){
   const cont=$('rep-hero-stats');if(!cont)return;
   const ultimo=[...datos].reverse().find(d=>d.eficiencia_mes!=null);
@@ -1468,8 +1488,6 @@ function drawRepEficienciaAcum(datos){
   const W=640,H=230,M={t:18,r:16,b:38,l:46};
   const w=W-M.l-M.r,h=H-M.t-M.b,n=datos.length;
   const maxY=Math.max(...conVal.map(d=>d.eficiencia_mes),1)*1.2;
-  const maxFol=Math.max(...datos.map(d=>d.folios_tot),1);
-  const maxHor=Math.max(...datos.map(d=>d.hh_tot),1);
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=`<defs>
     <linearGradient id="gradEfic" x1="0" y1="0" x2="0" y2="1">
@@ -1480,17 +1498,9 @@ function drawRepEficienciaAcum(datos){
   s+=svgGridBase(W,H,M,maxY);
   s+=svgDivisoresAnio(datos,W,H,M);
 
-  // Fondo: despachos y horas normalizados a la altura del panel (contexto de forma)
-  const barW=Math.max(3,Math.min(20,(w/n)*0.42));
-  datos.forEach((d,i)=>{
-    const cx=M.l+(w*(i+0.5)/n);
-    const hFol=h*0.85*(d.folios_tot/maxFol);
-    const hHor=h*0.85*(d.hh_tot/maxHor);
-    s+=`<rect x="${(cx-barW-1.5).toFixed(1)}" y="${(M.t+h-hFol).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,hFol).toFixed(1)}" fill="#00c896" opacity=".22" rx="2" class="dot-hit" data-d="${d.label}" data-v="${fmtI(d.folios_tot)}" data-s="Despachos" data-c="#00c896"/>`;
-    s+=`<rect x="${(cx+1.5).toFixed(1)}" y="${(M.t+h-hHor).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,hHor).toFixed(1)}" fill="#fbbf24" opacity=".22" rx="2" class="dot-hit" data-d="${d.label}" data-v="${fmt(d.hh_tot,0)}h" data-s="Horas totales" data-c="#fbbf24"/>`;
-  });
-
-  // Area + linea de eficiencia, protagonista
+  // Area + linea de eficiencia, protagonista — unica serie visible.
+  // Despachos y horas viven solo en el tooltip de cada punto (mas abajo),
+  // para no invitar a comparar alturas entre series que no comparten escala.
   let pathLinea='', pathArea='';
   datos.forEach((d,i)=>{
     if(d.eficiencia_mes==null)return;
