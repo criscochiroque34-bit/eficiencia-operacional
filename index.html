@@ -514,6 +514,18 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div id="rep-wrap-horas"><svg viewBox="0 0 640 200" style="width:100%;height:auto;display:block"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
   </div>
 
+  <!-- 7. Eficiencia acumulada al cierre de cada mes -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Eficiencia acumulada al cierre de cada mes</div><div style="font-size:.65rem;color:var(--tm);margin-top:2px">Se reinicia cada enero · línea punteada = objetivo de ese mes</div></div>
+      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
+        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:4px"></span>Acumulada</span>
+        <span><span style="width:8px;height:8px;border-radius:50%;background:var(--ora);display:inline-block;margin-right:4px"></span>Objetivo</span>
+      </div>
+    </div>
+    <div id="rep-wrap-eficacum"><svg viewBox="0 0 640 200" style="width:100%;height:auto;display:block"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
+  </div>
+
   <!-- 5. % T3/T1 por año -->
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
     <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem;margin-bottom:4px">Participación T3 vs T1 por año</div>
@@ -1418,6 +1430,57 @@ function drawRepHoras(datos){
   wrap.innerHTML=s;
   bindDots('rep-wrap-horas');
 }
+/* Eficiencia acumulada (Σfolios÷Σhoras, se reinicia cada enero) que
+   quedó al CERRAR cada mes — junto a la línea del objetivo de ese mes,
+   para ver de un vistazo en qué meses se cumplió y en cuáles no. */
+function drawRepEficienciaAcum(datos){
+  const wrap=$('rep-wrap-eficacum');if(!wrap)return;
+  const conVal=datos.filter(d=>d.eficiencia_acum!=null);
+  if(!conVal.length){wrap.innerHTML='<svg viewBox="0 0 640 200" style="width:100%;height:auto"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos suficientes</text></svg>';return;}
+  const W=640,H=210,M={t:15,r:16,b:36,l:44};
+  const w=W-M.l-M.r,h=H-M.t-M.b,n=datos.length;
+  const objetivos=datos.map(d=>objMes(d.anio,d.mes));
+  const maxY=Math.max(...conVal.map(d=>d.eficiencia_acum),...objetivos,1)*1.15;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  s+=svgGridBase(W,H,M,maxY);
+  s+=svgDivisoresAnio(datos,W,H,M);
+
+  // Linea de objetivo por mes (punteada)
+  let pathObj='';
+  datos.forEach((d,i)=>{
+    const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*objetivos[i]/maxY);
+    pathObj+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);
+  });
+  s+=`<path d="${pathObj}" stroke="#ff9500" stroke-width="2" fill="none" stroke-dasharray="5,4" stroke-linecap="round" opacity=".75"/>`;
+
+  // Linea de eficiencia acumulada, con color por punto (verde si cumple, rojo si no)
+  let pathAcum='';
+  datos.forEach((d,i)=>{
+    if(d.eficiencia_acum==null)return;
+    const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*d.eficiencia_acum/maxY);
+    pathAcum+=(pathAcum===''?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);
+  });
+  s+=`<path d="${pathAcum}" stroke="#7c6fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  datos.forEach((d,i)=>{
+    if(d.eficiencia_acum==null)return;
+    const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*d.eficiencia_acum/maxY);
+    const cumple=d.eficiencia_acum>=objetivos[i];
+    const color=cumple?'#00c896':'#ff4d6d';
+    s+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="9" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtE(d.eficiencia_acum)} (objetivo ${fmtE(objetivos[i])})" data-s="${cumple?'✓ cumplió':'✗ no cumplió'}" data-c="${color}"/>`;
+    s+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.5" fill="${color}" stroke="#07070f" stroke-width="1.4" pointer-events="none"/>`;
+  });
+
+  const etiquetas4=new Set(indicesEtiquetas(n));
+  datos.forEach((d,i)=>{
+    if(etiquetas4.has(i)){
+      const cx=M.l+(w*(i+0.5)/n);
+      s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
+    }
+  });
+  s+='</svg>';
+  wrap.innerHTML=s;
+  bindDots('rep-wrap-eficacum');
+}
 function drawRepSplitAnios(){
   const cont=$('rep-split-anios');if(!cont)return;
   const anios=aniosDisponibles();
@@ -1646,6 +1709,7 @@ function renderReportes(){
   drawRepDespachosTotal(datos);
   drawRepPorTurno(datos);
   drawRepHoras(datos);
+  drawRepEficienciaAcum(datos);
   drawRepSplitAnios();
 }
 function predecirCached(fecha){
