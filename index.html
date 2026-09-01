@@ -270,7 +270,22 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     </div>
   </div>
 
-  <!-- PLANILLA PROGRAMADA -->
+  <!-- MLA (desplegable) -->
+  <div style="margin-bottom:16px">
+    <button type="button" onclick="toggleMlaHoy()" id="mla-hoy-toggle-btn" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--s2);border:1px solid rgba(34,211,238,.25);border-radius:10px;padding:12px 16px;cursor:pointer;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.75rem">
+      <span style="display:flex;align-items:center;gap:8px"><span style="background:rgba(34,211,238,.13);color:#22d3ee;border:1px solid rgba(34,211,238,.35);padding:2px 8px;border-radius:4px;font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700">MLA</span>¿Te avisaron MLA para hoy? (opcional)</span>
+      <span id="mla-hoy-toggle-icon" style="color:var(--ts);transition:transform .2s">▾</span>
+    </button>
+    <div id="mla-hoy-body" style="display:none;margin-top:8px;background:var(--s2);border:1px solid rgba(34,211,238,.2);border-radius:10px;padding:16px">
+      <div style="font-size:.7rem;color:var(--tm);margin-bottom:12px;line-height:1.5">Se suma a la predicción del modelo (que ya viene sin MLA) para armar el total que usa la calculadora de HH.</div>
+      <div class="g2" style="margin-bottom:12px">
+        <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:#22d3ee;margin-bottom:4px">MLA avisado · T3</label><input type="number" id="mla-hoy-t3" placeholder="0" min="0" onchange="aplicarMlaHoy()" style="width:100%;background:var(--s3);border:1px solid rgba(34,211,238,.3);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:#22d3ee"></div>
+        <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:#22d3ee;margin-bottom:4px">MLA avisado · T1</label><input type="number" id="mla-hoy-t1" placeholder="0" min="0" onchange="aplicarMlaHoy()" style="width:100%;background:var(--s3);border:1px solid rgba(34,211,238,.3);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:#22d3ee"></div>
+      </div>
+      <div id="mla-hoy-resumen" style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ts)"></div>
+    </div>
+  </div>
+
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:18px;margin-bottom:16px">
     <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ts);margin-bottom:4px;font-weight:600">Personal planilla programado</div>
     <div style="font-size:.68rem;color:var(--tm);margin-bottom:14px">Varía por rotación, descansos y vacaciones — ingrésalo cada día</div>
@@ -670,6 +685,22 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
         </div>
       </div>
     </div>
+
+    <!-- MLA (desplegable, no ocupa espacio si no se usa) -->
+    <div style="margin-bottom:16px">
+      <button type="button" onclick="toggleMlaManual()" id="mla-toggle-btn" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--s3);border:1px solid rgba(34,211,238,.25);border-radius:8px;padding:10px 14px;cursor:pointer;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.72rem">
+        <span style="display:flex;align-items:center;gap:8px"><span class="pill mla" style="background:rgba(34,211,238,.13);color:#22d3ee;border:1px solid rgba(34,211,238,.35);padding:2px 8px;border-radius:4px;font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700">MLA</span>¿Hoy entró MLA? (opcional)</span>
+        <span id="mla-toggle-icon" style="color:var(--ts);transition:transform .2s">▾</span>
+      </button>
+      <div id="mla-manual-body" style="display:none;margin-top:10px;background:var(--s3);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:14px">
+        <div style="font-size:.68rem;color:var(--tm);margin-bottom:12px;line-height:1.5">Cuánto de los "Despachos reales" de arriba fue del flujo MLA — se resta antes de que el modelo aprenda el patrón normal, pero el total y la eficiencia de hoy no cambian.</div>
+        <div class="g2">
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:#22d3ee;margin-bottom:4px">MLA · T3 Día</label><input type="number" id="m-mlat3" placeholder="0" min="0" style="width:100%;background:var(--s2);border:1px solid rgba(34,211,238,.3);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:#22d3ee"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:#22d3ee;margin-bottom:4px">MLA · T1 Noche</label><input type="number" id="m-mlat1" placeholder="0" min="0" style="width:100%;background:var(--s2);border:1px solid rgba(34,211,238,.3);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.88rem;font-weight:600;color:#22d3ee"></div>
+        </div>
+      </div>
+    </div>
+
     <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm)">
       <div style="font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:8px">Preview eficiencia</div>
       <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>Efectiva T3 (sin capacit.)</span><strong id="prev-ft3" style="color:var(--t3)">—</strong></div>
@@ -1785,6 +1816,16 @@ function calcEMA(arr,alpha=0.35){
   arr.forEach(v=>{e=e==null?v:alpha*v+(1-alpha)*e;});
   return e;
 }
+/* Folios "normales" de un día (sin el flujo MLA) — es lo que el motor ML
+   usa para aprender el patrón regular, para que un día con MLA no infle
+   la proyección de las próximas semanas. El total real (con MLA incluido)
+   sigue intacto en eficiencia, acumulados e Histórico — esto SOLO afecta
+   lo que ve el motor de predicción. */
+function folNormal(d,turno){
+  const base=turno==='t3'?(+d.folios_t3||0):(+d.folios_t1||0);
+  const mla=turno==='t3'?(+d.mla_t3||0):(+d.mla_t1||0);
+  return Math.max(0,base-mla);
+}
 
 /* ── Confianza derivada del comportamiento REAL de la muestra ──
    Se basa en el coeficiente de variación (CV = sd/media): cuanto más
@@ -1830,7 +1871,7 @@ function predecir(fecha){
       return base;
     }
     const rec=previos.slice(-6);
-    const m3=rec.map(d=>+d.folios_t3||0), m1=rec.map(d=>+d.folios_t1||0);
+    const m3=rec.map(d=>folNormal(d,'t3')), m1=rec.map(d=>folNormal(d,'t1'));
     const ft3=calcEMA(m3), ft1=calcEMA(m1);
     return{
       ft3:Math.round(ft3||0), ft1:Math.round(ft1||0),
@@ -1855,7 +1896,7 @@ function predecirBase(fecha,td){
   else if(mismoTipo.length>=3){base=mismoTipo;nivel='tipo';}
   else{base=conDatos;nivel='global';}
   const rec=base.slice(-10);
-  const m3=rec.map(d=>+d.folios_t3||0), m1=rec.map(d=>+d.folios_t1||0);
+  const m3=rec.map(d=>folNormal(d,'t3')), m1=rec.map(d=>folNormal(d,'t1'));
   const ft3=calcEMA(m3), ft1=calcEMA(m1);
   return{
     ft3:Math.round(ft3||0), ft1:Math.round(ft1||0),
@@ -1873,7 +1914,7 @@ function baselineNaive(fecha){
   d.setDate(d.getDate()-7);
   const prev=_idx.dias.get(fechaStr(d));
   if(!prev)return null;
-  return{ft3:+prev.folios_t3||0, ft1:+prev.folios_t1||0};
+  return{ft3:folNormal(prev,'t3'), ft1:folNormal(prev,'t1')};
 }
 
 /* ── MOTOR DE EVALUACIÓN (walk-forward backtesting) ──
@@ -1899,7 +1940,7 @@ function evaluarModelo(opts){
   test.forEach(d=>{
     const p=predecirCached(d.fecha);
     if(!p)return;
-    const r3=+d.folios_t3||0, r1=+d.folios_t1||0, rt=r3+r1;
+    const r3=folNormal(d,'t3'), r1=folNormal(d,'t1'), rt=r3+r1;
     const p3=p.ft3, p1=p.ft1, pt=p3+p1;
     if(rt<=0)return;
     acc.n++;
@@ -2164,7 +2205,34 @@ async function cargarProyFecha(){
     }
   }catch(e){console.warn(e);}
 }
+/* ── MLA de hoy: se suma a la predicción del modelo (que ya viene
+   sin MLA) para armar el total que usa la calculadora de HH. ── */
+function toggleMlaHoy(){
+  const body=$('mla-hoy-body'),icon=$('mla-hoy-toggle-icon');
+  const abrir=body.style.display==='none';
+  body.style.display=abrir?'block':'none';
+  if(icon)icon.style.transform=abrir?'rotate(180deg)':'';
+}
+function aplicarMlaHoy(){
+  const p=S.predActual;
+  const mla3=num('mla-hoy-t3'), mla1=num('mla-hoy-t1');
+  const base3=p?p.ft3:0, base1=p?p.ft1:0;
+  $('fol-t3').value=Math.round(base3+mla3);
+  $('fol-t1').value=Math.round(base1+mla1);
+  const resumen=$('mla-hoy-resumen');
+  if(resumen){
+    resumen.textContent=(mla3>0||mla1>0)
+      ?`T3: modelo ${fmtI(base3)} + MLA ${fmtI(mla3)} = ${fmtI(base3+mla3)}  ·  T1: modelo ${fmtI(base1)} + MLA ${fmtI(mla1)} = ${fmtI(base1+mla1)}`
+      :'';
+  }
+  recalc();
+}
 function aplicarPrediccion(){
+  // Nueva fecha -> el MLA de hoy no debe arrastrarse de la fecha anterior
+  ['mla-hoy-t3','mla-hoy-t1'].forEach(i=>{const e=$(i);if(e)e.value='';});
+  const bodyMla=$('mla-hoy-body'),iconMla=$('mla-hoy-toggle-icon');
+  if(bodyMla){bodyMla.style.display='none';if(iconMla)iconMla.style.transform='';}
+  const resumenMla=$('mla-hoy-resumen'); if(resumenMla)resumenMla.textContent='';
   const td=tipoDia(S.fecha);
   const dObj=new Date(S.fecha+'T12:00:00');
   $('hoy-fecha').textContent=`${DNL[dObj.getDay()]}, ${dObj.toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'})}`;
@@ -2295,11 +2363,26 @@ async function cargarManualFecha(){
     set('m-hpt3',d.hp_t3);set('m-hpt1',d.hp_t1);
     set('m-htt3',d.ht_t3);set('m-htt1',d.ht_t1);
     set('m-hct3',d.hc_t3);set('m-hct1',d.hc_t1);
+    set('m-mlat3',d.mla_t3);set('m-mlat1',d.mla_t1);
+    // Si el día ya tenía MLA cargado, se abre solo para que se vea de una
+    const tieneMla=(+d.mla_t3||0)>0||(+d.mla_t1||0)>0;
+    mostrarMlaManual(tieneMla);
     toast('Día ya registrado — puedes editarlo');
   } else {
-    ['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1'].forEach(i=>{const e=$(i);if(e)e.value='';});
+    ['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1','m-mlat3','m-mlat1'].forEach(i=>{const e=$(i);if(e)e.value='';});
+    mostrarMlaManual(false);
   }
   updateManualPreview();
+}
+function mostrarMlaManual(mostrar){
+  const body=$('mla-manual-body'),icon=$('mla-toggle-icon');
+  if(!body)return;
+  body.style.display=mostrar?'block':'none';
+  if(icon)icon.style.transform=mostrar?'rotate(180deg)':'';
+}
+function toggleMlaManual(){
+  const body=$('mla-manual-body');
+  mostrarMlaManual(body.style.display==='none');
 }
 /* ═══ DETECCIÓN DE ERRORES DE DIGITACIÓN ═══
    Antes de guardar un dato manual, lo compara contra días similares
@@ -2337,6 +2420,9 @@ async function guardarManual(){
   const f=$('manual-fecha').value;
   if(!f){toast('Ingresa la fecha','error');return;}
   const f3chk=num('m-ft3'), f1chk=num('m-ft1');
+  const mla3chk=num('m-mlat3'), mla1chk=num('m-mlat1');
+  if(mla3chk>f3chk){toast('El MLA de T3 no puede ser mayor que los despachos totales de T3','error');return;}
+  if(mla1chk>f1chk){toast('El MLA de T1 no puede ser mayor que los despachos totales de T1','error');return;}
   const problemas=detectarAnomalia(f,f3chk,f1chk);
   if(problemas){
     const seguro=confirm('Estos datos se ven muy distintos a lo normal:\n\n'+problemas.join('\n')+'\n\n¿Seguro que quieres guardarlos así?');
@@ -2349,6 +2435,7 @@ async function guardarManual(){
       hp_t3:num('m-hpt3'),hp_t1:num('m-hpt1'),
       ht_t3:num('m-htt3'),ht_t1:num('m-htt1'),
       hc_t3:num('m-hct3'),hc_t1:num('m-hct1'),
+      mla_t3:num('m-mlat3'),mla_t1:num('m-mlat1'),
       updated_at:new Date().toISOString()};
     const{error}=await db.from('eo_dias').upsert(row,{onConflict:'fecha'});
     if(error)throw error;
@@ -2371,7 +2458,8 @@ async function borrarDia(){
     await db.from('eo_dias').delete().eq('fecha',f);
     S.dias=S.dias.filter(d=>d.fecha!==f);
     reindexar();
-    ['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1'].forEach(i=>{const e=$(i);if(e)e.value='';});
+    ['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1','m-mlat3','m-mlat1'].forEach(i=>{const e=$(i);if(e)e.value='';});
+    mostrarMlaManual(false);
     updateManualPreview();
     toast('Día borrado ✓');
     aplicarPrediccion();recalc();
@@ -2817,8 +2905,9 @@ function renderHistRows(){
     const p=predecir(d.fecha);
     const hef3=(+d.hp_t3||0)+(+d.ht_t3||0), hef1=(+d.hp_t1||0)+(+d.ht_t1||0);
     const div=document.createElement('div');
-    div.innerHTML=`<div onclick="toggleHist('${id}')" style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr 36px;align-items:center;padding:11px 12px;cursor:pointer;border-bottom:1px solid var(--b1)${esHoy?';background:rgba(124,111,255,.05)':''}">
-      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600${esHoy?';color:var(--t1)':''}">${DN[dObj.getDay()]} ${dObj.getDate()}</div><div style="font-size:.6rem;color:${ev?'var(--ora)':td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--tm)'}">${ev?'🎯 '+ev.nombre:td==='feriado'?'Feriado':td==='finde'?'Finde':'Semana'}</div></div>
+    const tieneMla=(+d.mla_t3||0)>0||(+d.mla_t1||0)>0;
+    div.innerHTML=`<div onclick="toggleHist('${id}')" style="display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 1fr 36px;align-items:center;padding:11px 12px;cursor:pointer;border-bottom:1px solid var(--b1)${esHoy?';background:rgba(124,111,255,.05)':''}${tieneMla?';border-left:2px solid rgba(34,211,238,.4)':''}">
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600${esHoy?';color:var(--t1)':''}">${DN[dObj.getDay()]} ${dObj.getDate()}</div><div style="font-size:.6rem;color:${ev?'var(--ora)':td==='feriado'?'var(--red)':td==='finde'?'var(--ora)':'var(--tm)'}">${ev?'🎯 '+ev.nombre:td==='feriado'?'Feriado':td==='finde'?'Finde':'Semana'}${tieneMla?' <span style="background:rgba(34,211,238,.13);color:#22d3ee;border:1px solid rgba(34,211,238,.35);padding:0 5px;border-radius:3px;font-size:.55rem;font-weight:700">MLA</span>':''}</div></div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)">${fmtI(d.folios_t3)}</div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tx)">${fmtI(d.folios_t1)}</div>
       <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--t3)">${e3!=null?fmtE(e3):'—'}</div>
@@ -2831,11 +2920,13 @@ function renderHistRows(){
         <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--b1)">T3 Día · real</div>
           ${['Despachos|'+fmtI(d.folios_t3),'HH planilla|'+fmt(d.hp_t3,2)+'h','HH terceros|'+fmt(d.ht_t3,2)+'h','HH capacit.|'+fmt(d.hc_t3,2)+'h','HH efectivas|'+fmt(hef3,2)+'h'].map(x=>{const[a,b]=x.split('|');return `<div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>${a}</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${b}</strong></div>`;}).join('')}
           <div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t3)">${e3!=null?fmtE(e3):'—'}</strong></div>
+          ${(+d.mla_t3||0)>0?`<div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--tm)"><span>de eso, MLA</span><strong style="font-family:'JetBrains Mono',monospace;color:#22d3ee">${fmtI(d.mla_t3)}</strong></div><div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Normal (sin MLA)</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmtI((+d.folios_t3||0)-(+d.mla_t3||0))}</strong></div>`:''}
           ${p&&p.ft3>0?(()=>{const rv=+d.folios_t3||0;const dv=((rv-p.ft3)/p.ft3*100);return `<div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--tm)"><span>Desv. T3</span><strong style="font-family:'JetBrains Mono',monospace;color:${Math.abs(dv)<10?'var(--ok)':'var(--red)'}">${dv>=0?'+':''}${fmt(dv)}%</strong></div>`;})():''}
         </div>
         <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--b1)">T1 Noche · real</div>
           ${['Despachos|'+fmtI(d.folios_t1),'HH planilla|'+fmt(d.hp_t1,2)+'h','HH terceros|'+fmt(d.ht_t1,2)+'h','HH capacit.|'+fmt(d.hc_t1,2)+'h','HH efectivas|'+fmt(hef1,2)+'h'].map(x=>{const[a,b]=x.split('|');return `<div style="display:flex;justify-content:space-between;margin-bottom:3px;color:var(--tm)"><span>${a}</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${b}</strong></div>`;}).join('')}
           <div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b1);color:var(--tm)"><span>Efic. efectiva</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--t1)">${e1!=null?fmtE(e1):'—'}</strong></div>
+          ${(+d.mla_t1||0)>0?`<div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--tm)"><span>de eso, MLA</span><strong style="font-family:'JetBrains Mono',monospace;color:#22d3ee">${fmtI(d.mla_t1)}</strong></div><div style="display:flex;justify-content:space-between;color:var(--tm)"><span>Normal (sin MLA)</span><strong style="font-family:'JetBrains Mono',monospace;color:var(--tx)">${fmtI((+d.folios_t1||0)-(+d.mla_t1||0))}</strong></div>`:''}
           ${p&&p.ft1>0?(()=>{const rv=+d.folios_t1||0;const dv=((rv-p.ft1)/p.ft1*100);return `<div style="display:flex;justify-content:space-between;margin-top:3px;color:var(--tm)"><span>Desv. T1</span><strong style="font-family:'JetBrains Mono',monospace;color:${Math.abs(dv)<10?'var(--ok)':'var(--red)'}">${dv>=0?'+':''}${fmt(dv)}%</strong></div>`;})():''}
         </div>
         <div><div style="color:var(--ts);text-transform:uppercase;letter-spacing:.1em;font-size:.56rem;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--b1)">Proyección vs real</div>
