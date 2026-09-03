@@ -510,9 +510,12 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Despachos totales por mes</div><div style="font-size:.65rem;color:var(--tm);margin-top:2px">T3 + T1 combinados · con línea de tendencia</div></div>
-      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
-        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--tx);display:inline-block;margin-right:4px"></span>Despachos</span>
-        <span><span style="width:8px;height:8px;border-radius:50%;background:var(--ora);display:inline-block;margin-right:4px"></span>Tendencia</span>
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
+          <span><span style="width:8px;height:8px;border-radius:2px;background:var(--tx);display:inline-block;margin-right:4px"></span>Despachos</span>
+          <span><span style="width:8px;height:8px;border-radius:50%;background:var(--ora);display:inline-block;margin-right:4px"></span>Tendencia</span>
+        </div>
+        <button class="btn btn-s btn-sm" onclick="descargarExcelDespachosTotal()">⬇ Excel</button>
       </div>
     </div>
     <div id="rep-wrap-total"><svg viewBox="0 0 640 200" style="width:100%;height:auto;display:block"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
@@ -522,9 +525,12 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Despachos por turno, mes a mes</div><div style="font-size:.65rem;color:var(--tm);margin-top:2px">Comparando T3 vs T1</div></div>
-      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
-        <span><span class="ld" style="width:8px;height:8px;border-radius:2px;background:var(--t3);display:inline-block;margin-right:4px"></span>T3 Día</span>
-        <span><span class="ld" style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:4px"></span>T1 Noche</span>
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
+          <span><span class="ld" style="width:8px;height:8px;border-radius:2px;background:var(--t3);display:inline-block;margin-right:4px"></span>T3 Día</span>
+          <span><span class="ld" style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:4px"></span>T1 Noche</span>
+        </div>
+        <button class="btn btn-s btn-sm" onclick="descargarExcelPorTurno()">⬇ Excel</button>
       </div>
     </div>
     <div id="rep-wrap-turno"><svg viewBox="0 0 640 200" style="width:100%;height:auto;display:block"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
@@ -534,9 +540,12 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Horas totales por mes</div><div style="font-size:.65rem;color:var(--tm);margin-top:2px">Planilla vs. terceros</div></div>
-      <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
-        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--plan);display:inline-block;margin-right:4px"></span>Planilla</span>
-        <span><span style="width:8px;height:8px;border-radius:2px;background:var(--terc);display:inline-block;margin-right:4px"></span>Terceros</span>
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)">
+          <span><span style="width:8px;height:8px;border-radius:2px;background:var(--plan);display:inline-block;margin-right:4px"></span>Planilla</span>
+          <span><span style="width:8px;height:8px;border-radius:2px;background:var(--terc);display:inline-block;margin-right:4px"></span>Terceros</span>
+        </div>
+        <button class="btn btn-s btn-sm" onclick="descargarExcelHoras()">⬇ Excel</button>
       </div>
     </div>
     <div id="rep-wrap-horas"><svg viewBox="0 0 640 200" style="width:100%;height:auto;display:block"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
@@ -546,7 +555,10 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 
   <!-- 5. % T3/T1 por año -->
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
-    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem;margin-bottom:4px">Participación T3 vs T1 por año</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+      <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">Participación T3 vs T1 por año</div>
+      <button class="btn btn-s btn-sm" onclick="descargarExcelSplitAnios()">⬇ Excel</button>
+    </div>
     <div style="font-size:.65rem;color:var(--tm);margin-bottom:14px">Comparando cada año registrado</div>
     <div id="rep-split-anios" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
   </div>
@@ -1367,10 +1379,13 @@ function drawRepDespachosTotal(datos){
   });
   s+=`<path d="${path}" stroke="#e2e2f0" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
   const etiquetas1=new Set(indicesEtiquetas(n));
+  const valLabels1=new Set(indicesEtiquetas(n,n<=12?n:8));
   datos.forEach((d,i)=>{
     const cx=M.l+(w*(i+0.5)/n), cy=M.t+h-(h*d.folios_tot/maxY);
     s+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="9" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d.folios_tot)}" data-s="Despachos totales" data-c="#e2e2f0"/>`;
     s+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="#07070f" stroke="#e2e2f0" stroke-width="1.8" pointer-events="none"/>`;
+    if(valLabels1.has(i))
+      s+=`<text x="${cx.toFixed(1)}" y="${(cy-9).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="8" fill="#c9c9de">${fmtI(d.folios_tot)}</text>`;
     if(etiquetas1.has(i))
       s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
   });
@@ -1395,9 +1410,10 @@ function drawRepPorTurno(datos){
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=svgGridBase(W,H,M,maxY);
   s+=svgDivisoresAnio(datos,W,H,M);
+  const valLabels2=new Set(indicesEtiquetas(n,n<=12?n:8));
   if(usarLineasPorVolumen(n)){
     // Muchos meses: dos líneas, nunca se amontonan
-    const linea=(campo,color,nombre)=>{
+    const linea=(campo,color,nombre,dyLabel)=>{
       let path='';
       datos.forEach((d,i)=>{const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);});
       let out=`<path d="${path}" stroke="${color}" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
@@ -1405,11 +1421,13 @@ function drawRepPorTurno(datos){
         const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);
         out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d[campo])}" data-s="${nombre}" data-c="${color}"/>`;
         out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="2.6" fill="#07070f" stroke="${color}" stroke-width="1.6" pointer-events="none"/>`;
+        if(valLabels2.has(i))
+          out+=`<text x="${cx.toFixed(1)}" y="${(cy+dyLabel).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="7.5" fill="${color}">${fmtI(d[campo])}</text>`;
       });
       return out;
     };
-    s+=linea('folios_t3','#00c896','T3 Día');
-    s+=linea('folios_t1','#7c6fff','T1 Noche');
+    s+=linea('folios_t3','#00c896','T3 Día',-8);
+    s+=linea('folios_t1','#7c6fff','T1 Noche',14);
   } else {
     // Pocos meses: barras agrupadas, se leen mejor lado a lado
     const grupoW=w/n, barW=Math.min(16,grupoW*0.32);
@@ -1418,6 +1436,10 @@ function drawRepPorTurno(datos){
       const h3=h*d.folios_t3/maxY, h1=h*d.folios_t1/maxY;
       s+=`<rect x="${(cx-barW-1).toFixed(1)}" y="${(M.t+h-h3).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,h3).toFixed(1)}" fill="#00c896" rx="2" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d.folios_t3)}" data-s="T3 Día" data-c="#00c896"/>`;
       s+=`<rect x="${(cx+1).toFixed(1)}" y="${(M.t+h-h1).toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(1,h1).toFixed(1)}" fill="#7c6fff" rx="2" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmtI(d.folios_t1)}" data-s="T1 Noche" data-c="#7c6fff"/>`;
+      if(valLabels2.has(i)){
+        s+=`<text x="${(cx-barW/2-1).toFixed(1)}" y="${(M.t+h-h3-4).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="7" fill="#00c896">${fmtI(d.folios_t3)}</text>`;
+        s+=`<text x="${(cx+barW/2+1).toFixed(1)}" y="${(M.t+h-h1-4).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="7" fill="#7c6fff">${fmtI(d.folios_t1)}</text>`;
+      }
     });
   }
   const etiquetas2=new Set(indicesEtiquetas(n));
@@ -1440,7 +1462,7 @@ function drawRepHoras(datos){
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=svgGridBase(W,H,M,maxY);
   s+=svgDivisoresAnio(datos,W,H,M);
-  const linea=(campo,color,nombre)=>{
+  const linea=(campo,color,nombre,dyLabel)=>{
     let path='';
     datos.forEach((d,i)=>{const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);});
     let out=`<path d="${path}" stroke="${color}" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
@@ -1448,11 +1470,14 @@ function drawRepHoras(datos){
       const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);
       out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="9" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmt(d[campo],0)}h" data-s="${nombre}" data-c="${color}"/>`;
       out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="#07070f" stroke="${color}" stroke-width="1.8" pointer-events="none"/>`;
+      if(valLabels3.has(i))
+        out+=`<text x="${cx.toFixed(1)}" y="${(cy+dyLabel).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="7.5" fill="${color}">${fmt(d[campo],0)}h</text>`;
     });
     return out;
   };
-  s+=linea('hh_plan','#60a5fa','HH Planilla');
-  s+=linea('hh_terc','#fbbf24','HH Terceros');
+  const valLabels3=new Set(indicesEtiquetas(n,n<=12?n:8));
+  s+=linea('hh_plan','#60a5fa','HH Planilla',-8);
+  s+=linea('hh_terc','#fbbf24','HH Terceros',14);
   const etiquetas3=new Set(indicesEtiquetas(n));
   datos.forEach((d,i)=>{
     if(etiquetas3.has(i)){
@@ -1470,26 +1495,58 @@ function drawRepHoras(datos){
 /* Descarga a Excel exactamente los mismos datos que muestra el gráfico
    hero — el mismo campo eficiencia_mes (no el acumulado que se corrigió),
    respetando el filtro de año activo en la vista. */
-function descargarExcelEficienciaMensual(){
-  const datos=agregadoMensual(anioActivoReportes());
-  if(!datos.length){toast('No hay datos para descargar','error');return;}
-  const filas=[['Mes','Año','Despachos totales','Horas totales','Eficiencia (cierre de mes)']];
-  datos.forEach(d=>{
-    filas.push([d.label.replace(/ '\\d\\d$/,''),d.anio,d.folios_tot,r1(d.hh_tot),d.eficiencia_mes!=null?r2(d.eficiencia_mes):'']);
-  });
-  const nombreArchivo=`Eficiencia_mensual_${S.repAnio==='all'?'todos_los_anios':S.repAnio}.xlsx`;
+/* Helper genérico de exportación — todos los botones de Excel de
+   Reportes anuales pasan por aquí, así el formato queda consistente
+   y el arreglo de CSV como respaldo funciona igual en todos lados. */
+function exportarExcelGenerico(nombreArchivo,encabezados,filas,anchos){
+  if(!filas.length){toast('No hay datos para descargar','error');return;}
+  const data=[encabezados,...filas];
   if(typeof XLSX!=='undefined'){
-    const ws=XLSX.utils.aoa_to_sheet(filas);
-    ws['!cols']=[{wch:10},{wch:8},{wch:18},{wch:14},{wch:22}];
+    const ws=XLSX.utils.aoa_to_sheet(data);
+    if(anchos)ws['!cols']=anchos.map(w=>({wch:w}));
     const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'Eficiencia mensual');
+    XLSX.utils.book_append_sheet(wb,ws,'Datos');
     XLSX.writeFile(wb,nombreArchivo);
   } else {
-    const csv=filas.map(r=>r.join(',')).join('\\n');
+    const csv=data.map(r=>r.join(',')).join('\n');
     const a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob(['\\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
+    a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
     a.download=nombreArchivo.replace('.xlsx','.csv');a.click();
   }
+}
+function sufijoAnioActivo(){return S.repAnio==='all'?'todos_los_anios':String(S.repAnio);}
+function limpiarLabelAnio(label){return label.replace(/ '\d\d$/,'');}
+
+function descargarExcelEficienciaMensual(){
+  const datos=agregadoMensual(anioActivoReportes());
+  const filas=datos.map(d=>[limpiarLabelAnio(d.label),d.anio,d.folios_tot,r1(d.hh_tot),d.eficiencia_mes!=null?r2(d.eficiencia_mes):'']);
+  exportarExcelGenerico(`Eficiencia_mensual_${sufijoAnioActivo()}.xlsx`,['Mes','Año','Despachos totales','Horas totales','Eficiencia (cierre de mes)'],filas,[10,8,18,14,22]);
+}
+function descargarExcelDespachosTotal(){
+  const datos=agregadoMensual(anioActivoReportes());
+  const reg=regresionLineal(datos.map(d=>d.folios_tot));
+  const filas=datos.map((d,i)=>[limpiarLabelAnio(d.label),d.anio,d.folios_tot,reg?Math.round(Math.max(0,reg.puntos[i])):'']);
+  exportarExcelGenerico(`Despachos_totales_${sufijoAnioActivo()}.xlsx`,['Mes','Año','Despachos totales','Tendencia'],filas,[10,8,18,14]);
+}
+function descargarExcelPorTurno(){
+  const datos=agregadoMensual(anioActivoReportes());
+  const filas=datos.map(d=>[limpiarLabelAnio(d.label),d.anio,d.folios_t3,d.folios_t1]);
+  exportarExcelGenerico(`Despachos_por_turno_${sufijoAnioActivo()}.xlsx`,['Mes','Año','Folios T3','Folios T1'],filas,[10,8,14,14]);
+}
+function descargarExcelHoras(){
+  const datos=agregadoMensual(anioActivoReportes());
+  const filas=datos.map(d=>[limpiarLabelAnio(d.label),d.anio,r1(d.hh_plan),r1(d.hh_terc),r1(d.hh_tot)]);
+  exportarExcelGenerico(`Horas_totales_${sufijoAnioActivo()}.xlsx`,['Mes','Año','HH Planilla','HH Terceros','HH Total'],filas,[10,8,14,14,12]);
+}
+function descargarExcelSplitAnios(){
+  const anios=aniosDisponibles();
+  const filas=anios.map(a=>{
+    const dias=S.dias.filter(d=>d.fecha.startsWith(String(a))&&((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+    const f3=dias.reduce((s,d)=>s+(+d.folios_t3||0),0), f1=dias.reduce((s,d)=>s+(+d.folios_t1||0),0);
+    const tot=f3+f1;
+    return[a,f3,f1,tot>0?r1(f3/tot*100):0,tot>0?r1(f1/tot*100):0];
+  });
+  exportarExcelGenerico('Participacion_T3_T1_por_anio.xlsx',['Año','Folios T3','Folios T1','% T3','% T1'],filas,[8,14,14,10,10]);
 }
 function renderRepHeroStats(datos){
   const cont=$('rep-hero-stats');if(!cont)return;
