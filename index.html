@@ -562,6 +562,21 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div style="font-size:.65rem;color:var(--tm);margin-bottom:14px">Comparando cada año registrado</div>
     <div id="rep-split-anios" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"></div>
   </div>
+
+  <!-- 8. Días pico por mes -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+      <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem">🔥 Días pico por mes</div>
+      <button class="btn btn-s btn-sm" onclick="descargarExcelPicos()">⬇ Excel</button>
+    </div>
+    <div style="font-size:.65rem;color:var(--tm);margin-bottom:14px">El día con más despachos (T3+T1) de cada mes</div>
+    <div style="background:var(--s3);border-radius:8px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:70px 100px 1fr 1fr 1fr 1fr;padding:9px 12px;background:var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts)">
+        <div>Mes</div><div>Día pico</div><div style="text-align:right;padding-right:12px">T3</div><div style="text-align:right;padding-right:12px">T1</div><div style="text-align:right;padding-right:12px">Total</div><div></div>
+      </div>
+      <div id="rep-picos-tabla"><div style="padding:24px;text-align:center;color:var(--ts);font-size:.8rem">Cargando…</div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ SIMULADOR DE OBJETIVOS ══ -->
@@ -1843,6 +1858,54 @@ function renderSimDia(diario,E,alcance){
   `;
 }
 
+/* Día con más despachos (T3+T1) de cada mes — solo sobre días con
+   dato real, respeta el filtro de año de Reportes. */
+function picosPorMes(anio){
+  const porMes={};
+  S.dias.forEach(d=>{
+    const tot=(+d.folios_t3||0)+(+d.folios_t1||0);
+    if(tot<=0)return;
+    const a=+d.fecha.slice(0,4);
+    if(anio!=='all'&&a!==anio)return;
+    const key=d.fecha.slice(0,7);
+    if(!porMes[key]||tot>porMes[key]._tot)porMes[key]={...d,_tot:tot};
+  });
+  return Object.values(porMes).sort((x,y)=>x.fecha.localeCompare(y.fecha)).map(d=>{
+    const dObj=new Date(d.fecha+'T12:00:00');
+    const a=+d.fecha.slice(0,4), m=+d.fecha.slice(5,7);
+    const ev=_idx.eventos.get(d.fecha);
+    return{
+      anio:a, mes:m, label:MESES_CORTO[m-1]+(anio==='all'?" '"+String(a).slice(2):''),
+      fecha:d.fecha, dia_semana:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][dObj.getDay()],
+      folios_t3:+d.folios_t3||0, folios_t1:+d.folios_t1||0, folios_tot:d._tot,
+      tipo_dia:tipoDia(d.fecha), evento:ev?ev.nombre:null,
+    };
+  });
+}
+function renderRepPicos(picos){
+  const c=$('rep-picos-tabla');if(!c)return;
+  if(!picos.length){c.innerHTML='<div style="padding:24px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos suficientes</div>';return;}
+  c.innerHTML='';
+  picos.forEach(p=>{
+    const row=document.createElement('div');
+    const tag=p.evento?`⭐ ${p.evento}`:p.tipo_dia==='feriado'?'🔴 Feriado':p.tipo_dia==='finde'?'Finde':'Semana';
+    const tagColor=p.evento?'var(--ora)':p.tipo_dia==='feriado'?'var(--red)':p.tipo_dia==='finde'?'var(--ora)':'var(--tm)';
+    row.style.cssText='display:grid;grid-template-columns:70px 100px 1fr 1fr 1fr 1fr;padding:9px 12px;border-bottom:1px solid var(--b1);font-size:.76rem;align-items:center';
+    row.innerHTML=`
+      <div style="font-family:'JetBrains Mono',monospace;font-weight:600">${p.label}</div>
+      <div><div style="font-family:'JetBrains Mono',monospace;font-size:.72rem">${p.dia_semana} ${p.fecha.slice(8,10)}</div><div style="font-size:.6rem;color:${tagColor}">${tag}</div></div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--t3)">${fmtI(p.folios_t3)}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;color:var(--t1)">${fmtI(p.folios_t1)}</div>
+      <div style="text-align:right;padding-right:12px;font-family:'JetBrains Mono',monospace;font-weight:700">${fmtI(p.folios_tot)}</div>
+      <div></div>`;
+    c.appendChild(row);
+  });
+}
+function descargarExcelPicos(){
+  const picos=picosPorMes(anioActivoReportes());
+  const filas=picos.map(p=>[limpiarLabelAnio(p.label),p.anio,p.fecha,p.dia_semana,p.folios_t3,p.folios_t1,p.folios_tot,p.evento||(p.tipo_dia==='feriado'?'Feriado':p.tipo_dia==='finde'?'Finde':'Semana')]);
+  exportarExcelGenerico(`Dias_pico_${sufijoAnioActivo()}.xlsx`,['Mes','Año','Fecha','Día','Folios T3','Folios T1','Total','Tipo'],filas,[10,8,12,10,12,12,10,14]);
+}
 function renderReportes(){
   renderRepAnioSel();
   const datos=agregadoMensual(anioActivoReportes());
@@ -1851,6 +1914,7 @@ function renderReportes(){
   drawRepHoras(datos);
   drawRepEficienciaAcum(datos);
   drawRepSplitAnios();
+  renderRepPicos(picosPorMes(anioActivoReportes()));
 }
 function predecirCached(fecha){
   if(_idx.pred.has(fecha))return _idx.pred.get(fecha);
