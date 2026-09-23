@@ -35,6 +35,8 @@ html,body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;mi
 .dia-semana-panel.a{display:block}
 .dia-semana-tab{border:1px solid var(--b1);background:var(--s3);color:var(--tm);border-radius:7px;padding:7px 13px;font-family:'JetBrains Mono',monospace;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}
 .dia-semana-tab.a{border-color:rgba(124,111,255,.4);background:rgba(124,111,255,.15);color:var(--t1)}
+.dia-semana-turno{border:1px solid var(--b1);background:var(--s3);color:var(--tm);border-radius:7px;padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}
+.dia-semana-turno.a{border-color:rgba(0,200,150,.4);background:rgba(0,200,150,.15);color:var(--t3)}
 
 /* Tabla diaria tipo spreadsheet del Simulador */
 #sim-panel-dia table th,#sim-panel-dia table td{padding:7px 10px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.72rem;white-space:nowrap;border-bottom:1px solid var(--b1)}
@@ -492,10 +494,18 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 
   <div class="sl" style="margin-top:20px">Variación por día de semana, dentro del mes</div>
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;overflow-x:auto">
-    <div style="display:flex;gap:6px;margin-bottom:16px">
-      <button class="dia-semana-tab a" onclick="showDiaSemanaTab('a',this)">Semana a semana</button>
-      <button class="dia-semana-tab" onclick="showDiaSemanaTab('b',this)">vs. promedio del mes</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div style="display:flex;gap:6px">
+        <button class="dia-semana-tab a" onclick="showDiaSemanaTab('a',this)">Semana a semana</button>
+        <button class="dia-semana-tab" onclick="showDiaSemanaTab('b',this)">vs. promedio del mes</button>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="dia-semana-turno a" onclick="toggleDiaSemanaTurno('general',this)">General</button>
+        <button class="dia-semana-turno" onclick="toggleDiaSemanaTurno('t3',this)">T3 Día</button>
+        <button class="dia-semana-turno" onclick="toggleDiaSemanaTurno('t1',this)">T1 Noche</button>
+      </div>
     </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-bottom:14px">Calculado sin MLA — el flujo especial no cuenta para el patrón normal del día.</div>
     <div id="dia-semana-a-wrap" class="dia-semana-panel a">
       <div style="font-size:.65rem;color:var(--tm);margin-bottom:12px">Cada día de semana, comparado con su propia ocurrencia anterior dentro del mes</div>
       <div id="dia-semana-a"><div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Cargando…</div></div>
@@ -3026,7 +3036,15 @@ function cargarHistMes(a,m){
 const DIAS_SEMANA_LBL=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 /* Opción A: cada día de semana, semana a semana dentro del mes,
    con % de variación entre su primera y su última ocurrencia real. */
-function variacionSemanaASemana(a,m){
+/* Valor de un día ya SIN MLA, según el turno elegido — mismo criterio
+   que ya usa el motor ML y las desviaciones de Histórico. */
+function valorDiaSemana(d,turno){
+  if(turno==='t3')return folNormal(d,'t3');
+  if(turno==='t1')return folNormal(d,'t1');
+  return folNormal(d,'t3')+folNormal(d,'t1');
+}
+function variacionSemanaASemana(a,m,turno){
+  turno=turno||'general';
   const semanas=semanasDelMes(a,m);
   // Se inicializa cada slot con null explícito (no un array vacío) — si no,
   // las semanas donde ese día no existe (ej. un mes que empieza a mitad de
@@ -3036,7 +3054,7 @@ function variacionSemanaASemana(a,m){
   semanas.forEach((sem,iSem)=>{
     sem.dias.forEach(f=>{
       const d=_idx.dias.get(f);
-      const tot=d?((+d.folios_t3||0)+(+d.folios_t1||0)):0;
+      const tot=d?valorDiaSemana(d,turno):0;
       const dowLunes=(new Date(f+'T12:00:00').getDay()+6)%7; // 0=lunes
       porDia[dowLunes][iSem]={fecha:f,valor:tot>0?tot:null};
     });
@@ -3052,15 +3070,16 @@ function variacionSemanaASemana(a,m){
 }
 /* Opción B: promedio de cada día de semana vs. el promedio general
    del mes (solo días con dato real). */
-function variacionVsPromedioMes(a,m){
+function variacionVsPromedioMes(a,m,turno){
+  turno=turno||'general';
   const pre=`${a}-${String(m).padStart(2,'0')}`;
   const dias=S.dias.filter(d=>d.fecha.startsWith(pre)&&((+d.folios_t3||0)+(+d.folios_t1||0))>0);
   if(!dias.length)return{promedioMes:null,filas:[]};
-  const promedioMes=media(dias.map(d=>(+d.folios_t3||0)+(+d.folios_t1||0)));
+  const promedioMes=media(dias.map(d=>valorDiaSemana(d,turno)));
   const filas=DIAS_SEMANA_LBL.map((lbl,i)=>{
     const deEseDia=dias.filter(d=>((new Date(d.fecha+'T12:00:00').getDay()+6)%7)===i);
     if(!deEseDia.length)return{dia:lbl,promedio:null,variacion:null,n:0};
-    const prom=media(deEseDia.map(d=>(+d.folios_t3||0)+(+d.folios_t1||0)));
+    const prom=media(deEseDia.map(d=>valorDiaSemana(d,turno)));
     return{dia:lbl,promedio:r1(prom),variacion:promedioMes>0?r1((prom-promedioMes)/promedioMes*100):null,n:deEseDia.length};
   });
   return{promedioMes:r1(promedioMes),filas};
@@ -3220,9 +3239,17 @@ function drawAcumDiaria(){
   s+='</svg>';wrap.innerHTML=s;bindDots('wrap-acumd');
 }
 /* ── Tab A: mapa de calor semana a semana ── */
+let S_diaSemanaTurno='general';
+function toggleDiaSemanaTurno(tr,btn){
+  S_diaSemanaTurno=tr;
+  document.querySelectorAll('.dia-semana-turno').forEach(b=>b.classList.remove('a'));
+  btn.classList.add('a');
+  renderDiaSemanaA();
+  renderDiaSemanaB();
+}
 function renderDiaSemanaA(){
   const c=$('dia-semana-a');if(!c||!S.mesActivo)return;
-  const filas=variacionSemanaASemana(S.mesActivo.a,S.mesActivo.m);
+  const filas=variacionSemanaASemana(S.mesActivo.a,S.mesActivo.m,S_diaSemanaTurno);
   const nSemanas=filas[0]?filas[0].nSemanas:0;
   if(!nSemanas){c.innerHTML='<div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos suficientes</div>';return;}
   const todosVals=filas.flatMap(f=>f.valores).filter(v=>v!=null);
@@ -3249,7 +3276,7 @@ function renderDiaSemanaA(){
 /* ── Tab B: promedio por día de semana vs. promedio del mes ── */
 function renderDiaSemanaB(){
   const c=$('dia-semana-b');if(!c||!S.mesActivo)return;
-  const{promedioMes,filas}=variacionVsPromedioMes(S.mesActivo.a,S.mesActivo.m);
+  const{promedioMes,filas}=variacionVsPromedioMes(S.mesActivo.a,S.mesActivo.m,S_diaSemanaTurno);
   if(promedioMes==null){c.innerHTML='<div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos suficientes</div>';return;}
   const maxAbs=Math.max(...filas.filter(f=>f.variacion!=null).map(f=>Math.abs(f.variacion)),1);
   let html=`<div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--tm);margin-bottom:12px">Promedio general del mes: <strong style="color:var(--tx)">${fmtI(promedioMes)}</strong> despachos/día</div>`;
