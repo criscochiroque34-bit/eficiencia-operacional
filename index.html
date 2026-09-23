@@ -507,7 +507,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     </div>
     <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-bottom:14px">Calculado sin MLA — el flujo especial no cuenta para el patrón normal del día.</div>
     <div id="dia-semana-a-wrap" class="dia-semana-panel a">
-      <div style="font-size:.65rem;color:var(--tm);margin-bottom:12px">Cada día de semana, comparado con su propia ocurrencia anterior dentro del mes</div>
+      <div style="font-size:.65rem;color:var(--tm);margin-bottom:12px">La última semana comparada contra el promedio de las semanas anteriores del mismo mes — detecta un cambio reciente aunque el mes haya empezado alto o bajo</div>
       <div id="dia-semana-a"><div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Cargando…</div></div>
     </div>
     <div id="dia-semana-b-wrap" class="dia-semana-panel">
@@ -3062,9 +3062,15 @@ function variacionSemanaASemana(a,m,turno){
   return DIAS_SEMANA_LBL.map((lbl,i)=>{
     const valores=porDia[i].map(x=>x?x.valor:null);
     const conDato=valores.filter(v=>v!=null);
-    const primero=conDato[0], ultimo=conDato[conDato.length-1];
-    const variacion=(primero!=null&&ultimo!=null&&conDato.length>=2&&primero>0)
-      ?r1((ultimo-primero)/primero*100):null;
+    // Última semana con dato vs. el PROMEDIO de todas las anteriores —
+    // no solo la primera. Así una caída en la última semana se detecta
+    // aunque el mes no haya empezado especialmente alto ni bajo.
+    let variacion=null;
+    if(conDato.length>=2){
+      const ultimo=conDato[conDato.length-1];
+      const promAnteriores=media(conDato.slice(0,-1));
+      variacion=promAnteriores>0?r1((ultimo-promAnteriores)/promAnteriores*100):null;
+    }
     return{dia:lbl,valores,nSemanas:semanas.length,variacion};
   });
 }
@@ -3257,7 +3263,7 @@ function renderDiaSemanaA(){
   let html=`<table style="border-collapse:collapse;width:100%"><tr>
     <th style="font-family:'JetBrains Mono',monospace;font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ts);padding:5px 8px;text-align:left">Día</th>`;
   for(let s=0;s<nSemanas;s++)html+=`<th style="font-family:'JetBrains Mono',monospace;font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ts);padding:5px 6px;text-align:center">Sem ${s+1}</th>`;
-  html+=`<th style="font-family:'JetBrains Mono',monospace;font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ts);padding:5px 8px;text-align:center">Var.</th></tr>`;
+  html+=`<th style="font-family:'JetBrains Mono',monospace;font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ts);padding:5px 8px;text-align:center" title="Última semana vs. el promedio de las anteriores">Últ. vs prom.</th></tr>`;
   filas.forEach(f=>{
     html+=`<tr><td style="font-family:'Syne',sans-serif;font-weight:700;font-size:.76rem;padding:4px 8px">${f.dia}</td>`;
     f.valores.forEach(v=>{
