@@ -29,6 +29,12 @@ html,body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;mi
 .tab-sim.a{background:rgba(124,111,255,.15);border-color:rgba(124,111,255,.4);color:var(--t1)}
 .sim-panel{display:none}
 .sim-panel.a{display:block}
+.fte-toggle{border:1px solid var(--b1);background:var(--s3);color:var(--tm);border-radius:6px;padding:6px 14px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;cursor:pointer}
+.fte-toggle.a{border-color:rgba(0,200,150,.4);background:rgba(0,200,150,.15);color:var(--t3)}
+.dia-semana-panel{display:none}
+.dia-semana-panel.a{display:block}
+.dia-semana-tab{border:1px solid var(--b1);background:var(--s3);color:var(--tm);border-radius:7px;padding:7px 13px;font-family:'JetBrains Mono',monospace;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}
+.dia-semana-tab.a{border-color:rgba(124,111,255,.4);background:rgba(124,111,255,.15);color:var(--t1)}
 
 /* Tabla diaria tipo spreadsheet del Simulador */
 #sim-panel-dia table th,#sim-panel-dia table td{padding:7px 10px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.72rem;white-space:nowrap;border-bottom:1px solid var(--b1)}
@@ -483,6 +489,22 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     </div>
     <div id="hist-rows"><div style="padding:30px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</div></div>
   </div>
+
+  <div class="sl" style="margin-top:20px">Variación por día de semana, dentro del mes</div>
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;overflow-x:auto">
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <button class="dia-semana-tab a" onclick="showDiaSemanaTab('a',this)">Semana a semana</button>
+      <button class="dia-semana-tab" onclick="showDiaSemanaTab('b',this)">vs. promedio del mes</button>
+    </div>
+    <div id="dia-semana-a-wrap" class="dia-semana-panel a">
+      <div style="font-size:.65rem;color:var(--tm);margin-bottom:12px">Cada día de semana, comparado con su propia ocurrencia anterior dentro del mes</div>
+      <div id="dia-semana-a"><div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Cargando…</div></div>
+    </div>
+    <div id="dia-semana-b-wrap" class="dia-semana-panel">
+      <div style="font-size:.65rem;color:var(--tm);margin-bottom:12px">Qué tan por encima o por debajo del promedio general del mes está cada día de semana</div>
+      <div id="dia-semana-b"><div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Cargando…</div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ REPORTES ANUALES ══ -->
@@ -579,6 +601,36 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       </div>
     </div>
     <div id="rep-wrap-picos"><svg viewBox="0 0 640 220" style="width:100%;height:auto;display:block"><text x="320" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
+  </div>
+
+  <!-- 9. FTE por mes, separado por turno -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.92rem;display:flex;align-items:center;gap:7px">FTE promedio por mes <span title="Full-Time Equivalent" style="width:15px;height:15px;border-radius:50%;background:var(--s3);border:1px solid var(--b2);color:var(--ts);font-size:.6rem;display:inline-flex;align-items:center;justify-content:center;cursor:help;font-family:'JetBrains Mono',monospace">?</span></div>
+        <div style="font-size:.65rem;color:var(--tm);margin-top:2px">Personas equivalentes a tiempo completo · turno <span id="rep-fte-turno-lbl">T3 Día</span></div>
+      </div>
+      <button class="btn btn-s btn-sm" onclick="descargarExcelFTE()">⬇ Excel</button>
+    </div>
+
+    <div style="background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:11px 13px;margin:12px 0 16px;font-size:.72rem;color:var(--tm);line-height:1.6">
+      <strong style="color:var(--plan)">¿Qué es FTE?</strong> Convierte horas trabajadas en "cantidad de personas", sin importar si esas horas las cubrió una persona con extras o varias con turnos parciales.
+      <div style="font-family:'JetBrains Mono',monospace;background:var(--s3);display:inline-block;padding:2px 8px;border-radius:4px;color:var(--tx);margin-top:6px">FTE = horas del mes ÷ (días operativos × jornada de ese turno)</div>
+    </div>
+
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <button class="fte-toggle a" onclick="toggleFteTurno('t3',this)">T3 Día</button>
+      <button class="fte-toggle" onclick="toggleFteTurno('t1',this)">T1 Noche</button>
+    </div>
+
+    <div style="display:flex;gap:14px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm);margin-bottom:6px">
+      <span><span style="width:9px;height:9px;border-radius:2px;background:var(--plan);display:inline-block;margin-right:5px;vertical-align:middle"></span>FTE Planilla</span>
+      <span><span style="width:9px;height:9px;border-radius:2px;background:var(--terc);display:inline-block;margin-right:5px;vertical-align:middle"></span>FTE Terceros</span>
+    </div>
+
+    <div id="rep-fte-hero" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0"></div>
+
+    <div id="rep-wrap-fte"><svg viewBox="0 0 640 210" style="width:100%;height:auto;display:block"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
   </div>
 </div>
 
@@ -1864,6 +1916,33 @@ function renderSimDia(diario,E,alcance){
 
 /* Día con más despachos (T3+T1) de cada mes — solo sobre días con
    dato real, respeta el filtro de año de Reportes. */
+/* FTE (Full-Time Equivalent) por mes, SEPARADO por turno — T3 y T1
+   tienen jornadas distintas (8h vs 9.36h), así que no se mezclan en
+   un solo promedio. Por cada turno:
+     FTE = horas trabajadas en el mes ÷ (días operativos × jornada)
+   "Días operativos" = días donde ese turno realmente tuvo horas
+   (excluye domingos sin T3, por ejemplo). */
+function fteMensual(anio,turno){
+  const porMes={};
+  S.dias.forEach(d=>{
+    const hp=turno==='t3'?(+d.hp_t3||0):(+d.hp_t1||0);
+    const ht=turno==='t3'?(+d.ht_t3||0):(+d.ht_t1||0);
+    if(hp+ht<=0)return; // dia sin operacion de este turno, no cuenta
+    const a=+d.fecha.slice(0,4);
+    if(anio!=='all'&&a!==anio)return;
+    const key=d.fecha.slice(0,7);
+    if(!porMes[key])porMes[key]={key,anio:a,mes:+d.fecha.slice(5,7),hp:0,ht:0,dias:0};
+    porMes[key].hp+=hp; porMes[key].ht+=ht; porMes[key].dias++;
+  });
+  const jornadaP=cfgOf('semana',turno).jornada_planilla;
+  const jornadaT=cfgOf('semana',turno).jornada_tercero;
+  return Object.values(porMes).sort((x,y)=>x.key.localeCompare(y.key)).map(p=>({
+    ...p,
+    label:MESES_CORTO[p.mes-1]+(anio==='all'?" '"+String(p.anio).slice(2):''),
+    fte_planilla:jornadaP>0?r1(p.hp/(p.dias*jornadaP)):0,
+    fte_terceros:jornadaT>0?r1(p.ht/(p.dias*jornadaT)):0,
+  }));
+}
 function picosPorMes(anio){
   const porMes={};
   S.dias.forEach(d=>{
@@ -1917,6 +1996,70 @@ function descargarExcelPicos(){
   const filas=picos.map(p=>[limpiarLabelAnio(p.label),p.anio,p.fecha,p.dia_semana,p.folios_t3,p.folios_t1,p.folios_tot,p.evento||(p.tipo_dia==='feriado'?'Feriado':p.tipo_dia==='finde'?'Finde':'Semana')]);
   exportarExcelGenerico(`Dias_pico_${sufijoAnioActivo()}.xlsx`,['Mes','Año','Fecha','Día','Folios T3','Folios T1','Total','Tipo'],filas,[10,8,12,10,12,12,10,14]);
 }
+let S_fteTurno='t3';
+function toggleFteTurno(tr,btn){
+  S_fteTurno=tr;
+  document.querySelectorAll('.fte-toggle').forEach(b=>b.classList.remove('a'));
+  btn.classList.add('a');
+  drawRepFTE();
+}
+function renderFteHeroStats(datos){
+  const cont=$('rep-fte-hero');if(!cont)return;
+  const ultimo=[...datos].reverse()[0];
+  if(!ultimo){cont.innerHTML='';return;}
+  cont.innerHTML=`
+    <div style="background:var(--s3);border-radius:8px;padding:12px 14px">
+      <div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:5px">FTE Planilla · ${ultimo.label}</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--plan);line-height:1">${fmt(ultimo.fte_planilla,1)}</div>
+    </div>
+    <div style="background:var(--s3);border-radius:8px;padding:12px 14px">
+      <div style="font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ts);margin-bottom:5px">FTE Terceros · ${ultimo.label}</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--terc);line-height:1">${fmt(ultimo.fte_terceros,1)}</div>
+    </div>`;
+}
+function drawRepFTE(){
+  const wrap=$('rep-wrap-fte');if(!wrap)return;
+  const datos=fteMensual(anioActivoReportes(),S_fteTurno);
+  renderFteHeroStats(datos);
+  const lbl=$('rep-fte-turno-lbl');if(lbl)lbl.textContent=S_fteTurno==='t3'?'T3 Día':'T1 Noche';
+  if(!datos.length){wrap.innerHTML='<svg viewBox="0 0 640 200" style="width:100%;height:auto"><text x="320" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos suficientes</text></svg>';return;}
+  const W=640,H=210,M={t:15,r:16,b:36,l:44};
+  const w=W-M.l-M.r,h=H-M.t-M.b,n=datos.length;
+  const maxY=Math.max(...datos.map(d=>Math.max(d.fte_planilla,d.fte_terceros)),1)*1.2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  s+=svgGridBase(W,H,M,maxY);
+  s+=svgDivisoresAnio(datos,W,H,M);
+  const valLabelsF=new Set(indicesEtiquetas(n,n<=12?n:8));
+  const linea=(campo,color,nombre,dyLabel)=>{
+    let path='';
+    datos.forEach((d,i)=>{const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);path+=(i===0?'M ':' L ')+cx.toFixed(1)+' '+cy.toFixed(1);});
+    let out=`<path d="${path}" stroke="${color}" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+    datos.forEach((d,i)=>{
+      const cx=M.l+(w*(i+0.5)/n),cy=M.t+h-(h*d[campo]/maxY);
+      out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="9" fill="transparent" class="dot-hit" style="cursor:pointer" data-d="${d.label}" data-v="${fmt(d[campo],1)} FTE" data-s="${nombre}" data-c="${color}"/>`;
+      out+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3" fill="#07070f" stroke="${color}" stroke-width="1.8" pointer-events="none"/>`;
+      if(valLabelsF.has(i))
+        out+=`<text x="${cx.toFixed(1)}" y="${(cy+dyLabel).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="7.5" fill="${color}">${fmt(d[campo],1)}</text>`;
+    });
+    return out;
+  };
+  s+=linea('fte_planilla','#60a5fa','FTE Planilla',-8);
+  s+=linea('fte_terceros','#fbbf24','FTE Terceros',14);
+  datos.forEach((d,i)=>{
+    if(n<=14||i%Math.ceil(n/14)===0||i===n-1){
+      const cx=M.l+(w*(i+0.5)/n);
+      s+=`<text x="${cx.toFixed(1)}" y="${M.t+h+16}" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#9090b8">${d.label}</text>`;
+    }
+  });
+  s+='</svg>';
+  wrap.innerHTML=s;
+  bindDots('rep-wrap-fte');
+}
+function descargarExcelFTE(){
+  const datos=fteMensual(anioActivoReportes(),S_fteTurno);
+  const filas=datos.map(d=>[limpiarLabelAnio(d.label),d.anio,d.dias,r1(d.hp),r1(d.ht),d.fte_planilla,d.fte_terceros]);
+  exportarExcelGenerico(`FTE_${S_fteTurno.toUpperCase()}_${sufijoAnioActivo()}.xlsx`,['Mes','Año','Días operativos','HH Planilla','HH Terceros','FTE Planilla','FTE Terceros'],filas,[10,8,14,14,14,14,14]);
+}
 function renderReportes(){
   renderRepAnioSel();
   const datos=agregadoMensual(anioActivoReportes());
@@ -1926,6 +2069,7 @@ function renderReportes(){
   drawRepEficienciaAcum(datos);
   drawRepSplitAnios();
   drawRepPicos(picosPorMes(anioActivoReportes()));
+  drawRepFTE();
 }
 function predecirCached(fecha){
   if(_idx.pred.has(fecha))return _idx.pred.get(fecha);
@@ -2874,6 +3018,53 @@ function cargarHistMes(a,m){
   $('hist-sub').textContent=`${nm} · ${S.histMes.length} días registrados`;
   renderHist();
 }
+/* ═══════════════════════════════════════════════════════════
+   VARIACIÓN POR DÍA DE SEMANA — dentro del mes activo de Histórico.
+   Reutiliza semanasDelMes() (misma lógica ya probada del Simulador)
+   para que las semanas coincidan con las que ya usa el resto de la app.
+   ═══════════════════════════════════════════════════════════ */
+const DIAS_SEMANA_LBL=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+/* Opción A: cada día de semana, semana a semana dentro del mes,
+   con % de variación entre su primera y su última ocurrencia real. */
+function variacionSemanaASemana(a,m){
+  const semanas=semanasDelMes(a,m);
+  // Se inicializa cada slot con null explícito (no un array vacío) — si no,
+  // las semanas donde ese día no existe (ej. un mes que empieza a mitad de
+  // semana) dejan un "hueco" que .map() salta en silencio, desalineando
+  // las columnas del mapa de calor.
+  const porDia=DIAS_SEMANA_LBL.map(()=>new Array(semanas.length).fill(null));
+  semanas.forEach((sem,iSem)=>{
+    sem.dias.forEach(f=>{
+      const d=_idx.dias.get(f);
+      const tot=d?((+d.folios_t3||0)+(+d.folios_t1||0)):0;
+      const dowLunes=(new Date(f+'T12:00:00').getDay()+6)%7; // 0=lunes
+      porDia[dowLunes][iSem]={fecha:f,valor:tot>0?tot:null};
+    });
+  });
+  return DIAS_SEMANA_LBL.map((lbl,i)=>{
+    const valores=porDia[i].map(x=>x?x.valor:null);
+    const conDato=valores.filter(v=>v!=null);
+    const primero=conDato[0], ultimo=conDato[conDato.length-1];
+    const variacion=(primero!=null&&ultimo!=null&&conDato.length>=2&&primero>0)
+      ?r1((ultimo-primero)/primero*100):null;
+    return{dia:lbl,valores,nSemanas:semanas.length,variacion};
+  });
+}
+/* Opción B: promedio de cada día de semana vs. el promedio general
+   del mes (solo días con dato real). */
+function variacionVsPromedioMes(a,m){
+  const pre=`${a}-${String(m).padStart(2,'0')}`;
+  const dias=S.dias.filter(d=>d.fecha.startsWith(pre)&&((+d.folios_t3||0)+(+d.folios_t1||0))>0);
+  if(!dias.length)return{promedioMes:null,filas:[]};
+  const promedioMes=media(dias.map(d=>(+d.folios_t3||0)+(+d.folios_t1||0)));
+  const filas=DIAS_SEMANA_LBL.map((lbl,i)=>{
+    const deEseDia=dias.filter(d=>((new Date(d.fecha+'T12:00:00').getDay()+6)%7)===i);
+    if(!deEseDia.length)return{dia:lbl,promedio:null,variacion:null,n:0};
+    const prom=media(deEseDia.map(d=>(+d.folios_t3||0)+(+d.folios_t1||0)));
+    return{dia:lbl,promedio:r1(prom),variacion:promedioMes>0?r1((prom-promedioMes)/promedioMes*100):null,n:deEseDia.length};
+  });
+  return{promedioMes:r1(promedioMes),filas};
+}
 function efDia(d,tr){
   if(tr==='t3'){const h=(+d.hp_t3||0)+(+d.ht_t3||0);return h>0?(+d.folios_t3||0)/h:null;}
   if(tr==='t1'){const h=(+d.hp_t1||0)+(+d.ht_t1||0);return h>0?(+d.folios_t1||0)/h:null;}
@@ -2905,6 +3096,8 @@ function renderHist(){
   drawDiaria();
   drawAcumDiaria();
   renderHistRows();
+  renderDiaSemanaA();
+  renderDiaSemanaB();
 }
 function svgBase(W,H,M,maxY,data){
   const w=W-M.l-M.r,h=H-M.t-M.b,n=data.length;
@@ -3025,6 +3218,64 @@ function drawAcumDiaria(){
   if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · acumulada',labelLast:t==='t1'});
   if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · acumulada'});
   s+='</svg>';wrap.innerHTML=s;bindDots('wrap-acumd');
+}
+/* ── Tab A: mapa de calor semana a semana ── */
+function renderDiaSemanaA(){
+  const c=$('dia-semana-a');if(!c||!S.mesActivo)return;
+  const filas=variacionSemanaASemana(S.mesActivo.a,S.mesActivo.m);
+  const nSemanas=filas[0]?filas[0].nSemanas:0;
+  if(!nSemanas){c.innerHTML='<div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos suficientes</div>';return;}
+  const todosVals=filas.flatMap(f=>f.valores).filter(v=>v!=null);
+  const maxV=todosVals.length?Math.max(...todosVals):1;
+  let html=`<table style="border-collapse:collapse;width:100%"><tr>
+    <th style="font-family:'JetBrains Mono',monospace;font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ts);padding:5px 8px;text-align:left">Día</th>`;
+  for(let s=0;s<nSemanas;s++)html+=`<th style="font-family:'JetBrains Mono',monospace;font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ts);padding:5px 6px;text-align:center">Sem ${s+1}</th>`;
+  html+=`<th style="font-family:'JetBrains Mono',monospace;font-size:.56rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ts);padding:5px 8px;text-align:center">Var.</th></tr>`;
+  filas.forEach(f=>{
+    html+=`<tr><td style="font-family:'Syne',sans-serif;font-weight:700;font-size:.76rem;padding:4px 8px">${f.dia}</td>`;
+    f.valores.forEach(v=>{
+      if(v==null){html+=`<td style="padding:3px"><div style="border-radius:6px;padding:9px 4px;text-align:center;background:var(--s3);color:var(--ts);font-family:'JetBrains Mono',monospace;font-size:.72rem">—</div></td>`;return;}
+      const intensidad=Math.min(1,v/maxV);
+      html+=`<td style="padding:3px"><div style="border-radius:6px;padding:9px 4px;text-align:center;background:rgba(0,200,150,${(0.1+intensidad*0.35).toFixed(2)});font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.72rem">${fmtI(v)}</div></td>`;
+    });
+    const vr=f.variacion;
+    const colorVr=vr==null?'var(--ts)':vr>=0?'var(--ok)':'var(--red)';
+    const bgVr=vr==null?'var(--s3)':vr>=0?'rgba(0,200,150,.12)':'rgba(255,77,109,.12)';
+    html+=`<td style="padding:3px"><div style="border-radius:6px;padding:9px 4px;text-align:center;background:${bgVr};color:${colorVr};font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.72rem">${vr!=null?(vr>=0?'+':'')+fmt(vr,1)+'%':'—'}</div></td></tr>`;
+  });
+  html+='</table>';
+  c.innerHTML=html;
+}
+/* ── Tab B: promedio por día de semana vs. promedio del mes ── */
+function renderDiaSemanaB(){
+  const c=$('dia-semana-b');if(!c||!S.mesActivo)return;
+  const{promedioMes,filas}=variacionVsPromedioMes(S.mesActivo.a,S.mesActivo.m);
+  if(promedioMes==null){c.innerHTML='<div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Sin datos suficientes</div>';return;}
+  const maxAbs=Math.max(...filas.filter(f=>f.variacion!=null).map(f=>Math.abs(f.variacion)),1);
+  let html=`<div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--tm);margin-bottom:12px">Promedio general del mes: <strong style="color:var(--tx)">${fmtI(promedioMes)}</strong> despachos/día</div>`;
+  filas.forEach(f=>{
+    if(f.promedio==null){
+      html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;opacity:.4"><div style="width:78px;font-family:'Syne',sans-serif;font-weight:700;font-size:.74rem">${f.dia}</div><div style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ts)">sin datos</div></div>`;
+      return;
+    }
+    const pctBarra=Math.min(100,Math.abs(f.variacion)/maxAbs*100);
+    const esPositivo=f.variacion>=0;
+    html+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+      <div style="width:78px;font-family:'Syne',sans-serif;font-weight:700;font-size:.74rem;flex-shrink:0">${f.dia}</div>
+      <div style="flex:1;background:var(--s3);border-radius:4px;height:20px;position:relative;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:${pctBarra}%;background:${esPositivo?'rgba(0,200,150,.35)':'rgba(255,77,109,.35)'};border-radius:4px"></div>
+        <div style="position:absolute;left:8px;top:0;bottom:0;display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--tm)">${fmtI(f.promedio)}</div>
+      </div>
+      <div style="width:64px;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.72rem;color:${esPositivo?'var(--ok)':'var(--red)'};flex-shrink:0">${esPositivo?'+':''}${fmt(f.variacion,1)}%</div>
+    </div>`;
+  });
+  c.innerHTML=html;
+}
+function showDiaSemanaTab(id,btn){
+  document.querySelectorAll('.dia-semana-panel').forEach(p=>p.classList.remove('a'));
+  $('dia-semana-'+id+'-wrap').classList.add('a');
+  document.querySelectorAll('.dia-semana-tab').forEach(t=>t.classList.remove('a'));
+  btn.classList.add('a');
 }
 function renderHistRows(){
   const c=$('hist-rows');
