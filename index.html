@@ -494,14 +494,6 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div id="wrap-acumd"><svg id="chart-acumd" viewBox="0 0 580 180" style="width:100%;height:auto;display:block"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Selecciona un mes</text></svg></div>
     <div id="acumd-impacto" style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:#ff6b6b;margin-top:10px"></div>
   </div>
-  <!-- Cuadro simple: día, despachos, horas normales, horas capacitación -->
-  <div class="sl">Despachos y horas · simple</div>
-  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden;margin-bottom:16px">
-    <div style="display:grid;grid-template-columns:90px 1fr 1fr 1fr;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);font-weight:500">
-      <div>Día</div><div style="text-align:right;padding-right:12px">Despachos</div><div style="text-align:right;padding-right:12px">Horas normales</div><div style="text-align:right;padding-right:12px">Horas capacit.</div>
-    </div>
-    <div id="hist-rows-simple"><div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</div></div>
-  </div>
   <!-- Tabla -->
   <div class="sl">Detalle del mes · click para expandir</div>
   <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
@@ -3159,29 +3151,8 @@ function renderHist(){
   drawDiaria();
   drawAcumDiaria();
   renderHistRows();
-  renderHistRowsSimple();
   renderDiaSemanaA();
   renderDiaSemanaB();
-}
-/* Cuadro simple día/despachos/horas normales/horas capacitación — para
-   verificar a ojo por qué la línea "con capacitación" aparece o no. */
-function renderHistRowsSimple(){
-  const cont=$('hist-rows-simple');if(!cont)return;
-  const data=S.histMes;
-  if(!data.length){cont.innerHTML='<div style="padding:20px;text-align:center;color:var(--ts);font-size:.8rem">Selecciona un mes</div>';return;}
-  cont.innerHTML=data.map(d=>{
-    const fol=(+d.folios_t3||0)+(+d.folios_t1||0);
-    const hn=(+d.hp_t3||0)+(+d.ht_t3||0)+(+d.hp_t1||0)+(+d.ht_t1||0);
-    const hc=(+d.hc_t3||0)+(+d.hc_t1||0);
-    const fecha=new Date(d.fecha+'T12:00:00');
-    const lbl=DN[fecha.getDay()]+' '+fecha.getDate();
-    return `<div style="display:grid;grid-template-columns:90px 1fr 1fr 1fr;padding:9px 12px;border-bottom:1px solid var(--b1);font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--tx)">
-      <div>${lbl}</div>
-      <div style="text-align:right;padding-right:12px">${fmtI(fol)}</div>
-      <div style="text-align:right;padding-right:12px">${fmt(hn,1)}h</div>
-      <div style="text-align:right;padding-right:12px;color:${hc>0?'#ff8787':'var(--tm)'};font-weight:${hc>0?'700':'400'}">${fmt(hc,1)}h</div>
-    </div>`;
-  }).join('');
 }
 function svgBase(W,H,M,maxY,data){
   const w=W-M.l-M.r,h=H-M.t-M.b,n=data.length;
