@@ -460,6 +460,16 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div class="kpi"><div class="kpi-l">Total despachado</div><div class="kpi-v n" id="hkpi-fol">—</div><div class="kpi-s">folios del mes</div></div>
     <div class="kpi"><div class="kpi-l">Precisión modelo</div><div class="kpi-v ok" id="hkpi-ml">—</div><div class="kpi-s">MAPE últ. 30d</div></div>
   </div>
+  <!-- HERO: eficiencia + despachos + horas por mes, todo el histórico -->
+  <div style="background:linear-gradient(160deg,rgba(124,111,255,.09),rgba(0,200,150,.03) 60%);border:1px solid rgba(124,111,255,.22);border-radius:14px;padding:20px;margin-bottom:22px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap;gap:10px">
+      <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.02rem">Eficiencia, despachos y horas por mes</div><div style="font-size:.68rem;color:var(--tm);margin-top:2px">Cierre real de cada mes — el mismo número que ves en Histórico</div></div>
+      <button class="btn btn-s btn-sm" onclick="descargarExcelEficienciaMensualHist()">⬇ Excel</button>
+    </div>
+    <div id="hist-hero-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0"></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm);margin-bottom:10px">Pasa el mouse (o toca) sobre cada punto para ver despachos y horas de ese mes.</div>
+    <div id="hist-wrap-eficacum"><svg viewBox="0 0 640 220" style="width:100%;height:auto;display:block"><text x="320" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Cargando…</text></svg></div>
+  </div>
   <!-- Selector año + mes -->
   <div class="sl">Año</div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px" id="anio-sel"></div>
@@ -1603,6 +1613,11 @@ function descargarExcelEficienciaMensual(){
   const filas=datos.map(d=>[limpiarLabelAnio(d.label),d.anio,d.folios_tot,r1(d.hh_tot),d.eficiencia_mes!=null?r2(d.eficiencia_mes):'']);
   exportarExcelGenerico(`Eficiencia_mensual_${sufijoAnioActivo()}.xlsx`,['Mes','Año','Despachos totales','Horas totales','Eficiencia (cierre de mes)'],filas,[10,8,18,14,22]);
 }
+function descargarExcelEficienciaMensualHist(){
+  const datos=agregadoMensual('all');
+  const filas=datos.map(d=>[limpiarLabelAnio(d.label),d.anio,d.folios_tot,r1(d.hh_tot),d.eficiencia_mes!=null?r2(d.eficiencia_mes):'']);
+  exportarExcelGenerico('Eficiencia_mensual_historico.xlsx',['Mes','Año','Despachos totales','Horas totales','Eficiencia (cierre de mes)'],filas,[10,8,18,14,22]);
+}
 function descargarExcelDespachosTotal(){
   const datos=agregadoMensual(anioActivoReportes());
   const reg=regresionLineal(datos.map(d=>d.folios_tot));
@@ -1629,8 +1644,8 @@ function descargarExcelSplitAnios(){
   });
   exportarExcelGenerico('Participacion_T3_T1_por_anio.xlsx',['Año','Folios T3','Folios T1','% T3','% T1'],filas,[8,14,14,10,10]);
 }
-function renderRepHeroStats(datos){
-  const cont=$('rep-hero-stats');if(!cont)return;
+function renderRepHeroStats(datos,statsId='rep-hero-stats'){
+  const cont=$(statsId);if(!cont)return;
   const ultimo=[...datos].reverse().find(d=>d.eficiencia_mes!=null);
   if(!ultimo){cont.innerHTML='';return;}
   const stats=[
@@ -1649,17 +1664,18 @@ function renderRepHeroStats(datos){
    ese fue el bug que se corrigió), con despachos y horas como contexto
    de fondo a escala normalizada (para comparar la FORMA de la tendencia
    sin siete ejes distintos peleando por espacio). */
-function drawRepEficienciaAcum(datos){
-  const wrap=$('rep-wrap-eficacum');if(!wrap)return;
-  renderRepHeroStats(datos);
+function drawRepEficienciaAcum(datos,wrapId='rep-wrap-eficacum',statsId='rep-hero-stats'){
+  const wrap=$(wrapId);if(!wrap)return;
+  renderRepHeroStats(datos,statsId);
   const conVal=datos.filter(d=>d.eficiencia_mes!=null);
   if(!conVal.length){wrap.innerHTML='<svg viewBox="0 0 640 220" style="width:100%;height:auto"><text x="320" y="110" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos suficientes</text></svg>';return;}
   const W=640,H=230,M={t:18,r:16,b:38,l:46};
   const w=W-M.l-M.r,h=H-M.t-M.b,n=datos.length;
   const maxY=Math.max(...conVal.map(d=>d.eficiencia_mes),1)*1.2;
+  const gradId='gradEfic-'+wrapId;
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=`<defs>
-    <linearGradient id="gradEfic" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#7c6fff" stop-opacity=".32"/>
       <stop offset="100%" stop-color="#7c6fff" stop-opacity="0"/>
     </linearGradient>
@@ -1678,7 +1694,7 @@ function drawRepEficienciaAcum(datos){
   });
   const primerX=M.l+(w*0.5/n), ultX=M.l+(w*(n-0.5)/n);
   pathArea=pathLinea+` L ${ultX.toFixed(1)} ${(M.t+h).toFixed(1)} L ${primerX.toFixed(1)} ${(M.t+h).toFixed(1)} Z`;
-  s+=`<path d="${pathArea}" fill="url(#gradEfic)"/>`;
+  s+=`<path d="${pathArea}" fill="url(#${gradId})"/>`;
   s+=`<path d="${pathLinea}" stroke="#7c6fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
 
   const etiquetas4=new Set(indicesEtiquetas(n,n<=12?n:10));
@@ -1700,7 +1716,7 @@ function drawRepEficienciaAcum(datos){
   });
   s+='</svg>';
   wrap.innerHTML=s;
-  bindDots('rep-wrap-eficacum');
+  bindDots(wrapId);
 }
 function drawRepSplitAnios(){
   const cont=$('rep-split-anios');if(!cont)return;
@@ -3110,6 +3126,7 @@ function renderHist(){
   $('hkpi-fol').textContent=fmtI(f1+f3);
   const prec=precisionModelo();
   $('hkpi-ml').textContent=prec!=null?fmt(prec,1)+'%':'—';
+  drawRepEficienciaAcum(agregadoMensual('all'),'hist-wrap-eficacum','hist-hero-stats');
   renderCierreMes();
   // Leyendas
   const legs=[];
@@ -3117,7 +3134,9 @@ function renderHist(){
   if(t==='t1'||t==='all')legs.push(`<span><span style="width:8px;height:8px;border-radius:2px;background:var(--t1);display:inline-block;margin-right:4px"></span>T1 Noche</span>`);
   if(t==='all')legs.push(`<span><span style="width:8px;height:8px;border-radius:2px;background:var(--tx);display:inline-block;margin-right:4px"></span>General</span>`);
   $('leg-diaria').innerHTML=legs.join('');
-  $('leg-acumd').innerHTML=legs.join('');
+  const legsAcum=legs.slice();
+  if(t==='all')legsAcum.push(`<span><span style="width:8px;height:2px;border-top:2px dashed #ff6b6b;display:inline-block;margin-right:4px"></span>Con capacitación</span>`);
+  $('leg-acumd').innerHTML=legsAcum.join('');
   drawDiaria();
   drawAcumDiaria();
   renderHistRows();
@@ -3145,7 +3164,8 @@ function linePath(vals,W,H,M,maxY,color,opts){
     pts.push({x,y:M.t+h-(h*v/maxY),v,i});}});
   if(!pts.length)return '';
   let p='';pts.forEach((q,k)=>{p+=(k===0?'M ':' L ')+q.x.toFixed(1)+' '+q.y.toFixed(1);});
-  let s=`<path d="${p}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const dash=opts.dash?` stroke-dasharray="${opts.dash}"`:'';
+  let s=`<path d="${p}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"${dash}/>`;
   const fechas=opts.fechas||[];
   pts.forEach(q=>{
     const f=fechas[q.i]||'';
@@ -3226,10 +3246,18 @@ function drawAcumDiaria(){
     else{cf+=(+d.folios_t3||0)+(+d.folios_t1||0);ch+=(+d.hp_t3||0)+(+d.ht_t3||0)+(+d.hp_t1||0)+(+d.ht_t1||0);}
     return ch>0?cf/ch:null;});};
   const a3=acum('t3'),a1=acum('t1'),ag=acum('all');
+  // General, pero sumando también HH Capacitación al denominador — muestra
+  // cuánto "costaría" el indicador oficial si la capacitación sí penalizara.
+  let cf=0,ch=0;
+  const agCap=data.map(d=>{
+    cf+=(+d.folios_t3||0)+(+d.folios_t1||0);
+    ch+=(+d.hp_t3||0)+(+d.ht_t3||0)+(+d.hp_t1||0)+(+d.ht_t1||0)+(+d.hc_t3||0)+(+d.hc_t1||0);
+    return ch>0?cf/ch:null;
+  });
   let all=[];
   if(t==='t3'||t==='all')all=all.concat(a3.filter(Boolean));
   if(t==='t1'||t==='all')all=all.concat(a1.filter(Boolean));
-  if(t==='all')all=all.concat(ag.filter(Boolean));
+  if(t==='all')all=all.concat(ag.filter(Boolean)).concat(agCap.filter(Boolean));
   const objM=objMes(S.mesActivo?.a,S.mesActivo?.m);
   if(t==='all')all.push(objM);
   if(!all.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin horas registradas</text></svg>';return;}
@@ -3242,6 +3270,7 @@ function drawAcumDiaria(){
   if(t==='t3'||t==='all')s+=linePath(a3,W,H,M,maxY,'#00c896',{fechas:fs,serie:'T3 Día · acumulada',labelLast:t==='t3'});
   if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · acumulada',labelLast:t==='t1'});
   if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · acumulada'});
+  if(t==='all')s+=linePath(agCap,W,H,M,maxY,'#ff6b6b',{fechas:fs,serie:'General con capacitación · acumulada',dash:'5,4',labelLast:false});
   s+='</svg>';wrap.innerHTML=s;bindDots('wrap-acumd');
 }
 /* ── Tab A: mapa de calor semana a semana ── */
