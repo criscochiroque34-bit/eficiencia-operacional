@@ -1003,6 +1003,7 @@ function reindexar(){
   _idx.dias=new Map(S.dias.map(d=>[d.fecha,d]));
   _idx.pred.clear();
   _mem.evalCache=null;
+  invalidarCacheAgregadoMensual();
 }
 const _mem={evalCache:null};
 
@@ -1340,6 +1341,16 @@ function simularEscenario(anio,mes,eficienciaObjetivo,alcance){
     personas_por_turno:personasPorTurno,
   };
 }
+/* Cache del cierre mensual "todos los años" que usa el hero de Histórico:
+   es independiente del turno/mes seleccionado, así que no hace falta
+   recalcularlo en cada click de T1/T3/Ambos o cambio de mes — solo cuando
+   S.dias realmente cambia (guardar, borrar, importar, carga inicial). */
+let _agregadoMensualAllCache=null;
+function agregadoMensualAllCached(){
+  if(!_agregadoMensualAllCache)_agregadoMensualAllCache=agregadoMensual('all');
+  return _agregadoMensualAllCache;
+}
+function invalidarCacheAgregadoMensual(){_agregadoMensualAllCache=null;}
 function agregadoMensual(anio){
   const porMes={}; // 'YYYY-MM' -> acumulador
   S.dias.forEach(d=>{
@@ -1614,7 +1625,7 @@ function descargarExcelEficienciaMensual(){
   exportarExcelGenerico(`Eficiencia_mensual_${sufijoAnioActivo()}.xlsx`,['Mes','Año','Despachos totales','Horas totales','Eficiencia (cierre de mes)'],filas,[10,8,18,14,22]);
 }
 function descargarExcelEficienciaMensualHist(){
-  const datos=agregadoMensual('all');
+  const datos=agregadoMensualAllCached();
   const filas=datos.map(d=>[limpiarLabelAnio(d.label),d.anio,d.folios_tot,r1(d.hh_tot),d.eficiencia_mes!=null?r2(d.eficiencia_mes):'']);
   exportarExcelGenerico('Eficiencia_mensual_historico.xlsx',['Mes','Año','Despachos totales','Horas totales','Eficiencia (cierre de mes)'],filas,[10,8,18,14,22]);
 }
@@ -3126,7 +3137,7 @@ function renderHist(){
   $('hkpi-fol').textContent=fmtI(f1+f3);
   const prec=precisionModelo();
   $('hkpi-ml').textContent=prec!=null?fmt(prec,1)+'%':'—';
-  drawRepEficienciaAcum(agregadoMensual('all'),'hist-wrap-eficacum','hist-hero-stats');
+  drawRepEficienciaAcum(agregadoMensualAllCached(),'hist-wrap-eficacum','hist-hero-stats');
   renderCierreMes();
   // Leyendas
   const legs=[];
