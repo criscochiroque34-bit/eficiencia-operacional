@@ -3343,8 +3343,12 @@ function updateAcumdCrosshair(idx){
   const line=svg.querySelector('#acumd-xline');
   if(line){line.setAttribute('x1',x.toFixed(1));line.setAttribute('x2',x.toFixed(1));line.setAttribute('opacity','1');}
   const rows=[];
+  const hcHoy=(+data[idx]?.hc_t3||0)+(+data[idx]?.hc_t1||0);
   series.forEach(se=>{
-    const v=se.vals[idx];
+    let v=se.vals[idx];
+    // "Con capacitación" solo se muestra si ESE día tuvo horas de
+    // capacitación — si no, es ruido repetir el mismo número que General.
+    if(se.key==='cap'&&hcHoy<=0)v=null;
     const dot=svg.querySelector('#acumd-pt-'+se.key);
     if(v==null){if(dot)dot.setAttribute('opacity','0');return;}
     const y=M.t+h-(h*v/maxY);
