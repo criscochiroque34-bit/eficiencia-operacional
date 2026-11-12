@@ -492,6 +492,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       <div style="display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tm)" id="leg-acumd"></div>
     </div>
     <div id="wrap-acumd"><svg id="chart-acumd" viewBox="0 0 580 180" style="width:100%;height:auto;display:block"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Selecciona un mes</text></svg></div>
+    <div id="acumd-impacto" style="font-family:'JetBrains Mono',monospace;font-size:.68rem;color:#ff6b6b;margin-top:10px"></div>
   </div>
   <!-- Tabla -->
   <div class="sl">Detalle del mes · click para expandir</div>
@@ -3255,12 +3256,29 @@ function drawDiaria(){
   if(t==='all')s+=linePath(vg,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · diaria'});
   s+='</svg>';wrap.innerHTML=s;bindDots('wrap-diaria');
 }
+/* Área sombreada entre dos series (misma escala/eje) — se usa para mostrar
+   de un vistazo la brecha entre "General" y "con capacitación" sin saturar
+   el gráfico con números repetidos en cada punto. */
+function areaBetween(valsTop,valsBot,W,H,M,maxY){
+  const w=W-M.l-M.r,h=H-M.t-M.b,n=valsTop.length;
+  const top=[],bot=[];
+  for(let i=0;i<n;i++){
+    if(valsTop[i]==null||valsBot[i]==null)continue;
+    const x=n>1?M.l+(w*i/(n-1)):M.l+w/2;
+    top.push({x,y:M.t+h-(h*valsTop[i]/maxY)});
+    bot.push({x,y:M.t+h-(h*valsBot[i]/maxY)});
+  }
+  if(top.length<2)return '';
+  let d='M '+top[0].x.toFixed(1)+' '+top[0].y.toFixed(1);
+  for(let i=1;i<top.length;i++)d+=' L '+top[i].x.toFixed(1)+' '+top[i].y.toFixed(1);
+  for(let i=bot.length-1;i>=0;i--)d+=' L '+bot[i].x.toFixed(1)+' '+bot[i].y.toFixed(1);
+  return d+' Z';
+}
 function drawAcumDiaria(){
   const wrap=$('wrap-acumd'),t=S.turnoHist,data=S.histMes;
-  if(!data.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';return;}
-  // Margen superior ampliado (antes 15) para dar espacio a las etiquetas de
-  // valor por punto apiladas (T1, General) sin que se corten en el borde.
-  const W=580,H=180,M={t:30,r:20,b:30,l:38};
+  const impactoEl=$('acumd-impacto');
+  if(!data.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';if(impactoEl)impactoEl.textContent='';return;}
+  const W=580,H=180,M={t:15,r:20,b:30,l:38};
   const acum=(tr)=>{let cf=0,ch=0;return data.map(d=>{
     if(tr==='t3'){cf+=+d.folios_t3||0;ch+=(+d.hp_t3||0)+(+d.ht_t3||0);}
     else if(tr==='t1'){cf+=+d.folios_t1||0;ch+=(+d.hp_t1||0)+(+d.ht_t1||0);}
@@ -3281,18 +3299,33 @@ function drawAcumDiaria(){
   if(t==='all')all=all.concat(ag.filter(Boolean)).concat(agCap.filter(Boolean));
   const objM=objMes(S.mesActivo?.a,S.mesActivo?.m);
   if(t==='all')all.push(objM);
-  if(!all.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin horas registradas</text></svg>';return;}
+  if(!all.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin horas registradas</text></svg>';if(impactoEl)impactoEl.textContent='';return;}
   const maxY=Math.max(...all)*1.25;
   const w=W-M.l-M.r,h=H-M.t-M.b;
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=svgBase(W,H,M,maxY,data);
+  if(t==='all'){
+    const areaD=areaBetween(ag,agCap,W,H,M,maxY);
+    if(areaD)s+=`<path d="${areaD}" fill="#ff6b6b" fill-opacity=".28"/>`;
+  }
   if(t==='all'){const y=M.t+h-(h*objM/maxY);s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#ff9500" stroke-dasharray="4,3" opacity=".5"/><text x="${M.l+w+2}" y="${y+3}" font-family="JetBrains Mono" font-size="7" fill="#ff9500">obj</text>`;}
   const fs=data.map(d=>d.fecha);
-  if(t==='t3'||t==='all')s+=linePath(a3,W,H,M,maxY,'#00c896',{fechas:fs,serie:'T3 Día · acumulada',labelEach:true,labelDy:14});
-  if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · acumulada',labelEach:true,labelDy:-9});
-  if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · acumulada',labelEach:true,labelDy:-20});
-  if(t==='all')s+=linePath(agCap,W,H,M,maxY,'#ff6b6b',{fechas:fs,serie:'General con capacitación · acumulada',dash:'5,4',labelEach:true,labelDy:9});
+  if(t==='t3'||t==='all')s+=linePath(a3,W,H,M,maxY,'#00c896',{fechas:fs,serie:'T3 Día · acumulada',labelLast:t==='t3'});
+  if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · acumulada',labelLast:t==='t1'});
+  if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · acumulada'});
+  if(t==='all')s+=linePath(agCap,W,H,M,maxY,'#ff6b6b',{fechas:fs,serie:'General con capacitación · acumulada',dash:'5,4',labelLast:false});
   s+='</svg>';wrap.innerHTML=s;bindDots('wrap-acumd');
+  if(impactoEl){
+    if(t==='all'){
+      let i=ag.length-1;
+      while(i>=0&&(ag[i]==null||agCap[i]==null))i--;
+      if(i>=0){
+        const diff=ag[i]-agCap[i];
+        const pct=ag[i]>0?(diff/ag[i]*100):0;
+        impactoEl.textContent=`Impacto de capacitación · último día con datos: −${fmtE(diff)} fol/h (−${fmt(pct,1)}%) frente al indicador oficial`;
+      }else impactoEl.textContent='';
+    }else impactoEl.textContent='';
+  }
 }
 /* ── Tab A: mapa de calor semana a semana ── */
 let S_diaSemanaTurno='general';
