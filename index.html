@@ -3274,10 +3274,75 @@ function areaBetween(valsTop,valsBot,W,H,M,maxY){
   for(let i=bot.length-1;i>=0;i--)d+=' L '+bot[i].x.toFixed(1)+' '+bot[i].y.toFixed(1);
   return d+' Z';
 }
+/* Crosshair sincronizado del gráfico de eficiencia acumulada diaria: una
+   sola línea vertical + un solo tooltip con las 4 series del día apuntado,
+   en vez de un punto de hover independiente por serie. Reemplaza el hover
+   por-punto (bindDots) solo en este gráfico. */
+let _acumdCtx=null, _acumdCrosshairBound=false;
+function bindAcumdCrosshair(){
+  if(_acumdCrosshairBound)return;
+  _acumdCrosshairBound=true;
+  const wrap=$('wrap-acumd');
+  const mover=ev=>{
+    if(!_acumdCtx)return;
+    const svg=wrap.querySelector('svg');if(!svg)return;
+    const r=svg.getBoundingClientRect();
+    const cx=ev.touches?ev.touches[0].clientX:ev.clientX;
+    const relX=(cx-r.left)/r.width*_acumdCtx.W;
+    const{M,w,data}=_acumdCtx;
+    let idx=data.length>1?Math.round((relX-M.l)/w*(data.length-1)):0;
+    idx=Math.max(0,Math.min(data.length-1,idx));
+    updateAcumdCrosshair(idx);
+    if(ev.cancelable)ev.preventDefault();
+  };
+  wrap.addEventListener('pointermove',mover);
+  wrap.addEventListener('pointerleave',hideAcumdCrosshair);
+  wrap.addEventListener('touchmove',mover,{passive:false});
+  wrap.addEventListener('touchend',hideAcumdCrosshair);
+}
+function hideAcumdCrosshair(){
+  const wrap=$('wrap-acumd');if(!wrap)return;
+  const line=wrap.querySelector('#acumd-xline');if(line)line.setAttribute('opacity','0');
+  wrap.querySelectorAll('.acumd-pt').forEach(c=>c.setAttribute('opacity','0'));
+  ttHide();
+}
+function updateAcumdCrosshair(idx){
+  if(!_acumdCtx)return;
+  const{W,H,M,w,h,maxY,data,series}=_acumdCtx;
+  const wrap=$('wrap-acumd'),svg=wrap.querySelector('svg');if(!svg)return;
+  const n=data.length,x=n>1?M.l+(w*idx/(n-1)):M.l+w/2;
+  const line=svg.querySelector('#acumd-xline');
+  if(line){line.setAttribute('x1',x.toFixed(1));line.setAttribute('x2',x.toFixed(1));line.setAttribute('opacity','1');}
+  const rows=[];
+  series.forEach(se=>{
+    const v=se.vals[idx];
+    const dot=svg.querySelector('#acumd-pt-'+se.key);
+    if(v==null){if(dot)dot.setAttribute('opacity','0');return;}
+    const y=M.t+h-(h*v/maxY);
+    if(dot){dot.setAttribute('cx',x.toFixed(1));dot.setAttribute('cy',y.toFixed(1));dot.setAttribute('opacity','1');}
+    rows.push({label:se.label,v,color:se.color});
+  });
+  const d=new Date(data[idx].fecha+'T12:00:00');
+  const fechaLbl=DN[d.getDay()]+' '+d.getDate()+' '+d.toLocaleDateString('es-PE',{month:'short'});
+  const tt=ttEl();
+  tt.innerHTML=`<div class="tt-d">${fechaLbl}</div>`+
+    `<div style="display:flex;flex-direction:column;gap:5px;margin-top:2px">`+
+    rows.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:16px">`+
+      `<span style="display:flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;font-size:.66rem;color:var(--tm)">`+
+      `<span style="width:10px;height:2px;background:${r.color};display:inline-block"></span>${r.label}</span>`+
+      `<strong style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--tx)">${fmtE(r.v)}</strong></div>`).join('')+
+    `</div>`;
+  tt.style.opacity='1';
+  const rr=svg.getBoundingClientRect();
+  const px=rr.left+(x/W)*rr.width, py=rr.top+(M.t/H)*rr.height;
+  const tr=tt.getBoundingClientRect();
+  tt.style.left=Math.max(8,Math.min(window.innerWidth-tr.width-8,px-tr.width/2))+'px';
+  tt.style.top=Math.max(8,py-tr.height-10)+'px';
+}
 function drawAcumDiaria(){
   const wrap=$('wrap-acumd'),t=S.turnoHist,data=S.histMes;
   const impactoEl=$('acumd-impacto');
-  if(!data.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';if(impactoEl)impactoEl.textContent='';return;}
+  if(!data.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';if(impactoEl)impactoEl.textContent='';_acumdCtx=null;return;}
   const W=580,H=180,M={t:15,r:20,b:30,l:38};
   const acum=(tr)=>{let cf=0,ch=0;return data.map(d=>{
     if(tr==='t3'){cf+=+d.folios_t3||0;ch+=(+d.hp_t3||0)+(+d.ht_t3||0);}
@@ -3299,11 +3364,21 @@ function drawAcumDiaria(){
   if(t==='all')all=all.concat(ag.filter(Boolean)).concat(agCap.filter(Boolean));
   const objM=objMes(S.mesActivo?.a,S.mesActivo?.m);
   if(t==='all')all.push(objM);
-  if(!all.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin horas registradas</text></svg>';if(impactoEl)impactoEl.textContent='';return;}
+  if(!all.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin horas registradas</text></svg>';if(impactoEl)impactoEl.textContent='';_acumdCtx=null;return;}
   const maxY=Math.max(...all)*1.25;
   const w=W-M.l-M.r,h=H-M.t-M.b;
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
   s+=svgBase(W,H,M,maxY,data);
+  // Día de mayor brecha (peor caso del mes) — etiqueta selectiva, no un
+  // número por punto: así el ojo va directo al día más crítico.
+  let idxPico=-1,diffPico=0;
+  if(t==='all'){
+    for(let i=0;i<data.length;i++){
+      if(ag[i]==null||agCap[i]==null)continue;
+      const diff=ag[i]-agCap[i];
+      if(diff>diffPico){diffPico=diff;idxPico=i;}
+    }
+  }
   if(t==='all'){
     const areaD=areaBetween(ag,agCap,W,H,M,maxY);
     if(areaD)s+=`<path d="${areaD}" fill="#ff6b6b" fill-opacity=".28"/>`;
@@ -3314,7 +3389,33 @@ function drawAcumDiaria(){
   if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · acumulada',labelLast:t==='t1'});
   if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · acumulada'});
   if(t==='all')s+=linePath(agCap,W,H,M,maxY,'#ff6b6b',{fechas:fs,serie:'General con capacitación · acumulada',dash:'5,4',labelLast:false});
-  s+='</svg>';wrap.innerHTML=s;bindDots('wrap-acumd');
+  if(idxPico>=0&&diffPico>0.05){
+    const px=w*(idxPico/(Math.max(data.length-1,1)))+M.l;
+    const py=M.t+h-(h*agCap[idxPico]/maxY);
+    const arriba=py>M.t+28;
+    const ty=arriba?py-10:py+16;
+    const cerca_izq=px<M.l+55,cerca_der=px>M.l+w-55;
+    const anchor=cerca_izq?'start':cerca_der?'end':'middle';
+    const tx=cerca_izq?px+7:cerca_der?px-7:px;
+    s+=`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="4" fill="#ff6b6b" stroke="#0c0c18" stroke-width="1.6" pointer-events="none"/>`;
+    s+=`<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${anchor}" font-family="JetBrains Mono" font-size="8" font-weight="700" fill="#ff8787" pointer-events="none">mayor brecha −${fmtE(diffPico)}</text>`;
+  }
+  // Crosshair sincronizado: línea vertical + puntos resaltados por serie
+  const series=[];
+  if(t==='t3')series.push({key:'t3',label:'T3 Día',color:'#00c896',vals:a3});
+  if(t==='t1')series.push({key:'t1',label:'T1 Noche',color:'#7c6fff',vals:a1});
+  if(t==='all'){
+    series.push({key:'t3',label:'T3 Día',color:'#00c896',vals:a3});
+    series.push({key:'t1',label:'T1 Noche',color:'#7c6fff',vals:a1});
+    series.push({key:'general',label:'General',color:'#e2e2f0',vals:ag});
+    series.push({key:'cap',label:'Con capacitación',color:'#ff6b6b',vals:agCap});
+  }
+  s+=`<line id="acumd-xline" x1="${M.l}" y1="${M.t}" x2="${M.l}" y2="${M.t+h}" stroke="#9090b8" stroke-width="1" opacity="0" pointer-events="none"/>`;
+  series.forEach(se=>{s+=`<circle id="acumd-pt-${se.key}" class="acumd-pt" cx="0" cy="0" r="5" fill="${se.color}" stroke="#0c0c18" stroke-width="2" opacity="0" pointer-events="none"/>`;});
+  s+=`<rect x="${M.l}" y="${M.t}" width="${w}" height="${h}" fill="transparent" style="cursor:crosshair"/>`;
+  s+='</svg>';wrap.innerHTML=s;
+  _acumdCtx={W,H,M,w,h,maxY,data,series};
+  bindAcumdCrosshair();
   if(impactoEl){
     if(t==='all'){
       let i=ag.length-1;
