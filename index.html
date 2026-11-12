@@ -3278,6 +3278,16 @@ function efDiaCap(d){
 function ocultarDondeIgual(conCap,normal){
   return conCap.map((v,i)=>(v!=null&&normal[i]!=null&&Math.abs(v-normal[i])<1e-9)?null:v);
 }
+/* Para el ACUMULADO: oculta el punto cuando ESE día puntual no tuvo horas
+   de capacitación — aunque el acumulado arrastre una brecha de días
+   anteriores, ese día en concreto no sumó nada nuevo, así que no se
+   dibuja la roja ahí (solo en los días que sí aportaron capacitación). */
+function ocultarSinCapacitacionDia(conCap,data){
+  return conCap.map((v,i)=>{
+    const hc=(+data[i]?.hc_t3||0)+(+data[i]?.hc_t1||0);
+    return hc>0?v:null;
+  });
+}
 function drawDiaria(){
   const wrap=$('wrap-diaria'),t=S.turnoHist,data=S.histMes;
   if(!data.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';return;}
@@ -3436,7 +3446,7 @@ function drawAcumDiaria(){
   if(t==='t3'||t==='all')s+=linePath(a3,W,H,M,maxY,'#00c896',{fechas:fs,serie:'T3 Día · acumulada',labelLast:t==='t3'});
   if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · acumulada',labelLast:t==='t1'});
   if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · acumulada'});
-  if(t==='all')s+=linePath(ocultarDondeIgual(agCap,ag),W,H,M,maxY,'#ff6b6b',{fechas:fs,serie:'General con capacitación · acumulada',dash:'5,4',labelLast:false,breakGaps:true});
+  if(t==='all')s+=linePath(ocultarSinCapacitacionDia(agCap,data),W,H,M,maxY,'#ff6b6b',{fechas:fs,serie:'General con capacitación · acumulada',dash:'5,4',labelLast:false,breakGaps:true});
   if(idxPico>=0&&diffPico>0.05){
     const px=w*(idxPico/(Math.max(data.length-1,1)))+M.l;
     const py=M.t+h-(h*agCap[idxPico]/maxY);
