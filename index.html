@@ -3187,8 +3187,16 @@ function linePath(vals,W,H,M,maxY,color,opts){
   });
   const l=pts[pts.length-1];
   s+=`<circle cx="${l.x.toFixed(1)}" cy="${l.y.toFixed(1)}" r="4.5" fill="${color}" pointer-events="none"/>`;
-  if(opts.labelLast!==false)
+  if(opts.labelEach){
+    const dy=opts.labelDy!=null?opts.labelDy:-9;
+    const idxs=new Set(indicesEtiquetas(pts.length,opts.maxLabels||12));
+    pts.forEach((q,k)=>{
+      if(!idxs.has(k))return;
+      s+=`<text x="${q.x.toFixed(1)}" y="${(q.y+dy).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-size="7.5" font-weight="700" fill="${color}" pointer-events="none">${fmtE(q.v)}</text>`;
+    });
+  }else if(opts.labelLast!==false){
     s+=`<text x="${l.x.toFixed(1)}" y="${(l.y-10).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-size="9.5" font-weight="700" fill="${color}" pointer-events="none">${fmtE(l.v)}</text>`;
+  }
   return s;
 }
 /* ── Tooltip de gráficos ── */
@@ -3250,7 +3258,9 @@ function drawDiaria(){
 function drawAcumDiaria(){
   const wrap=$('wrap-acumd'),t=S.turnoHist,data=S.histMes;
   if(!data.length){wrap.innerHTML='<svg viewBox="0 0 580 180" style="width:100%;height:auto"><text x="290" y="95" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#4a4a6a">Sin datos del mes</text></svg>';return;}
-  const W=580,H=180,M={t:15,r:20,b:30,l:38};
+  // Margen superior ampliado (antes 15) para dar espacio a las etiquetas de
+  // valor por punto apiladas (T1, General) sin que se corten en el borde.
+  const W=580,H=180,M={t:30,r:20,b:30,l:38};
   const acum=(tr)=>{let cf=0,ch=0;return data.map(d=>{
     if(tr==='t3'){cf+=+d.folios_t3||0;ch+=(+d.hp_t3||0)+(+d.ht_t3||0);}
     else if(tr==='t1'){cf+=+d.folios_t1||0;ch+=(+d.hp_t1||0)+(+d.ht_t1||0);}
@@ -3278,10 +3288,10 @@ function drawAcumDiaria(){
   s+=svgBase(W,H,M,maxY,data);
   if(t==='all'){const y=M.t+h-(h*objM/maxY);s+=`<line x1="${M.l}" y1="${y}" x2="${M.l+w}" y2="${y}" stroke="#ff9500" stroke-dasharray="4,3" opacity=".5"/><text x="${M.l+w+2}" y="${y+3}" font-family="JetBrains Mono" font-size="7" fill="#ff9500">obj</text>`;}
   const fs=data.map(d=>d.fecha);
-  if(t==='t3'||t==='all')s+=linePath(a3,W,H,M,maxY,'#00c896',{fechas:fs,serie:'T3 Día · acumulada',labelLast:t==='t3'});
-  if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · acumulada',labelLast:t==='t1'});
-  if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · acumulada'});
-  if(t==='all')s+=linePath(agCap,W,H,M,maxY,'#ff6b6b',{fechas:fs,serie:'General con capacitación · acumulada',dash:'5,4',labelLast:false});
+  if(t==='t3'||t==='all')s+=linePath(a3,W,H,M,maxY,'#00c896',{fechas:fs,serie:'T3 Día · acumulada',labelEach:true,labelDy:14});
+  if(t==='t1'||t==='all')s+=linePath(a1,W,H,M,maxY,'#7c6fff',{fechas:fs,serie:'T1 Noche · acumulada',labelEach:true,labelDy:-9});
+  if(t==='all')s+=linePath(ag,W,H,M,maxY,'#e2e2f0',{fechas:fs,serie:'General · acumulada',labelEach:true,labelDy:-20});
+  if(t==='all')s+=linePath(agCap,W,H,M,maxY,'#ff6b6b',{fechas:fs,serie:'General con capacitación · acumulada',dash:'5,4',labelEach:true,labelDy:9});
   s+='</svg>';wrap.innerHTML=s;bindDots('wrap-acumd');
 }
 /* ── Tab A: mapa de calor semana a semana ── */
