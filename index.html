@@ -212,10 +212,10 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <button class="sb-btn" onclick="showView('simulador',this)"><span class="ico">🎯</span>Simulador</button>
     <button class="sb-btn" onclick="showView('ml',this)"><span class="ico">🧠</span>Modelo ML</button>
     <button class="sb-btn" onclick="showView('consultor',this)"><span class="ico">💬</span>Consultor</button>
-    <div style="height:1px;background:var(--b1);margin:10px 0"></div>
-    <div class="sb-sec">Gestión</div>
-    <button class="sb-btn" onclick="showView('datos',this)"><span class="ico">⬆️</span>Ingresar datos</button>
-    <button class="sb-btn" onclick="showView('ajust',this)"><span class="ico">⚙️</span>Ajustes</button>
+    <div style="height:1px;background:var(--b1);margin:10px 0" data-rol-admin></div>
+    <div class="sb-sec" data-rol-admin>Gestión</div>
+    <button class="sb-btn" data-rol-admin onclick="showView('datos',this)"><span class="ico">⬆️</span>Ingresar datos</button>
+    <button class="sb-btn" data-rol-admin onclick="showView('ajust',this)"><span class="ico">⚙️</span>Ajustes</button>
     <div class="sb-bot">
       <div class="ml-badge">
         <div class="ml-t">Modelo ML · Precisión</div>
@@ -223,7 +223,8 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
         <div class="ml-s">Calculando…</div>
         <div class="ml-bar"><div class="ml-bar-fill" style="width:0%"></div></div>
       </div>
-      <button onclick="cerrarSesion()" style="width:100%;margin-top:10px;background:transparent;border:1px solid var(--b1);border-radius:6px;padding:7px;color:var(--ts);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer">🔒 Cerrar sesión</button>
+      <div id="usuario-badge" style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--ts);margin-top:10px"></div>
+      <button onclick="cerrarSesion()" style="width:100%;margin-top:6px;background:transparent;border:1px solid var(--b1);border-radius:6px;padding:7px;color:var(--ts);font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer">🔒 Cerrar sesión</button>
     </div>
   </aside>
   <main class="main">
@@ -763,6 +764,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <button class="dtab a" onclick="setDatosTab('manual',this)" style="padding:10px 20px;border:0;background:transparent;color:var(--t1);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border-bottom:2px solid var(--t1)">Manual</button>
     <button class="dtab" onclick="setDatosTab('excel',this)" style="padding:10px 20px;border:0;background:transparent;color:var(--tm);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent">Excel / CSV</button>
     <button class="dtab" onclick="setDatosTab('hist',this)" style="padding:10px 20px;border:0;background:transparent;color:var(--tm);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent">Importaciones</button>
+    <button class="dtab" onclick="setDatosTab('horas',this)" style="padding:10px 20px;border:0;background:transparent;color:var(--tm);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent">Horas a considerar</button>
   </div>
 
   <!-- MANUAL -->
@@ -770,6 +772,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div style="margin-bottom:16px">
       <label style="display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Fecha</label>
       <input type="date" id="manual-fecha" onchange="cargarManualFecha()" style="background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 12px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.88rem;color-scheme:dark;width:100%;max-width:220px">
+      <div id="manual-attrib" style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--ts);margin-top:6px"></div>
     </div>
     <div class="g2" style="margin-bottom:16px">
       <div><div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;margin-bottom:10px;display:flex;align-items:center;gap:6px"><span class="pill t3">T3</span> Turno Día</div>
@@ -839,6 +842,80 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <div id="tab-hist" style="display:none">
     <div class="sl">Historial de importaciones</div>
     <div id="imp-lista" style="display:flex;flex-direction:column;gap:8px"><div style="padding:24px;text-align:center;color:var(--ts);font-size:.78rem">Sin importaciones registradas</div></div>
+  </div>
+
+  <!-- HORAS A CONSIDERAR -->
+  <div id="tab-horas" style="display:none">
+    <div style="font-size:.72rem;color:var(--tm);margin-bottom:16px;line-height:1.5">Registro de horas extra o de apoyo que quieres tener a mano — no se relaciona con ningún indicador de eficiencia del panel.</div>
+
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;margin-bottom:18px">
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <button class="fp a" id="hc-m-calc" onclick="hcSetModo('calc')">Calcular por horario</button>
+        <button class="fp" id="hc-m-dir" onclick="hcSetModo('dir')">Cargar horas totales</button>
+      </div>
+
+      <div id="hc-f-calc">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Día</label><input type="date" id="hc-c-dia" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--tx);color-scheme:dark"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Hora inicio</label><input type="time" id="hc-c-ini" value="18:00" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--tx);color-scheme:dark"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Hora fin</label><input type="time" id="hc-c-fin" value="22:00" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--tx);color-scheme:dark"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Personas</label><input type="number" id="hc-c-per" min="1" step="1" value="5" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--tx)"></div>
+        </div>
+        <div id="hc-c-res" style="background:var(--s3);border:1px solid rgba(124,111,255,.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-family:'JetBrains Mono',monospace"></div>
+      </div>
+
+      <div id="hc-f-dir" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px">
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Fecha</label><input type="date" id="hc-d-dia" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--tx);color-scheme:dark"></div>
+          <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Horas totales</label><input type="number" id="hc-d-hrs" min="0.1" step="0.1" placeholder="0.0" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--tx)"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;position:relative" id="hc-motivo-wrap">
+        <label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Motivo</label>
+        <input type="text" id="hc-motivo" placeholder="Escribe o elige un motivo…" autocomplete="off" style="width:100%;max-width:420px;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'Inter',sans-serif;font-size:.82rem;color:var(--tx)">
+        <div id="hc-ac" style="display:none;position:absolute;left:0;top:100%;margin-top:4px;width:100%;max-width:420px;background:var(--s3);border:1px solid var(--t1);border-radius:8px;overflow:hidden;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
+      </div>
+
+      <button class="btn btn-p" id="hc-add" onclick="hcGuardar()">Agregar registro →</button>
+      <span id="hc-edit-nota" style="display:none;margin-left:10px;font-size:.72rem;color:var(--ora)">Editando un registro — <a href="#" onclick="hcCancelarEdicion();return false" style="color:var(--ora)">cancelar</a></span>
+      <div id="hc-msg" style="margin-top:10px;font-size:.72rem;min-height:16px"></div>
+    </div>
+
+    <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap">
+      <div><div style="font-weight:600;margin-bottom:3px;font-size:.85rem">Plantilla carga masiva</div><div style="font-size:.66rem;color:var(--tm);font-family:'JetBrains Mono',monospace">fecha · tipo · hora_inicio · hora_fin · personas · horas · motivo</div></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-s btn-sm" onclick="descargarPlantillaHoras('csv')">⬇ CSV</button>
+        <button class="btn btn-s btn-sm" onclick="descargarPlantillaHoras('xlsx')">⬇ Excel</button>
+        <input type="file" id="hc-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="onHcFileSelect(event)">
+        <button class="btn btn-s btn-sm" onclick="document.getElementById('hc-file-input').click()">⬆ Importar</button>
+      </div>
+    </div>
+    <div id="hc-upload-preview" style="display:none;background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm);margin-bottom:14px"></div>
+
+    <div class="sl">Registros</div>
+    <div class="g4" style="margin-bottom:14px">
+      <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Desde</label><input type="date" id="hc-f-desde" onchange="hcRender()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--tx);color-scheme:dark"></div>
+      <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Hasta</label><input type="date" id="hc-f-hasta" onchange="hcRender()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--tx);color-scheme:dark"></div>
+      <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Motivo</label><select id="hc-f-motivo" onchange="hcRender()" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;font-family:'Inter',sans-serif;font-size:.8rem;color:var(--tx)"><option value="">Todos</option></select></div>
+      <div style="display:flex;align-items:flex-end;gap:8px"><button class="btn btn-s btn-sm" onclick="hcLimpiarFiltro()">Quitar filtros</button><button class="btn btn-s btn-sm" onclick="descargarExcelHorasConsid()">⬇ Excel</button></div>
+    </div>
+
+    <div class="g3" style="margin-bottom:14px">
+      <div class="kpi"><div class="kpi-l">Horas del periodo</div><div class="kpi-v" id="hc-s-horas" style="color:var(--t1)">—</div></div>
+      <div class="kpi"><div class="kpi-l">Registros</div><div class="kpi-v" id="hc-s-reg">—</div></div>
+      <div class="kpi"><div class="kpi-l">Promedio por registro</div><div class="kpi-v" id="hc-s-prom" style="color:var(--ora)">—</div></div>
+    </div>
+
+    <div style="font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:8px">Horas por motivo</div>
+    <div id="hc-chips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+
+    <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:90px 90px 150px 60px 60px 1fr 140px 90px;gap:10px;padding:10px 12px;background:var(--s3);border-bottom:1px solid var(--b1);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);font-weight:500">
+        <div>Fecha</div><div>Tipo</div><div>Horario</div><div style="text-align:right">Pers.</div><div style="text-align:right">Horas</div><div>Motivo</div><div>Registrado por</div><div></div>
+      </div>
+      <div id="hc-rows"></div>
+    </div>
   </div>
 </div>
 
@@ -915,6 +992,31 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <datalist id="ev-sugeridos"></datalist>
   </div>
 
+  <div style="margin-bottom:24px">
+    <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:.85rem;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;padding-bottom:8px;border-bottom:1px solid var(--b1)">Usuarios y roles</div>
+    <div style="font-size:.68rem;color:var(--ts);margin:8px 0 12px">Admin ve y hace todo. Admin Jr no entra a "Ingresar datos" ni a "Ajustes". Cada registro del panel queda con el nombre de quien lo hizo.</div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px" id="usuarios-lista"></div>
+
+    <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:12px">
+      <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Nombre</label><input type="text" id="us-nombre" placeholder="Nombre y apellido" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.78rem"></div>
+      <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Rol</label><select id="us-rol" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.78rem"><option value="admin">Admin</option><option value="admin_jr">Admin Jr</option></select></div>
+      <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Clave</label><input type="text" id="us-clave" placeholder="Clave personal" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.78rem"></div>
+      <button class="btn btn-s btn-sm" id="us-btn-add" onclick="guardarUsuario()">+ Agregar</button>
+    </div>
+    <div id="us-edit-nota" style="display:none;font-size:.68rem;color:var(--ora);margin-bottom:12px">Editando un usuario — deja la clave vacía para no cambiarla. <a href="#" onclick="cancelarEdicionUsuario();return false" style="color:var(--ora)">Cancelar</a></div>
+
+    <div style="background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div><div style="font-weight:600;margin-bottom:3px;font-size:.85rem">Plantilla carga masiva</div><div style="font-size:.66rem;color:var(--tm);font-family:'JetBrains Mono',monospace">nombre · rol (admin/admin_jr) · clave</div></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-s btn-sm" onclick="descargarPlantillaUsuarios('csv')">⬇ CSV</button>
+        <button class="btn btn-s btn-sm" onclick="descargarPlantillaUsuarios('xlsx')">⬇ Excel</button>
+        <input type="file" id="us-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="onUsFileSelect(event)">
+        <button class="btn btn-s btn-sm" onclick="document.getElementById('us-file-input').click()">⬆ Importar</button>
+      </div>
+    </div>
+    <div id="us-upload-preview" style="display:none;background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--tm);margin-top:14px"></div>
+  </div>
+
   <button class="btn btn-p btn-w" onclick="guardarConfig()">Guardar configuración →</button>
 </div>
 <!-- ══ CONSULTOR ══ -->
@@ -960,8 +1062,8 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <button class="bn" onclick="showView('simulador',this,true)"><span class="ico">🎯</span>Simul.</button>
   <button class="bn" onclick="showView('ml',this,true)"><span class="ico">🧠</span>ML</button>
   <button class="bn" onclick="showView('consultor',this,true)"><span class="ico">💬</span>Chat</button>
-  <button class="bn" onclick="showView('datos',this,true)"><span class="ico">⬆️</span>Datos</button>
-  <button class="bn" onclick="showView('ajust',this,true)"><span class="ico">⚙️</span>Ajustes</button>
+  <button class="bn" data-rol-admin onclick="showView('datos',this,true)"><span class="ico">⬆️</span>Datos</button>
+  <button class="bn" data-rol-admin onclick="showView('ajust',this,true)"><span class="ico">⚙️</span>Ajustes</button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -971,6 +1073,7 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const db=supabase.createClient(SUPA_URL,SUPA_KEY);
 
 const S={turno:'t1',turnoHist:'t1',fecha:hoy(),cfg:{},objDia:{},feriados:[],objetivos:[],eventos:[],
+  usuarioActual:null,usuarios:[],horasConsid:[],
   dias:[],proy:null,calc:{},excelData:null,excelName:'',histMes:[],mesActivo:null,importaciones:[],
   histAnio:null,repAnio:'all'};
 
@@ -2682,9 +2785,14 @@ async function cargarManualFecha(){
     const tieneMla=(+d.mla_t3||0)>0||(+d.mla_t1||0)>0;
     mostrarMlaManual(tieneMla);
     toast('Día ya registrado — puedes editarlo');
+    const partes=[];
+    if(d.creado_por)partes.push('Ingresado por '+escapeHtml(d.creado_por));
+    if(d.actualizado_por&&d.actualizado_por!==d.creado_por)partes.push('última edición de '+escapeHtml(d.actualizado_por));
+    $('manual-attrib').textContent=partes.join(' · ');
   } else {
     ['m-ft3','m-ft1','m-hpt3','m-hpt1','m-htt3','m-htt1','m-hct3','m-hct1','m-mlat3','m-mlat1'].forEach(i=>{const e=$(i);if(e)e.value='';});
     mostrarMlaManual(false);
+    $('manual-attrib').textContent='';
   }
   updateManualPreview();
 }
@@ -2744,13 +2852,16 @@ async function guardarManual(){
   }
   loading(true);
   try{
+    const esNuevo=!S.dias.some(d=>d.fecha===f);
     const row={fecha:f,tipo_dia:tipoDia(f),fuente:'manual',
       folios_t3:num('m-ft3'),folios_t1:num('m-ft1'),
       hp_t3:num('m-hpt3'),hp_t1:num('m-hpt1'),
       ht_t3:num('m-htt3'),ht_t1:num('m-htt1'),
       hc_t3:num('m-hct3'),hc_t1:num('m-hct1'),
       mla_t3:num('m-mlat3'),mla_t1:num('m-mlat1'),
+      actualizado_por:S.usuarioActual?.nombre||null,
       updated_at:new Date().toISOString()};
+    if(esNuevo)row.creado_por=S.usuarioActual?.nombre||null;
     const{error}=await db.from('eo_dias').upsert(row,{onConflict:'fecha'});
     if(error)throw error;
     const i=S.dias.findIndex(d=>d.fecha===f);
@@ -2986,7 +3097,264 @@ function setDatosTab(t,btn){
   $('tab-manual').style.display=t==='manual'?'block':'none';
   $('tab-excel').style.display=t==='excel'?'block':'none';
   $('tab-hist').style.display=t==='hist'?'block':'none';
+  $('tab-horas').style.display=t==='horas'?'block':'none';
   if(t==='hist')cargarImportaciones();
+  if(t==='horas')hcRender();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HORAS A CONSIDERAR — registro independiente, no afecta ningún
+   indicador de eficiencia del panel. Vive en eo_horas_consideradas.
+   ═══════════════════════════════════════════════════════════ */
+let HC_MODO='calc', HC_EDIT_ID=null;
+const hcF1=n=>(n==null||isNaN(n))?'0.0':Number(n).toFixed(1);
+function hcSetModo(m){
+  HC_MODO=m;
+  $('hc-m-calc').classList.toggle('a',m==='calc');
+  $('hc-m-dir').classList.toggle('a',m==='dir');
+  $('hc-f-calc').style.display=m==='calc'?'block':'none';
+  $('hc-f-dir').style.display=m==='dir'?'block':'none';
+}
+function hcCalcular(){
+  const ini=$('hc-c-ini').value,fin=$('hc-c-fin').value,per=+$('hc-c-per').value;
+  if(!ini||!fin)return{err:'Falta la hora'};
+  let min=(+fin.slice(0,2))*60+(+fin.slice(3))-((+ini.slice(0,2))*60+(+ini.slice(3)));
+  const cruza=min<=0;if(cruza)min+=1440;
+  if(!(per>=1))return{err:'Pon la cantidad de personas'};
+  const h=min/60;
+  return{h,per,tot:Math.round(h*per*10)/10,cruza};
+}
+function hcPintaCalc(){
+  const r=hcCalcular(),el=$('hc-c-res');if(!el)return r;
+  if(r.err){el.style.borderColor='var(--red)';el.innerHTML=`<span style="color:var(--red);font-size:.78rem;font-weight:600">${r.err}</span>`;return r;}
+  el.style.borderColor='rgba(124,111,255,.3)';
+  el.innerHTML=`<span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--t1)">${hcF1(r.tot)}h</span>`+
+    `<span style="font-size:.68rem;color:var(--tm);margin-left:10px">${r.h.toFixed(1)}h × ${r.per} persona${r.per>1?'s':''}${r.cruza?' · termina al día siguiente':''}</span>`;
+  return r;
+}
+['hc-c-ini','hc-c-fin','hc-c-per'].forEach(id=>document.addEventListener('DOMContentLoaded',()=>{const e=$(id);if(e)e.addEventListener('input',hcPintaCalc);}));
+function hcMotivos(){
+  const m={};S.horasConsid.forEach(r=>{m[r.motivo]=(m[r.motivo]||0)+1;});
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+function hcNormAcento(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();}
+function hcPintaAc(){
+  const acEl=$('hc-ac'),inEl=$('hc-motivo');if(!acEl||!inEl)return;
+  const q=inEl.value.trim(),nq=hcNormAcento(q);
+  const ops=hcMotivos().filter(([m])=>!q||hcNormAcento(m).includes(nq));
+  let h=ops.map(([m,n])=>`<div class="hc-acit" data-v="${escapeHtml(m)}" style="display:flex;justify-content:space-between;gap:10px;padding:8px 12px;cursor:pointer;font-size:.8rem;color:var(--tx)">`+
+    `<span>${escapeHtml(m)}</span><span style="color:var(--tm);font-size:.68rem">${n} registro${n>1?'s':''}</span></div>`).join('');
+  const exacto=ops.some(([m])=>hcNormAcento(m)===nq);
+  if(q&&!exacto)h+=`<div class="hc-acit" data-v="${escapeHtml(q)}" style="padding:8px 12px;cursor:pointer;font-size:.8rem;color:var(--ok);font-weight:600">+ Usar "${escapeHtml(q)}" como motivo nuevo</div>`;
+  acEl.innerHTML=h;acEl.style.display=h?'block':'none';
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const acEl=$('hc-ac'),inEl=$('hc-motivo');
+  if(!inEl)return;
+  inEl.addEventListener('focus',hcPintaAc);
+  inEl.addEventListener('input',hcPintaAc);
+  inEl.addEventListener('blur',()=>setTimeout(()=>acEl.style.display='none',150));
+  acEl.addEventListener('mousedown',e=>{const it=e.target.closest('.hc-acit');if(it){inEl.value=it.dataset.v;acEl.style.display='none';}});
+});
+function hcMsg(t,ok){const e=$('hc-msg');if(!e)return;e.style.color=ok?'var(--ok)':'var(--red)';e.textContent=t;}
+async function hcGuardar(){
+  const motivo=$('hc-motivo').value.trim();
+  if(!motivo)return hcMsg('Falta el motivo.',false);
+  let obj;
+  if(HC_MODO==='calc'){
+    const r=hcPintaCalc();
+    if(r.err)return hcMsg(r.err+'.',false);
+    if(!$('hc-c-dia').value)return hcMsg('Falta el día.',false);
+    obj={tipo:'horario',fecha:$('hc-c-dia').value,hora_inicio:$('hc-c-ini').value,hora_fin:$('hc-c-fin').value,personas:r.per,horas:r.tot,motivo};
+  } else {
+    const h=Math.round((+$('hc-d-hrs').value)*10)/10;
+    if(!$('hc-d-dia').value)return hcMsg('Falta la fecha.',false);
+    if(!(h>0))return hcMsg('Pon las horas totales.',false);
+    obj={tipo:'directo',fecha:$('hc-d-dia').value,hora_inicio:null,hora_fin:null,personas:null,horas:h,motivo};
+  }
+  loading(true);
+  try{
+    const nombre=S.usuarioActual?.nombre||null;
+    obj.actualizado_por=nombre;
+    if(HC_EDIT_ID){
+      const{error}=await db.from('eo_horas_consideradas').update(obj).eq('id',HC_EDIT_ID);
+      if(error)throw error;
+      const i=S.horasConsid.findIndex(r=>r.id===HC_EDIT_ID);
+      if(i>=0)S.horasConsid[i]={...S.horasConsid[i],...obj};
+      hcMsg('Registro actualizado.',true);
+      hcCancelarEdicion();
+    } else {
+      obj.creado_por=nombre;
+      const{data,error}=await db.from('eo_horas_consideradas').insert(obj).select().single();
+      if(error)throw error;
+      S.horasConsid.unshift(data);
+      hcMsg('Registro agregado: '+hcF1(obj.horas)+'h · '+obj.motivo,true);
+    }
+    $('hc-motivo').value='';
+    hcRender();
+  }catch(e){console.error(e);hcMsg('Error al guardar.',false);}
+  finally{loading(false);}
+}
+function hcCancelarEdicion(){
+  HC_EDIT_ID=null;$('hc-edit-nota').style.display='none';$('hc-add').textContent='Agregar registro →';
+}
+function hcEditar(id){
+  const r=S.horasConsid.find(x=>x.id===id);if(!r)return;
+  HC_EDIT_ID=id;
+  hcSetModo(r.tipo==='horario'?'calc':'dir');
+  if(r.tipo==='horario'){$('hc-c-dia').value=r.fecha;$('hc-c-ini').value=r.hora_inicio;$('hc-c-fin').value=r.hora_fin;$('hc-c-per').value=r.personas;hcPintaCalc();}
+  else{$('hc-d-dia').value=r.fecha;$('hc-d-hrs').value=r.horas;}
+  $('hc-motivo').value=r.motivo;
+  $('hc-edit-nota').style.display='inline';$('hc-add').textContent='Guardar cambios →';
+  $('hc-motivo-wrap').scrollIntoView({behavior:'smooth',block:'center'});
+}
+async function hcBorrar(id){
+  const r=S.horasConsid.find(x=>x.id===id);if(!r)return;
+  if(!confirm(`¿Eliminar el registro del ${r.fecha} (${hcF1(r.horas)}h · ${r.motivo})?`))return;
+  loading(true);
+  try{
+    const{error}=await db.from('eo_horas_consideradas').delete().eq('id',id);
+    if(error)throw error;
+    S.horasConsid=S.horasConsid.filter(x=>x.id!==id);
+    if(HC_EDIT_ID===id)hcCancelarEdicion();
+    hcRender();hcMsg('Registro eliminado.',true);
+  }catch(e){console.error(e);hcMsg('Error al eliminar.',false);}
+  finally{loading(false);}
+}
+function hcLimpiarFiltro(){$('hc-f-desde').value='';$('hc-f-hasta').value='';$('hc-f-motivo').value='';hcRender();}
+function hcFiltrados(){
+  const d=$('hc-f-desde').value,h=$('hc-f-hasta').value,m=$('hc-f-motivo').value;
+  return S.horasConsid.filter(r=>(!d||r.fecha>=d)&&(!h||r.fecha<=h)&&(!m||r.motivo===m)).sort((a,b)=>b.fecha.localeCompare(a.fecha)||b.id-a.id);
+}
+function hcFmtFechaCorta(f){const d=new Date(f+'T12:00:00');return DN[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1);}
+function hcRender(){
+  if(!$('hc-rows'))return;
+  const sel=$('hc-f-motivo'),cur=sel.value;
+  sel.innerHTML='<option value="">Todos</option>'+hcMotivos().map(([m,n])=>`<option value="${escapeHtml(m)}">${escapeHtml(m)} (${n})</option>`).join('');
+  sel.value=hcMotivos().some(([m])=>m===cur)?cur:'';
+  const L=hcFiltrados(),tot=L.reduce((s,r)=>s+(+r.horas||0),0);
+  $('hc-s-horas').textContent=tot.toFixed(1);
+  $('hc-s-reg').textContent=L.length;
+  $('hc-s-prom').textContent=L.length?(tot/L.length).toFixed(1):'0.0';
+  const pm={};L.forEach(r=>{pm[r.motivo]=(pm[r.motivo]||0)+(+r.horas||0);});
+  $('hc-chips').innerHTML=Object.entries(pm).sort((a,b)=>b[1]-a[1]).map(([m,h])=>
+    `<span class="fp" style="cursor:default">${escapeHtml(m)} <strong style="color:var(--t1);margin-left:6px">${h.toFixed(1)}h</strong></span>`).join('')
+    ||'<span style="font-size:.72rem;color:var(--ts)">Sin registros en este filtro.</span>';
+  $('hc-rows').innerHTML=L.map(r=>`<div style="display:grid;grid-template-columns:90px 90px 150px 60px 60px 1fr 140px 90px;gap:10px;padding:9px 12px;border-bottom:1px solid var(--b1);font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--tx);align-items:center">`+
+    `<div>${hcFmtFechaCorta(r.fecha)}</div>`+
+    `<div><span class="pill" style="background:${r.tipo==='horario'?'rgba(124,111,255,.15)':'rgba(255,149,0,.15)'};color:${r.tipo==='horario'?'var(--t1)':'var(--ora)'}">${r.tipo==='horario'?'Horario':'Directo'}</span></div>`+
+    `<div style="color:var(--tm)">${r.tipo==='horario'?r.hora_inicio+' → '+r.hora_fin+(r.hora_fin<=r.hora_inicio?' (+1)':''):'—'}</div>`+
+    `<div style="text-align:right;color:var(--tm)">${r.tipo==='horario'?r.personas:'—'}</div>`+
+    `<div style="text-align:right;font-weight:700">${hcF1(r.horas)}h</div>`+
+    `<div style="font-family:'Inter',sans-serif">${escapeHtml(r.motivo)}</div>`+
+    `<div style="color:var(--tm);font-size:.65rem">${escapeHtml(r.creado_por||'—')}</div>`+
+    `<div><button class="btn btn-s btn-sm" onclick="hcEditar(${r.id})">Editar</button> <button class="btn btn-s btn-sm" style="color:var(--red)" onclick="hcBorrar(${r.id})">Borrar</button></div>`+
+    `</div>`).join('')||'<div style="padding:24px;text-align:center;color:var(--ts);font-size:.78rem">No hay registros con este filtro.</div>';
+}
+function descargarExcelHorasConsid(){
+  const L=hcFiltrados();
+  const filas=L.map(r=>[r.fecha,r.tipo==='horario'?'Horario':'Directo',r.tipo==='horario'?r.hora_inicio:'',r.tipo==='horario'?r.hora_fin:'',r.tipo==='horario'?r.personas:'',hcF1(r.horas),r.motivo,r.creado_por||'']);
+  exportarExcelGenerico('Horas_a_considerar.xlsx',['Fecha','Tipo','Hora inicio','Hora fin','Personas','Horas','Motivo','Registrado por'],filas,[12,10,10,10,10,8,24,16]);
+}
+const HC_COLS=['fecha','tipo','hora_inicio','hora_fin','personas','horas','motivo'];
+function descargarPlantillaHoras(tipo){
+  const sample=[HC_COLS,
+    ['01/01/2026','horario','18:00','22:00',5,'','Refuerzo por pico de ingreso'],
+    ['02/01/2026','directo','','','','12.5','Cobertura turno noche']];
+  if(tipo==='xlsx'&&typeof XLSX!=='undefined'){
+    const ws=XLSX.utils.aoa_to_sheet(sample);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Horas');
+    XLSX.writeFile(wb,'Plantilla_Horas_a_considerar.xlsx');
+  } else {
+    const csv=sample.map(r=>r.join(',')).join('\n');
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+    a.download='Plantilla_Horas_a_considerar.csv';a.click();
+  }
+}
+function onHcFileSelect(e){
+  const file=e.target.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      let matriz;
+      if(ext==='csv'){
+        const txt=new TextDecoder('utf-8').decode(ev.target.result);
+        const sep=(txt.split('\n')[0].match(/;/g)||[]).length>(txt.split('\n')[0].match(/,/g)||[]).length?';':',';
+        matriz=txt.split(/\r?\n/).filter(l=>l.trim()).map(l=>l.split(sep));
+      } else {
+        if(typeof XLSX==='undefined'){toast('Librería Excel no cargó — usa CSV','error');return;}
+        const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+        matriz=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:true});
+      }
+      hcProcesarMatriz(matriz);
+    }catch(err){console.error(err);toast('Error leyendo el archivo','error');}
+  };
+  reader.readAsArrayBuffer(file);
+}
+let HC_IMPORT_ROWS=null;
+function hcProcesarMatriz(matriz){
+  if(!matriz||!matriz.length){toast('Archivo vacío','error');return;}
+  let hIdx=-1,map={};
+  for(let i=0;i<Math.min(matriz.length,10);i++){
+    const hs=matriz[i].map(normHeader);
+    if(hs.includes('fecha')&&hs.includes('horas')&&hs.includes('motivo')){
+      hIdx=i;hs.forEach((h,j)=>{if(HC_COLS.includes(h)&&map[h]==null)map[h]=j;});
+      break;
+    }
+  }
+  const prev=$('hc-upload-preview');
+  if(hIdx<0){
+    prev.style.display='block';
+    prev.innerHTML=`<div style="color:var(--red)">No se encontró la fila de encabezados.</div><div style="margin-top:6px">Debe contener: ${HC_COLS.join(' · ')}</div>`;
+    HC_IMPORT_ROWS=null;return;
+  }
+  const rows=[];let invalidas=0;
+  for(let i=hIdx+1;i<matriz.length;i++){
+    const r=matriz[i];if(!r||!r.length)continue;
+    const f=parseFecha(r[map.fecha]);
+    const motivo=String(r[map.motivo]||'').trim();
+    const tipoCrudo=hcNormAcento(String(r[map.tipo]||'')).trim();
+    const esHorario=tipoCrudo.startsWith('horario');
+    if(!f||!motivo){invalidas++;continue;}
+    const nombre=S.usuarioActual?.nombre||null;
+    if(esHorario){
+      const ini=String(r[map.hora_inicio]||'').trim(),fin=String(r[map.hora_fin]||'').trim(),per=+r[map.personas]||0;
+      if(!ini||!fin||!per){invalidas++;continue;}
+      let min=(+fin.slice(0,2))*60+(+fin.slice(3))-((+ini.slice(0,2))*60+(+ini.slice(3)));
+      if(min<=0)min+=1440;
+      rows.push({tipo:'horario',fecha:f,hora_inicio:ini,hora_fin:fin,personas:per,horas:Math.round((min/60)*per*10)/10,motivo,creado_por:nombre,actualizado_por:nombre});
+    } else {
+      const h=parseNum(r[map.horas]);
+      if(!(h>0)){invalidas++;continue;}
+      rows.push({tipo:'directo',fecha:f,hora_inicio:null,hora_fin:null,personas:null,horas:Math.round(h*10)/10,motivo,creado_por:nombre,actualizado_por:nombre});
+    }
+  }
+  HC_IMPORT_ROWS=rows;
+  prev.style.display='block';
+  if(!rows.length){
+    prev.innerHTML=`<div style="color:var(--red)">Encabezados detectados en fila ${hIdx+1}, pero ninguna fila válida.</div>`;return;
+  }
+  prev.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Filas válidas</span><strong style="color:var(--ok)">${rows.length}</strong></div>`+
+    (invalidas?`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Filas inválidas (ignoradas)</span><strong style="color:var(--ora)">${invalidas}</strong></div>`:'')+
+    `<button class="btn btn-p btn-sm" onclick="hcImportar()">Importar ${rows.length} registro${rows.length>1?'s':''} →</button>`;
+}
+async function hcImportar(){
+  if(!HC_IMPORT_ROWS?.length)return;
+  loading(true);
+  try{
+    const{data,error}=await db.from('eo_horas_consideradas').insert(HC_IMPORT_ROWS).select();
+    if(error)throw error;
+    S.horasConsid=[...(data||[]),...S.horasConsid];
+    toast(`${HC_IMPORT_ROWS.length} registros importados ✓`);
+    $('hc-upload-preview').style.display='none';
+    $('hc-file-input').value='';
+    HC_IMPORT_ROWS=null;
+    hcRender();
+  }catch(e){console.error(e);toast('Error al importar','error');}
+  finally{loading(false);}
 }
 
 /* ═══ HISTÓRICO ═══ */
@@ -4096,28 +4464,197 @@ async function guardarConfig(){
   finally{loading(false);}
 }
 
+/* ═══════════════════════════════════════════════════════════
+   USUARIOS Y ROLES — eo_usuarios. Solo ADMIN llega a esta vista
+   (Ajustes está oculto para admin_jr), así que no hace falta un
+   chequeo de rol adicional aquí.
+   ═══════════════════════════════════════════════════════════ */
+let US_EDIT_ID=null;
+function renderUsuarios(){
+  const c=$('usuarios-lista');if(!c)return;
+  if(!S.usuarios.length){c.innerHTML='<div style="font-size:.72rem;color:var(--ts);padding:8px 0">Sin usuarios registrados</div>';return;}
+  c.innerHTML=[...S.usuarios].sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(u=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:8px 12px;font-family:'Inter',sans-serif;font-size:.8rem;${u.activo===false?'opacity:.5':''}">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-weight:600">${escapeHtml(u.nombre)}</span>
+        <span class="pill" style="background:${u.rol==='admin'?'rgba(124,111,255,.15)':'rgba(255,149,0,.15)'};color:${u.rol==='admin'?'var(--t1)':'var(--ora)'}">${u.rol==='admin'?'Admin':'Admin Jr'}</span>
+        ${u.activo===false?'<span style="font-size:.65rem;color:var(--ts)">inactivo</span>':''}
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-s btn-sm" onclick="editarUsuario(${u.id})">Editar</button>
+        <button class="btn btn-s btn-sm" style="color:var(--red)" onclick="eliminarUsuario(${u.id})">Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+async function guardarUsuario(){
+  const nombre=$('us-nombre').value.trim(),rol=$('us-rol').value,clave=$('us-clave').value.trim();
+  if(!nombre){toast('Falta el nombre','error');return;}
+  if(!US_EDIT_ID&&!clave){toast('Falta la clave','error');return;}
+  loading(true);
+  try{
+    const row={nombre,rol};
+    if(clave)row.clave_hash=await sha256(clave);
+    if(US_EDIT_ID){
+      const{error}=await db.from('eo_usuarios').update(row).eq('id',US_EDIT_ID);
+      if(error)throw error;
+      const i=S.usuarios.findIndex(u=>u.id===US_EDIT_ID);
+      if(i>=0)S.usuarios[i]={...S.usuarios[i],nombre,rol};
+      toast('Usuario actualizado ✓');
+      cancelarEdicionUsuario();
+    } else {
+      const{data,error}=await db.from('eo_usuarios').insert({...row,activo:true}).select('id,nombre,rol,activo').single();
+      if(error)throw error;
+      S.usuarios.push(data);
+      toast('Usuario agregado ✓');
+    }
+    $('us-nombre').value='';$('us-clave').value='';
+    renderUsuarios();
+  }catch(e){console.error(e);toast('Error al guardar — ¿clave repetida?','error');}
+  finally{loading(false);}
+}
+function editarUsuario(id){
+  const u=S.usuarios.find(x=>x.id===id);if(!u)return;
+  US_EDIT_ID=id;
+  $('us-nombre').value=u.nombre;$('us-rol').value=u.rol;$('us-clave').value='';
+  $('us-edit-nota').style.display='block';$('us-btn-add').textContent='Guardar cambios';
+  $('us-nombre').scrollIntoView({behavior:'smooth',block:'center'});
+}
+function cancelarEdicionUsuario(){
+  US_EDIT_ID=null;$('us-edit-nota').style.display='none';$('us-btn-add').textContent='+ Agregar';
+  $('us-nombre').value='';$('us-clave').value='';
+}
+async function eliminarUsuario(id){
+  const u=S.usuarios.find(x=>x.id===id);if(!u)return;
+  if(!confirm(`¿Eliminar a ${u.nombre}? Ya no podrá entrar al panel con su clave.`))return;
+  loading(true);
+  try{
+    const{error}=await db.from('eo_usuarios').delete().eq('id',id);
+    if(error)throw error;
+    S.usuarios=S.usuarios.filter(x=>x.id!==id);
+    if(US_EDIT_ID===id)cancelarEdicionUsuario();
+    renderUsuarios();toast('Usuario eliminado ✓');
+  }catch(e){console.error(e);toast('Error al eliminar','error');}
+  finally{loading(false);}
+}
+const US_COLS=['nombre','rol','clave'];
+function descargarPlantillaUsuarios(tipo){
+  const sample=[US_COLS,['Rosa Quispe','admin_jr','12345678']];
+  if(tipo==='xlsx'&&typeof XLSX!=='undefined'){
+    const ws=XLSX.utils.aoa_to_sheet(sample);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Usuarios');
+    XLSX.writeFile(wb,'Plantilla_Usuarios.xlsx');
+  } else {
+    const csv=sample.map(r=>r.join(',')).join('\n');
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}));
+    a.download='Plantilla_Usuarios.csv';a.click();
+  }
+}
+function onUsFileSelect(e){
+  const file=e.target.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const reader=new FileReader();
+  reader.onload=async ev=>{
+    try{
+      let matriz;
+      if(ext==='csv'){
+        const txt=new TextDecoder('utf-8').decode(ev.target.result);
+        const sep=(txt.split('\n')[0].match(/;/g)||[]).length>(txt.split('\n')[0].match(/,/g)||[]).length?';':',';
+        matriz=txt.split(/\r?\n/).filter(l=>l.trim()).map(l=>l.split(sep));
+      } else {
+        if(typeof XLSX==='undefined'){toast('Librería Excel no cargó — usa CSV','error');return;}
+        const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+        matriz=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:'',raw:true});
+      }
+      await usProcesarMatriz(matriz);
+    }catch(err){console.error(err);toast('Error leyendo el archivo','error');}
+  };
+  reader.readAsArrayBuffer(file);
+}
+let US_IMPORT_ROWS=null;
+async function usProcesarMatriz(matriz){
+  if(!matriz||!matriz.length){toast('Archivo vacío','error');return;}
+  let hIdx=-1,map={};
+  for(let i=0;i<Math.min(matriz.length,10);i++){
+    const hs=matriz[i].map(normHeader);
+    if(hs.includes('nombre')&&hs.includes('rol')&&hs.includes('clave')){
+      hIdx=i;hs.forEach((h,j)=>{if(US_COLS.includes(h)&&map[h]==null)map[h]=j;});break;
+    }
+  }
+  const prev=$('us-upload-preview');
+  if(hIdx<0){
+    prev.style.display='block';
+    prev.innerHTML=`<div style="color:var(--red)">No se encontró la fila de encabezados.</div><div style="margin-top:6px">Debe contener: ${US_COLS.join(' · ')}</div>`;
+    return;
+  }
+  const rows=[];let invalidas=0;
+  for(let i=hIdx+1;i<matriz.length;i++){
+    const r=matriz[i];if(!r||!r.length)continue;
+    const nombre=String(r[map.nombre]||'').trim();
+    const rolCrudo=hcNormAcento(String(r[map.rol]||'')).replace(/\s+/g,'_');
+    const rol=rolCrudo.startsWith('admin_j')?'admin_jr':(rolCrudo==='admin'?'admin':null);
+    const clave=String(r[map.clave]||'').trim();
+    if(!nombre||!rol||!clave){invalidas++;continue;}
+    rows.push({nombre,rol,clave_hash:await sha256(clave),activo:true});
+  }
+  if(!rows.length){
+    prev.style.display='block';
+    prev.innerHTML=`<div style="color:var(--red)">Encabezados detectados en fila ${hIdx+1}, pero ninguna fila válida (rol debe ser admin o admin_jr).</div>`;
+    US_IMPORT_ROWS=null;return;
+  }
+  US_IMPORT_ROWS=rows;
+  prev.style.display='block';
+  prev.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Filas válidas</span><strong style="color:var(--ok)">${rows.length}</strong></div>`+
+    (invalidas?`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Filas inválidas (ignoradas)</span><strong style="color:var(--ora)">${invalidas}</strong></div>`:'')+
+    `<button class="btn btn-p btn-sm" onclick="usImportar()">Importar ${rows.length} usuario${rows.length>1?'s':''} →</button>`;
+}
+async function usImportar(){
+  if(!US_IMPORT_ROWS?.length)return;
+  loading(true);
+  try{
+    const{data,error}=await db.from('eo_usuarios').insert(US_IMPORT_ROWS).select('id,nombre,rol,activo');
+    if(error)throw error;
+    S.usuarios.push(...(data||[]));
+    toast(`${US_IMPORT_ROWS.length} usuarios importados ✓`);
+    $('us-upload-preview').style.display='none';
+    $('us-file-input').value='';
+    US_IMPORT_ROWS=null;
+    renderUsuarios();
+  }catch(e){console.error(e);toast('Error al importar — ¿alguna clave repetida?','error');}
+  finally{loading(false);}
+}
+
 /* ═══ INIT ═══ */
 async function cargarTodo(){
   loading(true);
   try{
-    const[c,f,o,d,od,ev]=await Promise.all([
+    const esAdmin=S.usuarioActual?.rol==='admin';
+    const[c,f,o,d,od,ev,hc,us]=await Promise.all([
       db.from('eo_configuracion').select('*'),
       db.from('eo_feriados').select('*').order('fecha'),
       db.from('eo_objetivos').select('*'),
       db.from('eo_dias').select('*').order('fecha',{ascending:true}),
       db.from('eo_objetivos_dia').select('*'),
-      db.from('eo_eventos').select('*').order('fecha')
+      db.from('eo_eventos').select('*').order('fecha'),
+      // Solo admin ve/entra a "Ingresar datos" y "Ajustes" — no hace
+      // falta traer esto para admin_jr.
+      esAdmin?db.from('eo_horas_consideradas').select('*').order('fecha',{ascending:false}):Promise.resolve({data:[]}),
+      esAdmin?db.from('eo_usuarios').select('id,nombre,rol,activo').order('nombre'):Promise.resolve({data:[]})
     ]);
     if(c.data)c.data.forEach(r=>{S.cfg[`${r.tipo_dia}_${r.turno}`]=r;});
     S.feriados=f.data||[];
     S.objetivos=(o.data||[]).map(x=>({...x,objetivo_efic:+x.objetivo_efic}));
     S.dias=d.data||[];
     S.eventos=ev.data||[];
+    S.horasConsid=hc.data||[];
+    S.usuarios=us.data||[];
     S.objDia={};
     (od.data||[]).forEach(r=>{S.objDia[r.tipo_dia]=+r.objetivo;});
     if(!Object.keys(S.objDia).length)S.objDia={semana:20,finde:17,feriado:15};
     reindexar();
     renderConfig();
+    if(esAdmin)renderUsuarios();
     renderMesSel(); // ya carga el mes correcto internamente segun el anio activo
     await cargarProyFecha();
     aplicarPrediccion();
@@ -4126,6 +4663,7 @@ async function cargarTodo(){
   finally{loading(false);}
 }
 function showView(id,btn,mobile){
+  if(S.usuarioActual?.rol==='admin_jr'&&(id==='datos'||id==='ajust'))return;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('a'));
   $('v-'+id).classList.add('a');
   if(mobile)document.querySelectorAll('.bn').forEach(b=>b.classList.remove('a'));
@@ -4160,11 +4698,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 /* ═══════════════════════════════════════════════════════════
    CANDADO DE ACCESO
-   La verificación es solo un filtro básico (no es seguridad real
-   contra alguien con conocimientos técnicos) — adecuado para un
+   Cada persona entra con su propia clave (tabla eo_usuarios), que
+   la identifica (nombre) y le asigna un rol. No es seguridad real
+   contra alguien con conocimientos técnicos — adecuado para un
    link interno que no se comparte públicamente.
    ═══════════════════════════════════════════════════════════ */
-const GATE_HASH='c777f4f677d5c8fa33d6494ec851190c94b4a15a834bfe792989de6da761f58e';
 async function sha256(txt){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));
   return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -4172,33 +4710,53 @@ async function sha256(txt){
 async function intentarAcceso(){
   const val=$('gate-pass').value;
   const h=await sha256(val);
-  if(h===GATE_HASH){
-    // Se guarda el HASH real, no una bandera '1' — así no se puede
-    // "abrir" el candado escribiendo un valor cualquiera en localStorage
-    // sin conocer la clave real.
-    localStorage.setItem('eo_unlocked',h);
-    $('gate-overlay').style.display='none';
-    iniciarApp();
-  } else {
-    $('gate-err').textContent='Clave incorrecta';
-    $('gate-pass').value='';
-    $('gate-pass').focus();
-  }
+  try{
+    const{data,error}=await db.from('eo_usuarios').select('nombre,rol').eq('clave_hash',h).eq('activo',true).maybeSingle();
+    if(error)throw error;
+    if(data){
+      S.usuarioActual={nombre:data.nombre,rol:data.rol};
+      // Se guarda el hash real (identifica a la persona), no una bandera
+      // fija — así no se puede "abrir" el candado sin conocer una clave real.
+      localStorage.setItem('eo_unlocked',h);
+      localStorage.setItem('eo_usuario',JSON.stringify(S.usuarioActual));
+      $('gate-overlay').style.display='none';
+      aplicarRolUI();
+      iniciarApp();
+      return;
+    }
+  }catch(e){console.error('Error validando acceso',e);}
+  $('gate-err').textContent='Clave incorrecta';
+  $('gate-pass').value='';
+  $('gate-pass').focus();
 }
 function cerrarSesion(){
   localStorage.removeItem('eo_unlocked');
+  localStorage.removeItem('eo_usuario');
   location.reload();
 }
 function checkGate(){
   const guardado=localStorage.getItem('eo_unlocked');
-  if(guardado===GATE_HASH){
+  let usuario=null;
+  try{usuario=JSON.parse(localStorage.getItem('eo_usuario')||'null');}catch(e){}
+  if(guardado&&usuario?.nombre&&usuario?.rol){
+    S.usuarioActual=usuario;
     $('gate-overlay').style.display='none';
+    aplicarRolUI();
     iniciarApp();
   } else {
-    if(guardado)localStorage.removeItem('eo_unlocked'); // valor invalido/falsificado
+    if(guardado||usuario){localStorage.removeItem('eo_unlocked');localStorage.removeItem('eo_usuario');} // estado inválido/incompleto
     $('gate-overlay').style.display='flex';
     setTimeout(()=>$('gate-pass')?.focus(),200);
   }
+}
+/* Oculta del todo "Ingresar datos" y "Ajustes" (sidebar + nav móvil)
+   para el rol admin_jr — no solo deshabilita botones dentro, directamente
+   no aparecen esas secciones. */
+function aplicarRolUI(){
+  const esJr=S.usuarioActual?.rol==='admin_jr';
+  document.querySelectorAll('[data-rol-admin]').forEach(el=>{el.style.display=esJr?'none':'';});
+  const badge=$('usuario-badge');
+  if(badge)badge.textContent=S.usuarioActual?S.usuarioActual.nombre+' · '+(S.usuarioActual.rol==='admin'?'Admin':'Admin Jr'):'';
 }
 
 /* ═══════════════════════════════════════════════════════════

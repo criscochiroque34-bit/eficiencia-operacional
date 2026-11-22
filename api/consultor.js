@@ -60,16 +60,26 @@ Hablas con el analista de operaciones responsable del indicador de eficiencia. C
 - No des recomendaciones de recursos humanos, contratación, despidos ni temas legales/laborales. Si la pregunta va por ahí, limítate al análisis numérico de horas y capacidad, sin opinar sobre las personas.
 - No inventes causas de un resultado si no están en los datos. Puedes señalar correlaciones visibles ("los tres días más bajos del mes fueron feriados"), no especular motivos que no puedes ver.`;
 
-// Mismo hash SHA-256 que valida el candado en index.html (de la clave
-// "Crossdock2026" por defecto). Si cambias la clave del candado, actualiza
-// este valor también — o mejor, defínelo como variable de entorno
-// APP_AUTH_HASH en Vercel para no tener que tocar el código.
+// El candado de index.html ahora valida contra la tabla eo_usuarios (cada
+// persona tiene su propia clave, con hash SHA-256), en vez de una sola
+// clave fija para todos. Esta función hace la misma verificación contra
+// Supabase, así solo alguien con una clave activa puede usar el Consultor.
 //
 // Por qué existe esto: sin esta verificación, cualquiera que descubra la
 // URL de esta función puede llamarla directo (con curl, Postman, etc.)
 // sin pasar nunca por el candado de la app, y gastar tu cuota gratuita
 // de Gemini sin que te enteres.
-const AUTH_HASH_DEFAULT = "c777f4f677d5c8fa33d6494ec851190c94b4a15a834bfe792989de6da761f58e";
+const SUPA_URL = "https://lflenisloinbqyuptxzc.supabase.co";
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbGVuaXNsb2luYnF5dXB0eHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MzAxNDQsImV4cCI6MjA5MTEwNjE0NH0.jcjKs2xCgxf4mvGbf9a5eRETWAOKf0SXg_JC0iy4UsI";
+
+async function claveEsValida(hash) {
+  if (!hash) return false;
+  const url = `${SUPA_URL}/rest/v1/eo_usuarios?clave_hash=eq.${encodeURIComponent(hash)}&activo=eq.true&select=id`;
+  const resp = await fetch(url, { headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` } });
+  if (!resp.ok) return false;
+  const rows = await resp.json();
+  return Array.isArray(rows) && rows.length > 0;
+}
 
 // Límites básicos para evitar abuso incluso desde una sesión autorizada
 const MAX_MENSAJES = 12;
@@ -81,9 +91,14 @@ export default async function handler(req, res) {
     return;
   }
 
-  const authHash = process.env.APP_AUTH_HASH || AUTH_HASH_DEFAULT;
   const tokenRecibido = req.headers["x-eo-auth"];
-  if (!tokenRecibido || tokenRecibido !== authHash) {
+  let autorizado = false;
+  try {
+    autorizado = await claveEsValida(tokenRecibido);
+  } catch (e) {
+    console.error("Error validando acceso contra Supabase:", e);
+  }
+  if (!autorizado) {
     res.status(401).json({ error: "No autorizado" });
     return;
   }
