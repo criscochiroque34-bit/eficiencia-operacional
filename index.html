@@ -950,7 +950,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <button class="btn btn-p btn-w" onclick="conDescargar()">⬇ Descargar consolidado (Excel)</button>
 
     <div style="margin-top:24px">
-      <div class="sl">Pedidos incompletos · RASTREO / CCC para copiar</div>
+      <div class="sl">Pedidos incompletos · CCC para copiar</div>
       <div style="font-size:.66rem;color:var(--ts);margin-bottom:8px">Les falta algún dato (fecha de ingreso, flujo, cobertura o negocio). Consigue esos datos y súbelos abajo, en "Completar pedidos incompletos".</div>
       <textarea id="con-incompletos-txt" readonly style="width:100%;height:120px;background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.74rem;resize:vertical"></textarea>
       <button class="btn btn-s btn-sm" style="margin-top:8px" onclick="conCopiar('con-incompletos-txt')">Copiar</button>
@@ -4898,7 +4898,7 @@ function conActualizarResultado(){
   $('con-r-total').textContent=fmtI(r.totalFinal);
   $('con-r-nuevas').textContent=fmtI(r.nuevasAgregadas);
   $('con-r-incomp').textContent=fmtI(r.incompletos.length);
-  $('con-incompletos-txt').value=r.incompletos.map(f=>f.rastreo+'\t'+f.ccc).join('\n');
+  $('con-incompletos-txt').value=r.incompletos.map(f=>f.ccc).join('\n');
   conRenderSlotCompletar();
   conRenderCccBloques();
 }
@@ -4931,7 +4931,7 @@ async function conOnFileCompletar(ev){
     $('con-status-completar').style.color='var(--ok)';
     toast(`${pedidosCompletados} pedidos completados ✓`);
     $('con-r-incomp').textContent=fmtI(r.incompletos.length);
-    $('con-incompletos-txt').value=r.incompletos.map(f=>f.rastreo+'\t'+f.ccc).join('\n');
+    $('con-incompletos-txt').value=r.incompletos.map(f=>f.ccc).join('\n');
   }catch(e){
     $('con-status-completar').textContent=e.mensaje||'Error leyendo el archivo';
     $('con-status-completar').style.color='var(--red)';
