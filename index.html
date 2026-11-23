@@ -215,6 +215,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div style="height:1px;background:var(--b1);margin:10px 0" data-rol-admin></div>
     <div class="sb-sec" data-rol-admin>Gestión</div>
     <button class="sb-btn" data-rol-admin onclick="showView('datos',this)"><span class="ico">⬆️</span>Ingresar datos</button>
+    <button class="sb-btn" data-rol-admin onclick="showView('consolidador',this)"><span class="ico">🧩</span>Consolidador</button>
     <button class="sb-btn" data-rol-admin onclick="showView('ajust',this)"><span class="ico">⚙️</span>Ajustes</button>
     <div class="sb-bot">
       <div class="ml-badge">
@@ -919,6 +920,55 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   </div>
 </div>
 
+<!-- ══ CONSOLIDADOR ══ -->
+<div class="view" id="v-consolidador">
+  <div class="ph"><div><div class="ph-title">Consolidador</div><div class="ph-sub">Une Archivo 1 + Zeus + Tercer corte + REPROS en un solo archivo</div></div></div>
+
+  <div style="margin-bottom:16px">
+    <label style="display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Fecha de referencia</label>
+    <input type="date" id="con-fecha-ref" style="background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 12px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.88rem;color-scheme:dark;width:100%;max-width:220px">
+    <div style="font-size:.62rem;color:var(--ts);margin-top:4px">Si no la cambias, se usa la fecha de hoy. Afecta la columna FECHA de las filas nuevas y el cálculo de "día anterior" del Tercer corte.</div>
+  </div>
+
+  <div class="sl">Archivos</div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px" id="con-slots"></div>
+
+  <button class="btn btn-p btn-w" id="con-btn-procesar" onclick="conProcesar()" disabled>Procesar consolidado →</button>
+  <div id="con-error" style="display:none;background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.4);border-radius:8px;padding:12px 14px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--red)"></div>
+
+  <div id="con-log-wrap" style="display:none;margin-top:18px">
+    <div class="sl">Registro del proceso</div>
+    <div id="con-log" style="background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--tm);display:flex;flex-direction:column;gap:6px"></div>
+  </div>
+
+  <div id="con-resultado" style="display:none;margin-top:18px">
+    <div class="g3" style="margin-bottom:16px">
+      <div class="kpi"><div class="kpi-l">Filas finales</div><div class="kpi-v" id="con-r-total" style="color:var(--t1)">—</div></div>
+      <div class="kpi"><div class="kpi-l">Filas agregadas</div><div class="kpi-v" id="con-r-nuevas" style="color:var(--ok)">—</div></div>
+      <div class="kpi"><div class="kpi-l">Pedidos incompletos</div><div class="kpi-v" id="con-r-incomp" style="color:var(--ora)">—</div></div>
+    </div>
+    <button class="btn btn-p btn-w" onclick="conDescargar()">⬇ Descargar consolidado (Excel)</button>
+
+    <div style="margin-top:24px">
+      <div class="sl">Pedidos incompletos · RASTREO / CCC para copiar</div>
+      <div style="font-size:.66rem;color:var(--ts);margin-bottom:8px">Les falta algún dato (fecha de ingreso, flujo, cobertura o negocio). Consigue esos datos y súbelos abajo, en "Completar pedidos incompletos".</div>
+      <textarea id="con-incompletos-txt" readonly style="width:100%;height:120px;background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.74rem;resize:vertical"></textarea>
+      <button class="btn btn-s btn-sm" style="margin-top:8px" onclick="conCopiar('con-incompletos-txt')">Copiar</button>
+    </div>
+
+    <div style="margin-top:24px">
+      <div class="sl">Completar pedidos incompletos (opcional)</div>
+      <div style="font-size:.66rem;color:var(--ts);margin-bottom:8px">Sube un archivo con el mismo formato que Zeus — rellena solo las celdas vacías de los pedidos que ya existen, por RASTREO / Código Seguimiento. No crea filas nuevas. Lo que no encuentre, queda igual.</div>
+      <div id="con-slot-completar"></div>
+    </div>
+
+    <div style="margin-top:24px">
+      <div class="sl">Copiar CCC en bloques de 3,000</div>
+      <div id="con-ccc-bloques" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ AJUSTES ══ -->
 <div class="view" id="v-ajust">
   <div class="ph"><div><div class="ph-title">Ajustes</div><div class="ph-sub">Objetivos y configuración</div></div></div>
@@ -1063,6 +1113,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   <button class="bn" onclick="showView('ml',this,true)"><span class="ico">🧠</span>ML</button>
   <button class="bn" onclick="showView('consultor',this,true)"><span class="ico">💬</span>Chat</button>
   <button class="bn" data-rol-admin onclick="showView('datos',this,true)"><span class="ico">⬆️</span>Datos</button>
+  <button class="bn" data-rol-admin onclick="showView('consolidador',this,true)"><span class="ico">🧩</span>Consol.</button>
   <button class="bn" data-rol-admin onclick="showView('ajust',this,true)"><span class="ico">⚙️</span>Ajustes</button>
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -4625,6 +4676,309 @@ async function usImportar(){
   finally{loading(false);}
 }
 
+/* ═══════════════════════════════════════════════════════════
+   CONSOLIDADOR — une Archivo 1 + Zeus + Tercer corte (opcional) +
+   REPROS en un solo archivo. No toca Supabase ni los indicadores
+   de eficiencia — es puramente procesamiento de archivos en el
+   navegador (lee Excel/CSV, transforma, genera Excel de salida).
+   ═══════════════════════════════════════════════════════════ */
+function conNormTxt(s){return String(s==null?'':s).trim().normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();}
+function conParseFecha(v){
+  if(v==null||v==='')return null;
+  if(v instanceof Date)return{dia:v.getDate(),mes:v.getMonth()+1,anio:v.getFullYear()};
+  if(typeof v==='number'){const d=new Date(Date.UTC(1899,11,30)+v*86400000);return{dia:d.getUTCDate(),mes:d.getUTCMonth()+1,anio:d.getUTCFullYear()};}
+  const s=String(v).trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m)return{anio:+m[1],mes:+m[2],dia:+m[3]};
+  m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if(m){let[,d,mo,a]=m;if(a.length===2)a='20'+a;return{dia:+d,mes:+mo,anio:+a};}
+  const dt=new Date(s);
+  if(!isNaN(dt.getTime()))return{dia:dt.getDate(),mes:dt.getMonth()+1,anio:dt.getFullYear()};
+  return null;
+}
+function conFechaDDMMAAAA(f){return String(f.dia).padStart(2,'0')+'/'+String(f.mes).padStart(2,'0')+'/'+f.anio;}
+function conAyerDDMM(fechaRef){
+  const f=conParseFecha(fechaRef);
+  const d=new Date(Date.UTC(f.anio,f.mes-1,f.dia));
+  d.setUTCDate(d.getUTCDate()-1);
+  return String(d.getUTCDate()).padStart(2,'0')+'.'+String(d.getUTCMonth()+1).padStart(2,'0');
+}
+const CON_CAMPOS_INCOMPLETO=['fecha_ingreso','flujo_ingreso','flujo_destino','cobertura','negocio'];
+// Mapa: encabezado normalizado (sin tildes/mayúsculas) de la columna de
+// ORIGEN -> clave interna que usa el motor. Define también qué columnas
+// son obligatorias en cada archivo (sus keys).
+const CON_MAP={
+  archivo1:{'fecha':'fecha','rastreo':'rastreo','fecha de ingreso':'fecha_ingreso','ingreso xd':'ingreso_xd',
+    'flujo de ingreso':'flujo_ingreso','flujo de destino':'flujo_destino','cobertura':'cobertura','negocio':'negocio',
+    'estado tms':'estado_tms','validar':'validar','estado wh2':'estado_wh2','estado wh':'estado_wh',
+    'motivo de inventario':'motivo_inventario','mes':'mes','ano':'anio','ccc':'ccc','dinamico':'dinamico'},
+  zeus:{'codigo seguimiento':'codigo_seguimiento','fecha registro':'fecha_registro','tipo recepcion':'tipo_recepcion',
+    'flota':'flota','cobertura':'cobertura','negocio':'negocio'},
+  tercerCorte:{'codigoseguimiento':'codigo_seguimiento','flota':'flota','cobertura':'cobertura','fechaingresobodega':'fecha_ingreso_bodega'},
+  repros:{'folio':'folio'},
+};
+const CON_SLOT_DEFS=[
+  {key:'archivo1',nombre:'Archivo 1 (principal)',obligatorio:true},
+  {key:'zeus',nombre:'Archivo Zeus',obligatorio:true},
+  {key:'tercerCorte',nombre:'Tercer corte',obligatorio:false},
+  {key:'repros',nombre:'REPROS (hoja BASE)',obligatorio:true},
+];
+let CON_ESTADO={archivos:{},resultado:null};
+
+/* Motor puro (sin DOM) — probado por separado con datos de ejemplo antes
+   de integrarlo. Recibe arrays de objetos ya mapeados a claves internas. */
+function conProcesarConsolidado({archivo1,zeus,tercerCorte,repros,fechaRef}){
+  const log=[];
+  const fRef=conParseFecha(fechaRef);
+  if(!fRef)throw{mensaje:'La fecha de referencia no es válida.'};
+  const fechaRefFmt=conFechaDDMMAAAA(fRef);
+  const motivoFijo=`DESPACHADO T3 ${conAyerDDMM(fechaRef)}`;
+
+  const totalA1=archivo1.length;
+  let base=archivo1.filter(r=>conNormTxt(r.estado_wh2)!=='despachado');
+  log.push(`Archivo 1: ${totalA1} filas leídas · ${totalA1-base.length} eliminadas por ESTADO WH2 = DESPACHADO · quedan ${base.length}`);
+
+  let actualizadas=0;
+  base=base.map(r=>{
+    if(r.validar!=null&&String(r.validar).trim()!==''){actualizadas++;return{...r,estado_tms:r.validar,validar:''};}
+    return r;
+  });
+  log.push(`VALIDAR → ESTADO TMS: ${actualizadas} filas actualizadas`);
+
+  const rastreoSet=new Set(base.map(r=>String(r.rastreo||'').trim()).filter(Boolean));
+  const nuevasFilas=[];
+  function filaBase(rastreo,extra){
+    return{fecha:fechaRefFmt,rastreo,fecha_ingreso:'',ingreso_xd:'T3',flujo_ingreso:'',flujo_destino:'',
+      cobertura:'',negocio:'',estado_tms:'',validar:'',estado_wh2:'',estado_wh:'',motivo_inventario:'',dinamico:'',...extra};
+  }
+  function procesarOrigen(nombre,filas,codigoDe,extraFn){
+    if(!filas||!filas.length){log.push(`${nombre}: no se subió (opcional) — se omite este paso`);return;}
+    const vistos=new Set();
+    let dupInternos=0,yaExistian=0,sinCodigo=0,agregados=0;
+    filas.forEach(z=>{
+      const cod=String(codigoDe(z)||'').trim();
+      if(!cod){sinCodigo++;return;}
+      if(vistos.has(cod)){dupInternos++;return;}
+      vistos.add(cod);
+      if(rastreoSet.has(cod)){yaExistian++;return;}
+      rastreoSet.add(cod);
+      agregados++;
+      nuevasFilas.push(filaBase(cod,extraFn(z)));
+    });
+    log.push(`${nombre}: ${filas.length} filas leídas · ${dupInternos} duplicados internos · ${yaExistian} ya existían en RASTREO · ${sinCodigo} sin código · ${agregados} filas nuevas agregadas`);
+  }
+  procesarOrigen('Archivo Zeus',zeus,z=>z.codigo_seguimiento,z=>({
+    fecha_ingreso:z.fecha_registro,flujo_ingreso:z.tipo_recepcion,flujo_destino:z.flota,
+    cobertura:z.cobertura,negocio:z.negocio,_origen:'zeus'}));
+  procesarOrigen('Tercer corte',tercerCorte,z=>z.codigo_seguimiento,z=>({
+    fecha_ingreso:z.fecha_ingreso_bodega,flujo_destino:z.flota,cobertura:z.cobertura,
+    estado_wh2:'DESPACHADO',estado_wh:'DESPACHADO TERCER CORTE',motivo_inventario:motivoFijo,_origen:'tercerCorte'}));
+  procesarOrigen('REPROS',repros,z=>z.folio,()=>({_origen:'repros'}));
+
+  const todas=[...base,...nuevasFilas];
+  let sinFechaValida=0;
+  todas.forEach(r=>{
+    const f=conParseFecha(r.fecha);
+    if(f){r.mes=MESES_ES[f.mes-1]||'';r.anio=String(f.anio);}
+    else{sinFechaValida++;r.mes=r.mes||'';r.anio=r.anio||'';}
+    r.ccc=r.rastreo?String(r.rastreo).trim()+',':'';
+  });
+  log.push(`MES / AÑO / CCC calculados para ${todas.length} filas`+(sinFechaValida?` · ${sinFechaValida} sin fecha reconocible`:''));
+
+  const faltanBasicos=todas.filter(r=>!r.fecha||!r.rastreo||!r.ingreso_xd);
+  if(faltanBasicos.length)log.push(`⚠ ${faltanBasicos.length} filas con FECHA, RASTREO o INGRESO XD vacíos (no debería pasar)`);
+
+  const incompletos=todas.filter(r=>CON_CAMPOS_INCOMPLETO.some(c=>!r[c]));
+  log.push(`Pedidos incompletos detectados: ${incompletos.length} de ${todas.length}`);
+
+  return{filas:todas,log,incompletos,totalFinal:todas.length,nuevasAgregadas:nuevasFilas.length};
+}
+
+/* ── Capa de archivos (lee Excel/CSV, detecta encabezados, mapea) ── */
+function conLeerYMapear(file,tipo){
+  return new Promise((resolve,reject)=>{
+    const ext=file.name.split('.').pop().toLowerCase();
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        let matriz;
+        if(ext==='csv'){
+          const txt=new TextDecoder('utf-8').decode(ev.target.result);
+          const sep=(txt.split('\n')[0].match(/;/g)||[]).length>(txt.split('\n')[0].match(/,/g)||[]).length?';':',';
+          matriz=txt.split(/\r?\n/).filter(l=>l.trim()).map(l=>l.split(sep));
+        } else {
+          if(typeof XLSX==='undefined'){reject({mensaje:'Librería Excel no cargó — usa CSV'});return;}
+          const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+          const hoja=tipo==='repros'?(wb.Sheets['BASE']||wb.Sheets[wb.SheetNames[0]]):wb.Sheets[wb.SheetNames[0]];
+          // raw:false → todo llega como texto formateado (protege códigos de
+          // rastreo largos de convertirse en número y perder ceros/precisión)
+          matriz=XLSX.utils.sheet_to_json(hoja,{header:1,defval:'',raw:false});
+        }
+        const mapa=CON_MAP[tipo];
+        const requeridos=Object.keys(mapa);
+        let hIdx=-1,colIdx={},mejorFaltan=requeridos;
+        for(let i=0;i<Math.min(matriz.length,15);i++){
+          const hs=matriz[i].map(conNormTxt);
+          const faltan=requeridos.filter(r=>!hs.includes(r));
+          if(faltan.length<mejorFaltan.length)mejorFaltan=faltan;
+          if(!faltan.length){hIdx=i;hs.forEach((h,j)=>{if(mapa[h]!=null)colIdx[mapa[h]]=j;});break;}
+        }
+        if(hIdx<0){
+          reject({mensaje:`No se encontraron todas las columnas esperadas. Falta: ${mejorFaltan.join(', ')||'(no se reconoció ningún encabezado)'}`});
+          return;
+        }
+        const filas=[];
+        for(let i=hIdx+1;i<matriz.length;i++){
+          const r=matriz[i];if(!r||!r.length||r.every(c=>c===''||c==null))continue;
+          const obj={};
+          Object.values(mapa).forEach(key=>{obj[key]=colIdx[key]!=null?r[colIdx[key]]:'';});
+          filas.push(obj);
+        }
+        resolve({filas});
+      }catch(err){console.error(err);reject({mensaje:'Error leyendo el archivo: '+err.message});}
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+/* ── UI ── */
+function conInit(){
+  if(!$('con-fecha-ref').value)$('con-fecha-ref').value=hoy();
+  if(!$('con-slots').dataset.init){
+    $('con-slots').innerHTML=CON_SLOT_DEFS.map(conSlotHtml).join('');
+    $('con-slots').dataset.init='1';
+  }
+}
+function conSlotHtml(d){
+  return`<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div><div style="font-weight:600;font-size:.85rem">${d.nombre}${d.obligatorio?'':' <span style="color:var(--ts);font-weight:400;font-size:.68rem">(opcional)</span>'}</div>
+    <div id="con-status-${d.key}" style="font-size:.68rem;color:var(--ts);margin-top:3px">Sin archivo</div></div>
+    <div><input type="file" id="con-file-${d.key}" accept=".xlsx,.xls,.csv" style="display:none" onchange="conOnFile('${d.key}',event)">
+    <button class="btn btn-s btn-sm" onclick="document.getElementById('con-file-${d.key}').click()">Elegir archivo</button></div>
+  </div>`;
+}
+async function conOnFile(key,ev){
+  const file=ev.target.files[0];if(!file)return;
+  $('con-status-'+key).textContent='Leyendo…';$('con-status-'+key).style.color='var(--tm)';
+  try{
+    const{filas}=await conLeerYMapear(file,key);
+    CON_ESTADO.archivos[key]={filas,nombre:file.name};
+    $('con-status-'+key).textContent=`${file.name} · ${filas.length} filas`;
+    $('con-status-'+key).style.color='var(--ok)';
+  }catch(e){
+    CON_ESTADO.archivos[key]=null;
+    $('con-status-'+key).textContent=e.mensaje||'Error leyendo el archivo';
+    $('con-status-'+key).style.color='var(--red)';
+  }
+  $('con-btn-procesar').disabled=!(CON_ESTADO.archivos.archivo1&&CON_ESTADO.archivos.zeus&&CON_ESTADO.archivos.repros);
+}
+function conMostrarError(msg){
+  const e=$('con-error');e.style.display='block';e.textContent='⚠ '+msg;
+  $('con-log-wrap').style.display='none';$('con-resultado').style.display='none';
+}
+function conProcesar(){
+  $('con-error').style.display='none';
+  const a1=CON_ESTADO.archivos.archivo1,z=CON_ESTADO.archivos.zeus,tc=CON_ESTADO.archivos.tercerCorte,rp=CON_ESTADO.archivos.repros;
+  if(!a1||!z||!rp){conMostrarError('Faltan archivos obligatorios.');return;}
+  const fechaRef=$('con-fecha-ref').value;
+  if(!fechaRef){conMostrarError('Elige una fecha de referencia.');return;}
+  let resultado;
+  try{
+    resultado=conProcesarConsolidado({archivo1:a1.filas,zeus:z.filas,tercerCorte:tc?tc.filas:null,repros:rp.filas,fechaRef});
+  }catch(err){conMostrarError(err.mensaje||'Error procesando el archivo.');return;}
+  CON_ESTADO.resultado=resultado;
+  $('con-log-wrap').style.display='block';
+  $('con-log').innerHTML=resultado.log.map(l=>`<div>${escapeHtml(l)}</div>`).join('');
+  conActualizarResultado();
+}
+function conActualizarResultado(){
+  const r=CON_ESTADO.resultado;if(!r)return;
+  $('con-resultado').style.display='block';
+  $('con-r-total').textContent=fmtI(r.totalFinal);
+  $('con-r-nuevas').textContent=fmtI(r.nuevasAgregadas);
+  $('con-r-incomp').textContent=fmtI(r.incompletos.length);
+  $('con-incompletos-txt').value=r.incompletos.map(f=>f.rastreo+'\t'+f.ccc).join('\n');
+  conRenderSlotCompletar();
+  conRenderCccBloques();
+}
+function conRenderSlotCompletar(){
+  $('con-slot-completar').innerHTML=`<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div><div style="font-weight:600;font-size:.85rem">Archivo de relleno (formato Zeus)</div><div id="con-status-completar" style="font-size:.68rem;color:var(--ts);margin-top:3px">Sin archivo</div></div>
+    <div><input type="file" id="con-file-completar" accept=".xlsx,.xls,.csv" style="display:none" onchange="conOnFileCompletar(event)">
+    <button class="btn btn-s btn-sm" onclick="document.getElementById('con-file-completar').click()">Elegir archivo</button></div>
+  </div>`;
+}
+async function conOnFileCompletar(ev){
+  const file=ev.target.files[0];if(!file)return;
+  $('con-status-completar').textContent='Leyendo…';$('con-status-completar').style.color='var(--tm)';
+  try{
+    const{filas}=await conLeerYMapear(file,'zeus');
+    const r=CON_ESTADO.resultado;
+    const porCodigo={};filas.forEach(f=>{const c=String(f.codigo_seguimiento||'').trim();if(c)porCodigo[c]=f;});
+    const mapaCompletar={fecha_ingreso:'fecha_registro',flujo_ingreso:'tipo_recepcion',flujo_destino:'flota',cobertura:'cobertura',negocio:'negocio'};
+    let pedidosCompletados=0,celdas=0;
+    r.filas.forEach(fila=>{
+      const datos=porCodigo[String(fila.rastreo||'').trim()];if(!datos)return;
+      let tocada=false;
+      Object.entries(mapaCompletar).forEach(([destino,origen])=>{
+        if(!fila[destino]&&datos[origen]){fila[destino]=datos[origen];celdas++;tocada=true;}
+      });
+      if(tocada)pedidosCompletados++;
+    });
+    r.incompletos=r.filas.filter(f=>CON_CAMPOS_INCOMPLETO.some(c=>!f[c]));
+    $('con-status-completar').textContent=`${file.name} · ${filas.length} filas leídas · ${pedidosCompletados} pedidos completados (${celdas} celdas rellenadas)`;
+    $('con-status-completar').style.color='var(--ok)';
+    toast(`${pedidosCompletados} pedidos completados ✓`);
+    $('con-r-incomp').textContent=fmtI(r.incompletos.length);
+    $('con-incompletos-txt').value=r.incompletos.map(f=>f.rastreo+'\t'+f.ccc).join('\n');
+  }catch(e){
+    $('con-status-completar').textContent=e.mensaje||'Error leyendo el archivo';
+    $('con-status-completar').style.color='var(--red)';
+  }
+}
+function conRenderCccBloques(){
+  const r=CON_ESTADO.resultado;if(!r)return;
+  const ccc=r.filas.map(f=>f.ccc).filter(Boolean);
+  const bloques=[];
+  for(let i=0;i<ccc.length;i+=3000)bloques.push(ccc.slice(i,i+3000));
+  const cont=$('con-ccc-bloques');
+  cont.innerHTML='';
+  // Se arman con DOM (no innerHTML con <textarea> embebido): el texto de un
+  // textarea es RCDATA, así que pasarlo por escapeHtml (que convierte los
+  // saltos de línea en "<br>") dejaba el "<br>" como texto literal en vez
+  // de salto de línea real.
+  bloques.forEach((b,i)=>{
+    const wrap=document.createElement('div');
+    const lbl=document.createElement('div');
+    lbl.style.cssText='font-size:.66rem;color:var(--ts);margin-bottom:4px';
+    lbl.textContent=`Bloque ${i+1} de ${bloques.length} (${b.length} códigos)`;
+    const ta=document.createElement('textarea');
+    ta.id=`con-ccc-b${i}`;ta.readOnly=true;
+    ta.style.cssText="width:100%;height:90px;background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.72rem;resize:vertical";
+    ta.value=b.join('\n');
+    const btn=document.createElement('button');
+    btn.className='btn btn-s btn-sm';btn.style.marginTop='6px';
+    btn.textContent=`Copiar bloque ${i+1}`;
+    btn.onclick=()=>conCopiar(`con-ccc-b${i}`);
+    wrap.append(lbl,ta,btn);
+    cont.appendChild(wrap);
+  });
+}
+function conCopiar(id){
+  const el=$(id);el.select();el.setSelectionRange(0,999999999);
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(el.value).then(()=>toast('Copiado ✓')).catch(()=>{try{document.execCommand('copy');toast('Copiado ✓');}catch(e){}});
+  else{try{document.execCommand('copy');toast('Copiado ✓');}catch(e){}}
+}
+function conDescargar(){
+  const r=CON_ESTADO.resultado;if(!r)return;
+  const headers=['FECHA','RASTREO','FECHA DE INGRESO','INGRESO XD','FLUJO DE INGRESO','FLUJO DE DESTINO','Cobertura','Negocio','ESTADO TMS','VALIDAR','ESTADO WH2','ESTADO WH','Motivo de inventario','MES','AÑO','CCC','DINAMICO'];
+  const filas=r.filas.map(f=>[f.fecha,f.rastreo,f.fecha_ingreso,f.ingreso_xd,f.flujo_ingreso,f.flujo_destino,f.cobertura,f.negocio,f.estado_tms,f.validar,f.estado_wh2,f.estado_wh,f.motivo_inventario,f.mes,f.anio,f.ccc,f.dinamico]);
+  const ws=XLSX.utils.aoa_to_sheet([headers,...filas]);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Consolidado');
+  XLSX.writeFile(wb,'Consolidado_'+hoy()+'.xlsx');
+}
+
 /* ═══ INIT ═══ */
 async function cargarTodo(){
   loading(true);
@@ -4663,7 +5017,7 @@ async function cargarTodo(){
   finally{loading(false);}
 }
 function showView(id,btn,mobile){
-  if(S.usuarioActual?.rol==='admin_jr'&&(id==='datos'||id==='ajust'))return;
+  if(S.usuarioActual?.rol==='admin_jr'&&(id==='datos'||id==='ajust'||id==='consolidador'))return;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('a'));
   $('v-'+id).classList.add('a');
   if(mobile)document.querySelectorAll('.bn').forEach(b=>b.classList.remove('a'));
@@ -4682,6 +5036,7 @@ function showView(id,btn,mobile){
   }
   if(id==='ml')renderDiagnostico();
   if(id==='consultor')setTimeout(()=>$('chat-input')?.focus(),150);
+  if(id==='consolidador')conInit();
 }
 function iniciarApp(){
   $('proy-fecha').value=hoy();
