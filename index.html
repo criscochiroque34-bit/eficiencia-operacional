@@ -4792,28 +4792,50 @@ function conProcesarConsolidado({archivo1,zeus,tercerCorte,repros,fechaRef}){
     return{fecha:fechaRefFmt,rastreo,fecha_ingreso:'',ingreso_xd:'T3',flujo_ingreso:'',flujo_destino:'',
       cobertura:'',negocio:'',estado_tms:'',validar:'',estado_wh2:'',estado_wh:'',motivo_inventario:'',dinamico:'',...extra};
   }
-  function procesarOrigen(nombre,filas,codigoDe,extraFn){
+  // Mapa RASTREO -> fila real, para poder ACTUALIZAR una fila ya existente
+  // (no solo saber que existe) — lo usa Tercer corte para marcar DESPACHADO
+  // incluso en pedidos que no son filas nuevas.
+  const rastreoAFila=new Map();
+  base.forEach(r=>{const c=String(r.rastreo||'').trim();if(c)rastreoAFila.set(c,r);});
+  function procesarOrigen(nombre,filas,codigoDe,extraFn,onYaExiste){
     if(!filas||!filas.length){log.push(`${nombre}: no se subió (opcional) — se omite este paso`);return;}
     const vistos=new Set();
-    let dupInternos=0,yaExistian=0,sinCodigo=0,agregados=0;
+    let dupInternos=0,yaExistian=0,actualizadas=0,sinCodigo=0,agregados=0;
     filas.forEach(z=>{
       const cod=String(codigoDe(z)||'').trim();
       if(!cod){sinCodigo++;return;}
       if(vistos.has(cod)){dupInternos++;return;}
       vistos.add(cod);
-      if(rastreoSet.has(cod)){yaExistian++;return;}
+      if(rastreoSet.has(cod)){
+        yaExistian++;
+        if(onYaExiste){
+          const filaExistente=rastreoAFila.get(cod);
+          if(filaExistente){onYaExiste(filaExistente,z);actualizadas++;}
+        }
+        return;
+      }
       rastreoSet.add(cod);
+      const nueva=filaBase(cod,extraFn(z));
+      rastreoAFila.set(cod,nueva);
       agregados++;
-      nuevasFilas.push(filaBase(cod,extraFn(z)));
+      nuevasFilas.push(nueva);
     });
-    log.push(`${nombre}: ${filas.length} filas leídas · ${dupInternos} duplicados internos · ${yaExistian} ya existían en RASTREO · ${sinCodigo} sin código · ${agregados} filas nuevas agregadas`);
+    log.push(`${nombre}: ${filas.length} filas leídas · ${dupInternos} duplicados internos · ${yaExistian} ya existían en RASTREO${onYaExiste?` (${actualizadas} actualizadas)`:''} · ${sinCodigo} sin código · ${agregados} filas nuevas agregadas`);
   }
   procesarOrigen('Archivo Zeus',zeus,z=>z.codigo_seguimiento,z=>({
     fecha_ingreso:z.fecha_registro,flujo_ingreso:z.tipo_recepcion,flujo_destino:z.flota,
     cobertura:z.cobertura,negocio:z.negocio,_origen:'zeus'}));
+  // Tercer corte: incluso si el código YA existe (en Archivo 1 o agregado
+  // por Zeus en este mismo proceso), esa fila se marca como despachada —
+  // Tercer corte siempre "gana" en ese sentido, no se ignora.
   procesarOrigen('Tercer corte',tercerCorte,z=>z.codigo_seguimiento,z=>({
     fecha_ingreso:z.fecha_ingreso_bodega,flujo_destino:z.flota,cobertura:z.cobertura,
-    estado_wh2:'DESPACHADO',estado_wh:'DESPACHADO TERCER CORTE',motivo_inventario:motivoFijo,_origen:'tercerCorte'}));
+    estado_wh2:'DESPACHADO',estado_wh:'DESPACHADO TERCER CORTE',motivo_inventario:motivoFijo,_origen:'tercerCorte'}),
+    (filaExistente)=>{
+      filaExistente.estado_wh2='DESPACHADO';
+      filaExistente.estado_wh='DESPACHADO TERCER CORTE';
+      filaExistente.motivo_inventario=motivoFijo;
+    });
   procesarOrigen('REPROS',repros,z=>z.folio,()=>({_origen:'repros'}));
 
   const todas=[...base,...nuevasFilas];
