@@ -4705,6 +4705,15 @@ function conParseFecha(v){
   return null;
 }
 function conFechaDDMMAAAA(f){return String(f.dia).padStart(2,'0')+'/'+String(f.mes).padStart(2,'0')+'/'+f.anio;}
+// Para valores que vienen de una celda de fecha REAL de Excel (número
+// serial, leído con raw:true) — reconstruye DD/MM/AAAA, el mismo formato
+// que ya usa Archivo 1. Si no es un número (ya es texto), se deja tal cual.
+function conFormatearFechaDDMM(v){
+  if(v==null||v==='')return v;
+  if(typeof v!=='number')return v;
+  const d=new Date(Date.UTC(1899,11,30)+Math.round(v*86400000));
+  return String(d.getUTCDate()).padStart(2,'0')+'/'+String(d.getUTCMonth()+1).padStart(2,'0')+'/'+d.getUTCFullYear();
+}
 // Normaliza cualquier fecha/hora de origen al formato exacto "AAAA-MM-DD HH:MM:SS"
 function conFormatearFechaHora(v){
   if(v==null||v==='')return '';
@@ -4846,6 +4855,14 @@ function conLeerYMapear(file,tipo){
           // raw:false → todo llega como texto formateado (protege códigos de
           // rastreo largos de convertirse en número y perder ceros/precisión)
           matriz=XLSX.utils.sheet_to_json(hoja,{header:1,defval:'',raw:false});
+          // Para Archivo 1, FECHA/FECHA DE INGRESO deben quedar EXACTAS a como
+          // estaban — si la celda es una fecha real de Excel, raw:false la
+          // reformatea con el formato por defecto de la librería (M/D/AA) en
+          // vez de tu DD/MM/AAAA. Se lee aparte con raw:true (da el serial
+          // numérico original) y se reconstruye al formato de siempre.
+          if(tipo==='archivo1'){
+            var matrizCruda=XLSX.utils.sheet_to_json(hoja,{header:1,defval:'',raw:true});
+          }
         }
         const mapa=CON_MAP[tipo];
         const requeridos=Object.keys(mapa);
@@ -4865,6 +4882,11 @@ function conLeerYMapear(file,tipo){
           const r=matriz[i];if(!r||!r.length||r.every(c=>c===''||c==null))continue;
           const obj={};
           Object.values(mapa).forEach(key=>{obj[key]=colIdx[key]!=null?r[colIdx[key]]:'';});
+          if(tipo==='archivo1'&&typeof matrizCruda!=='undefined'&&matrizCruda[i]){
+            const rc=matrizCruda[i];
+            if(colIdx.fecha!=null)obj.fecha=conFormatearFechaDDMM(rc[colIdx.fecha]);
+            if(colIdx.fecha_ingreso!=null)obj.fecha_ingreso=conFormatearFechaDDMM(rc[colIdx.fecha_ingreso]);
+          }
           filas.push(obj);
         }
         resolve({filas});
