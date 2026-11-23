@@ -4774,7 +4774,39 @@ function conAyerDDMM(fechaRef){
   d.setUTCDate(d.getUTCDate()-1);
   return String(d.getUTCDate()).padStart(2,'0')+'.'+String(d.getUTCMonth()+1).padStart(2,'0');
 }
+function conFechaRefDDMM(fechaRef){
+  const f=conParseFecha(fechaRef);
+  if(!f)return'';
+  return String(f.dia).padStart(2,'0')+'.'+String(f.mes).padStart(2,'0');
+}
 const CON_CAMPOS_INCOMPLETO=['fecha_ingreso','flujo_ingreso','flujo_destino','cobertura','negocio'];
+// Reglas finales — se aplican sobre el consolidado DESPUÉS del cruce final,
+// que es cuando VALIDAR ya trae los estados reales de la búsqueda por CCC.
+// Primero se eliminan filas (devolución / rechazo / flujo de reparto) y
+// luego, a las que sobreviven, se les marca ESTADO WH2 = DESPACHADO según
+// VALIDAR — sin tocar las filas que ya son DESPACHADO (p.ej. Tercer corte).
+const CON_VALIDAR_DESPACHADO=['en bodega ol','en destino','en reparto','en transito bodega ol','en transito ct ol',
+  'en transito destino','entregado','entregado en tienda','excepcion de entrega','ingreso local','transito local'];
+const CON_TMS_RECHAZO=['rechazado','anulado','fallo de entrega'];
+const CON_FLUJO_DESTINO_ELIMINAR=['vans ruteo dinamico','of motorizados','vans rutero estatico'];
+function conAplicarReglasFinales(r){
+  const antes=r.filas.length;
+  let elimPorDevolucion=0,elimPorRechazo=0,elimPorFlujo=0,marcadasDespachado=0;
+  r.filas=r.filas.filter(f=>{
+    const val=conNormTxt(f.validar);
+    if(val==='en devolucion'){elimPorDevolucion++;return false;}
+    if(val==='ingreso local'&&CON_TMS_RECHAZO.includes(conNormTxt(f.estado_tms))){elimPorRechazo++;return false;}
+    if((val==='ingreso local'||val==='transito local')&&CON_FLUJO_DESTINO_ELIMINAR.includes(conNormTxt(f.flujo_destino))){elimPorFlujo++;return false;}
+    return true;
+  });
+  r.filas.forEach(f=>{
+    if(conNormTxt(f.estado_wh2)==='despachado')return;
+    if(CON_VALIDAR_DESPACHADO.includes(conNormTxt(f.validar))){f.estado_wh2='DESPACHADO';marcadasDespachado++;}
+  });
+  r.totalFinal=r.filas.length;
+  r.incompletos=r.filas.filter(f=>CON_CAMPOS_INCOMPLETO.some(c=>!f[c]));
+  return{eliminadas:antes-r.filas.length,elimPorDevolucion,elimPorRechazo,elimPorFlujo,marcadasDespachado};
+}
 // Mapa: encabezado normalizado (sin tildes/mayúsculas) de la columna de
 // ORIGEN -> clave interna que usa el motor. Define también qué columnas
 // son obligatorias en cada archivo (sus keys).
@@ -5112,8 +5144,19 @@ function conProcesarCruce(){
     else{fila.validar='#N/A';sinDato++;}
   });
   const msg=`Cruce aplicado: ${fmtI(encontrados)} coincidencias · ${fmtI(sinDato)} marcadas #N/A (de ${fmtI(r.filas.length)} filas totales)`;
-  const cm=$('con-cruce-msg');cm.style.display='flex';cm.innerHTML=`<span class="ico">✓</span>${msg}`;
   r.log.push(msg);
+
+  const reglas=conAplicarReglasFinales(r);
+  if(reglas.eliminadas)r.log.push(`Reglas finales — filas eliminadas: ${fmtI(reglas.eliminadas)} (${fmtI(reglas.elimPorDevolucion)} En Devolución · ${fmtI(reglas.elimPorRechazo)} Ingreso local + Rechazado/Anulado/Fallo de entrega · ${fmtI(reglas.elimPorFlujo)} Ingreso/Tránsito local + flujo de reparto)`);
+  if(reglas.marcadasDespachado)r.log.push(`Reglas finales — ESTADO WH2 marcado DESPACHADO en ${fmtI(reglas.marcadasDespachado)} filas (según VALIDAR)`);
+
+  $('con-r-total').textContent=fmtI(r.totalFinal);
+  $('con-r-incomp').textContent=fmtI(r.incompletos.length);
+  $('con-incompletos-txt').value=r.incompletos.map(f=>f.ccc).join('\n');
+  conRenderCccBloques();
+
+  const cm=$('con-cruce-msg');cm.style.display='flex';
+  cm.innerHTML=`<span class="ico">✓</span>${msg}${reglas.eliminadas?` · ${fmtI(reglas.eliminadas)} filas eliminadas por reglas finales`:''}${reglas.marcadasDespachado?` · ${fmtI(reglas.marcadasDespachado)} marcadas DESPACHADO`:''}`;
   $('con-log').innerHTML=r.log.map(l=>`<div>${escapeHtml(l)}</div>`).join('');
   toast('Cruce aplicado ✓');
 }
@@ -5196,14 +5239,45 @@ function conCopiar(id){
   if(navigator.clipboard?.writeText)navigator.clipboard.writeText(el.value).then(()=>toast('Copiado ✓')).catch(()=>{try{document.execCommand('copy');toast('Copiado ✓');}catch(e){}});
   else{try{document.execCommand('copy');toast('Copiado ✓');}catch(e){}}
 }
+// Resumen tipo tabla dinámica: ESTADO WH2 → Motivo de inventario → Cuenta
+// de RASTREO. El motor xlsx que corre en el navegador no puede escribir una
+// tabla dinámica real de Excel (con su caché interno) — esto arma el mismo
+// resultado ya calculado, en formato de tabla plana lista para leer.
+function conConstruirResumen(filas){
+  const grupos={};
+  filas.forEach(f=>{
+    const estado=f.estado_wh2||'(en blanco)';
+    const motivo=f.motivo_inventario||'(en blanco)';
+    if(!grupos[estado])grupos[estado]={};
+    grupos[estado][motivo]=(grupos[estado][motivo]||0)+1;
+  });
+  const filasResumen=[['Etiquetas de fila','Cuenta de RASTREO']];
+  let totalGeneral=0;
+  Object.keys(grupos).sort().forEach(estado=>{
+    filasResumen.push([estado,'']);
+    let totalEstado=0;
+    Object.keys(grupos[estado]).sort().forEach(motivo=>{
+      const c=grupos[estado][motivo];
+      totalEstado+=c;
+      filasResumen.push(['  '+motivo,c]);
+    });
+    filasResumen.push([estado+' Total',totalEstado]);
+    totalGeneral+=totalEstado;
+  });
+  filasResumen.push(['Total general',totalGeneral]);
+  return filasResumen;
+}
 function conDescargar(){
   const r=CON_ESTADO.resultado;if(!r)return;
   const headers=['FECHA','RASTREO','FECHA DE INGRESO','INGRESO XD','FLUJO DE INGRESO','FLUJO DE DESTINO','Cobertura','Negocio','ESTADO TMS','VALIDAR','ESTADO WH2','ESTADO WH','Motivo de inventario','MES','AÑO','CCC','DINAMICO'];
   const filas=r.filas.map(f=>[f.fecha,f.rastreo,f.fecha_ingreso,f.ingreso_xd,f.flujo_ingreso,f.flujo_destino,f.cobertura,f.negocio,f.estado_tms,f.validar,f.estado_wh2,f.estado_wh,f.motivo_inventario,f.mes,f.anio,f.ccc,f.dinamico]);
-  const ws=XLSX.utils.aoa_to_sheet([headers,...filas]);
+  const wsDetalle=XLSX.utils.aoa_to_sheet([headers,...filas]);
+  const wsResumen=XLSX.utils.aoa_to_sheet(conConstruirResumen(r.filas));
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Consolidado');
-  XLSX.writeFile(wb,'Consolidado_'+hoy()+'.xlsx');
+  XLSX.utils.book_append_sheet(wb,wsDetalle,'DETALLE');
+  XLSX.utils.book_append_sheet(wb,wsResumen,'RESUMEN');
+  const fechaRef=$('con-fecha-ref').value||hoy();
+  XLSX.writeFile(wb,`Copia de Kardex ${conFechaRefDDMM(fechaRef)}.xlsx`);
 }
 
 /* ═══ INIT ═══ */
