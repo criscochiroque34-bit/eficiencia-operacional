@@ -966,6 +966,14 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       <div class="sl">Copiar CCC en bloques de 3,000</div>
       <div id="con-ccc-bloques" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
+
+    <div style="margin-top:24px">
+      <div class="sl">Cruce final · actualizar VALIDAR</div>
+      <div style="font-size:.66rem;color:var(--ts);margin-bottom:8px">Sube el archivo que te devuelve la búsqueda por CCC (columnas RASTREO y ESTADO_TMS, entre otras). Por cada fila del consolidado: si su RASTREO aparece ahí, VALIDAR toma ese ESTADO_TMS; si no aparece, VALIDAR queda en "#N/A".</div>
+      <div id="con-slot-cruce"></div>
+      <button class="btn btn-p" style="margin-top:10px" id="con-btn-cruce" onclick="conProcesarCruce()" disabled>Procesar cruce →</button>
+      <div id="con-cruce-msg" style="margin-top:8px;font-size:.72rem;min-height:16px"></div>
+    </div>
   </div>
 </div>
 
@@ -4697,6 +4705,28 @@ function conParseFecha(v){
   return null;
 }
 function conFechaDDMMAAAA(f){return String(f.dia).padStart(2,'0')+'/'+String(f.mes).padStart(2,'0')+'/'+f.anio;}
+// Normaliza cualquier fecha/hora de origen al formato exacto "AAAA-MM-DD HH:MM:SS"
+function conFormatearFechaHora(v){
+  if(v==null||v==='')return '';
+  const pad=n=>String(n).padStart(2,'0');
+  let d;
+  if(v instanceof Date){d=v;}
+  else if(typeof v==='number'){
+    d=new Date(Date.UTC(1899,11,30)+Math.round(v*86400000));
+    return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;
+  } else {
+    const s=String(v).trim();
+    let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+    if(m){const[,a,mo,di,h,mi,se]=m;return `${a}-${pad(mo)}-${pad(di)} ${pad(h)}:${pad(mi)}:${pad(se||0)}`;}
+    m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if(m){const[,a,mo,di]=m;return `${a}-${pad(mo)}-${pad(di)} 00:00:00`;}
+    m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})[ T]?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?/);
+    if(m){let[,dd,mo,a,h,mi,se]=m;if(a.length===2)a='20'+a;return `${a}-${pad(mo)}-${pad(dd)} ${pad(h||0)}:${pad(mi||0)}:${pad(se||0)}`;}
+    d=new Date(s);
+    if(isNaN(d.getTime()))return s; // no se reconoció -> se deja tal cual, no se inventa nada
+  }
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
 function conAyerDDMM(fechaRef){
   const f=conParseFecha(fechaRef);
   const d=new Date(Date.UTC(f.anio,f.mes-1,f.dia));
@@ -4716,6 +4746,7 @@ const CON_MAP={
     'flota':'flota','cobertura':'cobertura','negocio':'negocio'},
   tercerCorte:{'codigoseguimiento':'codigo_seguimiento','flota':'flota','cobertura':'cobertura','fechaingresobodega':'fecha_ingreso_bodega'},
   repros:{'folio':'folio'},
+  cruceCcc:{'rastreo':'rastreo','estado_tms':'estado_tms'},
 };
 const CON_SLOT_DEFS=[
   {key:'archivo1',nombre:'Archivo 1 (principal, hoja DETALLE)',obligatorio:true},
@@ -4748,6 +4779,7 @@ function conProcesarConsolidado({archivo1,zeus,tercerCorte,repros,fechaRef}){
   const rastreoSet=new Set(base.map(r=>String(r.rastreo||'').trim()).filter(Boolean));
   const nuevasFilas=[];
   function filaBase(rastreo,extra){
+    if(extra&&extra.fecha_ingreso)extra={...extra,fecha_ingreso:conFormatearFechaHora(extra.fecha_ingreso)};
     return{fecha:fechaRefFmt,rastreo,fecha_ingreso:'',ingreso_xd:'T3',flujo_ingreso:'',flujo_destino:'',
       cobertura:'',negocio:'',estado_tms:'',validar:'',estado_wh2:'',estado_wh:'',motivo_inventario:'',dinamico:'',...extra};
   }
@@ -4901,6 +4933,46 @@ function conActualizarResultado(){
   $('con-incompletos-txt').value=r.incompletos.map(f=>f.ccc).join('\n');
   conRenderSlotCompletar();
   conRenderCccBloques();
+  conRenderSlotCruce();
+}
+function conRenderSlotCruce(){
+  $('con-slot-cruce').innerHTML=`<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div><div style="font-weight:600;font-size:.85rem">Archivo de resultado CCC</div><div id="con-status-cruce" style="font-size:.68rem;color:var(--ts);margin-top:3px">Sin archivo</div></div>
+    <div><input type="file" id="con-file-cruce" accept=".xlsx,.xls,.xlsm,.csv" style="display:none" onchange="conOnFileCruce(event)">
+    <button class="btn btn-s btn-sm" onclick="document.getElementById('con-file-cruce').click()">Elegir archivo</button></div>
+  </div>`;
+}
+let CON_CRUCE_FILAS=null;
+async function conOnFileCruce(ev){
+  const file=ev.target.files[0];if(!file)return;
+  $('con-status-cruce').textContent='Leyendo…';$('con-status-cruce').style.color='var(--tm)';
+  $('con-btn-cruce').disabled=true;CON_CRUCE_FILAS=null;
+  try{
+    const{filas}=await conLeerYMapear(file,'cruceCcc');
+    CON_CRUCE_FILAS=filas;
+    $('con-status-cruce').textContent=`${file.name} · ${filas.length} filas`;
+    $('con-status-cruce').style.color='var(--ok)';
+    $('con-btn-cruce').disabled=false;
+  }catch(e){
+    $('con-status-cruce').textContent=e.mensaje||'Error leyendo el archivo';
+    $('con-status-cruce').style.color='var(--red)';
+  }
+}
+function conProcesarCruce(){
+  const r=CON_ESTADO.resultado;if(!r||!CON_CRUCE_FILAS)return;
+  const porRastreo={};
+  CON_CRUCE_FILAS.forEach(f=>{const c=String(f.rastreo||'').trim();if(c)porRastreo[c]=f;});
+  let encontrados=0,sinDato=0;
+  r.filas.forEach(fila=>{
+    const datos=porRastreo[String(fila.rastreo||'').trim()];
+    if(datos){fila.validar=datos.estado_tms||'';encontrados++;}
+    else{fila.validar='#N/A';sinDato++;}
+  });
+  const msg=`Cruce aplicado: ${encontrados} coincidencias · ${sinDato} marcadas #N/A (de ${r.filas.length} filas totales)`;
+  $('con-cruce-msg').style.color='var(--ok)';$('con-cruce-msg').textContent=msg;
+  r.log.push(msg);
+  $('con-log').innerHTML=r.log.map(l=>`<div>${escapeHtml(l)}</div>`).join('');
+  toast('Cruce aplicado ✓');
 }
 function conRenderSlotCompletar(){
   $('con-slot-completar').innerHTML=`<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
@@ -4922,7 +4994,10 @@ async function conOnFileCompletar(ev){
       const datos=porCodigo[String(fila.rastreo||'').trim()];if(!datos)return;
       let tocada=false;
       Object.entries(mapaCompletar).forEach(([destino,origen])=>{
-        if(!fila[destino]&&datos[origen]){fila[destino]=datos[origen];celdas++;tocada=true;}
+        if(!fila[destino]&&datos[origen]){
+          fila[destino]=destino==='fecha_ingreso'?conFormatearFechaHora(datos[origen]):datos[origen];
+          celdas++;tocada=true;
+        }
       });
       if(tocada)pedidosCompletados++;
     });
