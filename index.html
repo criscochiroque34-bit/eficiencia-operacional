@@ -959,7 +959,10 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 
   <div class="con-grid" id="con-slots" style="margin-bottom:18px"></div>
 
-  <button class="btn btn-p btn-w" id="con-btn-procesar" onclick="conProcesar()" disabled>Procesar consolidado →</button>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-p" style="flex:1;min-width:200px" id="con-btn-procesar" onclick="conProcesar()" disabled>Procesar consolidado →</button>
+    <button class="btn btn-s" onclick="conReiniciarTodo()">✕ Quitar todo</button>
+  </div>
   <div id="con-error" style="display:none;background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.4);border-radius:8px;padding:12px 14px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--red)"></div>
 
   <div id="con-log-wrap" style="display:none;margin-top:18px">
@@ -5052,6 +5055,25 @@ function conQuitarArchivo(key){
 }
 function conActualizarBotonProcesar(){
   $('con-btn-procesar').disabled=!(CON_ESTADO.archivos.archivo1&&CON_ESTADO.archivos.zeus&&CON_ESTADO.archivos.repros);
+}
+function conReiniciarTodo(){
+  const hayAlgo=Object.values(CON_ESTADO.archivos).some(Boolean)||CON_ESTADO.resultado;
+  if(hayAlgo&&!confirm('¿Quitar todos los archivos cargados y reiniciar el Consolidador?'))return;
+  CON_ESTADO={archivos:{},resultado:null};
+  CON_CRUCE_FILAS=null;
+  CON_SLOT_DEFS.forEach(d=>{
+    const inp=$('con-file-'+d.key);if(inp)inp.value='';
+    conPintarSlotEstado(d.key,'idle');
+  });
+  const inpCompletar=$('con-file-completar');if(inpCompletar)inpCompletar.value='';
+  const inpCruce=$('con-file-cruce');if(inpCruce)inpCruce.value='';
+  conActualizarBotonProcesar();
+  $('con-btn-cruce').disabled=true;
+  $('con-error').style.display='none';
+  $('con-log-wrap').style.display='none';
+  $('con-resultado').style.display='none';
+  const cf=$('con-confirm-proceso');if(cf)cf.style.display='none';
+  toast('Consolidador reiniciado');
 }
 function conMostrarError(msg){
   const e=$('con-error');e.style.display='block';e.textContent='⚠ '+msg;
