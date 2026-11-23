@@ -4792,9 +4792,18 @@ const CON_VALIDAR_DESPACHADO=['en bodega ol','en destino','en reparto','en trans
   'en transito destino','entregado','entregado en tienda','excepcion de entrega','ingreso local','transito local'];
 const CON_TMS_RECHAZO=['rechazado','anulado','fallo de entrega'];
 const CON_FLUJO_DESTINO_ELIMINAR=['vans ruteo dinamico','of motorizados','vans rutero estatico'];
-function conAplicarReglasFinales(r){
+// Combinaciones FLUJO DE DESTINO + Cobertura que, en una fila que YA es
+// DESPACHADO (recién marcada por la regla de arriba — nunca una que ya lo
+// era desde antes, como las del Tercer corte, esas no se tocan en ninguna
+// lógica), reciben motivo "DESPACHADO T1 <fecha de referencia>".
+const CON_T1_COMBOS=new Set([
+  'ct - provincia|ct chiclayo','ct - provincia|ct chimbote','ct - provincia|ct huancayo',
+  'mbox sender|lima metropolitana','mbox sender|lima periferia','mbox sodimac|lima metropolitana',
+  'of motorizados|lima metropolitana','vans ruteo estatico|lima metropolitana','vans ruteo estatico|lima periferia',
+]);
+function conAplicarReglasFinales(r,fechaRef){
   const antes=r.filas.length;
-  let elimPorDevolucion=0,elimPorRechazo=0,elimPorFlujo=0,marcadasDespachado=0;
+  let elimPorDevolucion=0,elimPorRechazo=0,elimPorFlujo=0,marcadasDespachado=0,marcadasT1=0;
   r.filas=r.filas.filter(f=>{
     const val=conNormTxt(f.validar);
     if(val==='en devolucion'){elimPorDevolucion++;return false;}
@@ -4802,13 +4811,23 @@ function conAplicarReglasFinales(r){
     if((val==='ingreso local'||val==='transito local')&&CON_FLUJO_DESTINO_ELIMINAR.includes(conNormTxt(f.flujo_destino))){elimPorFlujo++;return false;}
     return true;
   });
+  // Filas que YA eran DESPACHADO antes de esta regla (Tercer corte) — se
+  // excluyen de las dos marcas de abajo, no se tocan en ninguna lógica.
+  const yaEraDespachado=new Set(r.filas.filter(f=>conNormTxt(f.estado_wh2)==='despachado'));
   r.filas.forEach(f=>{
-    if(conNormTxt(f.estado_wh2)==='despachado')return;
+    if(yaEraDespachado.has(f))return;
     if(CON_VALIDAR_DESPACHADO.includes(conNormTxt(f.validar))){f.estado_wh2='DESPACHADO';marcadasDespachado++;}
+  });
+  const motivoT1=`DESPACHADO T1 ${conFechaRefDDMM(fechaRef)}`;
+  r.filas.forEach(f=>{
+    if(yaEraDespachado.has(f))return;
+    if(conNormTxt(f.estado_wh2)!=='despachado')return;
+    const combo=conNormTxt(f.flujo_destino)+'|'+conNormTxt(f.cobertura);
+    if(CON_T1_COMBOS.has(combo)){f.motivo_inventario=motivoT1;marcadasT1++;}
   });
   r.totalFinal=r.filas.length;
   r.incompletos=r.filas.filter(f=>CON_CAMPOS_INCOMPLETO.some(c=>!f[c]));
-  return{eliminadas:antes-r.filas.length,elimPorDevolucion,elimPorRechazo,elimPorFlujo,marcadasDespachado};
+  return{eliminadas:antes-r.filas.length,elimPorDevolucion,elimPorRechazo,elimPorFlujo,marcadasDespachado,marcadasT1};
 }
 // Mapa: encabezado normalizado (sin tildes/mayúsculas) de la columna de
 // ORIGEN -> clave interna que usa el motor. Define también qué columnas
@@ -5168,9 +5187,11 @@ function conProcesarCruce(){
   const msg=`Cruce aplicado: ${fmtI(encontrados)} coincidencias · ${fmtI(sinDato)} marcadas #N/A (de ${fmtI(r.filas.length)} filas totales)`;
   r.log.push(msg);
 
-  const reglas=conAplicarReglasFinales(r);
+  const fechaRef=$('con-fecha-ref').value||hoy();
+  const reglas=conAplicarReglasFinales(r,fechaRef);
   if(reglas.eliminadas)r.log.push(`Reglas finales — filas eliminadas: ${fmtI(reglas.eliminadas)} (${fmtI(reglas.elimPorDevolucion)} En Devolución · ${fmtI(reglas.elimPorRechazo)} Ingreso local + Rechazado/Anulado/Fallo de entrega · ${fmtI(reglas.elimPorFlujo)} Ingreso/Tránsito local + flujo de reparto)`);
   if(reglas.marcadasDespachado)r.log.push(`Reglas finales — ESTADO WH2 marcado DESPACHADO en ${fmtI(reglas.marcadasDespachado)} filas (según VALIDAR)`);
+  if(reglas.marcadasT1)r.log.push(`Reglas finales — Motivo "DESPACHADO T1 ${conFechaRefDDMM(fechaRef)}" asignado en ${fmtI(reglas.marcadasT1)} filas (según flujo de destino + cobertura)`);
 
   $('con-r-total').textContent=fmtI(r.totalFinal);
   $('con-r-incomp').textContent=fmtI(r.incompletos.length);
@@ -5178,7 +5199,7 @@ function conProcesarCruce(){
   conRenderCccBloques();
 
   const cm=$('con-cruce-msg');cm.style.display='flex';
-  cm.innerHTML=`<span class="ico">✓</span>${msg}${reglas.eliminadas?` · ${fmtI(reglas.eliminadas)} filas eliminadas por reglas finales`:''}${reglas.marcadasDespachado?` · ${fmtI(reglas.marcadasDespachado)} marcadas DESPACHADO`:''}`;
+  cm.innerHTML=`<span class="ico">✓</span>${msg}${reglas.eliminadas?` · ${fmtI(reglas.eliminadas)} filas eliminadas por reglas finales`:''}${reglas.marcadasDespachado?` · ${fmtI(reglas.marcadasDespachado)} marcadas DESPACHADO`:''}${reglas.marcadasT1?` · ${fmtI(reglas.marcadasT1)} con motivo T1`:''}`;
   $('con-log').innerHTML=r.log.map(l=>`<div>${escapeHtml(l)}</div>`).join('');
   toast('Cruce aplicado ✓');
 }
@@ -5261,32 +5282,26 @@ function conCopiar(id){
   if(navigator.clipboard?.writeText)navigator.clipboard.writeText(el.value).then(()=>toast('Copiado ✓')).catch(()=>{try{document.execCommand('copy');toast('Copiado ✓');}catch(e){}});
   else{try{document.execCommand('copy');toast('Copiado ✓');}catch(e){}}
 }
-// Resumen tipo tabla dinámica: ESTADO WH2 → Motivo de inventario → Cuenta
-// de RASTREO. El motor xlsx que corre en el navegador no puede escribir una
-// tabla dinámica real de Excel (con su caché interno) — esto arma el mismo
-// resultado ya calculado, en formato de tabla plana lista para leer.
+// Resumen tipo tabla dinámica: solo el grupo DESPACHADO, desglosado por
+// Motivo de inventario → Cuenta de RASTREO. El motor xlsx que corre en el
+// navegador no puede escribir una tabla dinámica real de Excel (con su
+// caché interno) — esto arma el mismo resultado ya calculado, en formato
+// de tabla plana lista para leer.
 function conConstruirResumen(filas){
-  const grupos={};
+  const porMotivo={};
   filas.forEach(f=>{
-    const estado=f.estado_wh2||'(en blanco)';
+    if(conNormTxt(f.estado_wh2)!=='despachado')return;
     const motivo=f.motivo_inventario||'(en blanco)';
-    if(!grupos[estado])grupos[estado]={};
-    grupos[estado][motivo]=(grupos[estado][motivo]||0)+1;
+    porMotivo[motivo]=(porMotivo[motivo]||0)+1;
   });
-  const filasResumen=[['Etiquetas de fila','Cuenta de RASTREO']];
-  let totalGeneral=0;
-  Object.keys(grupos).sort().forEach(estado=>{
-    filasResumen.push([estado,'']);
-    let totalEstado=0;
-    Object.keys(grupos[estado]).sort().forEach(motivo=>{
-      const c=grupos[estado][motivo];
-      totalEstado+=c;
-      filasResumen.push(['  '+motivo,c]);
-    });
-    filasResumen.push([estado+' Total',totalEstado]);
-    totalGeneral+=totalEstado;
+  const filasResumen=[['Etiquetas de fila','Cuenta de RASTREO'],['DESPACHADO','']];
+  let total=0;
+  Object.keys(porMotivo).sort().forEach(motivo=>{
+    const c=porMotivo[motivo];
+    total+=c;
+    filasResumen.push(['  '+motivo,c]);
   });
-  filasResumen.push(['Total general',totalGeneral]);
+  filasResumen.push(['Total general',total]);
   return filasResumen;
 }
 function conDescargar(){
