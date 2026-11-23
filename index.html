@@ -4718,7 +4718,7 @@ const CON_MAP={
   repros:{'folio':'folio'},
 };
 const CON_SLOT_DEFS=[
-  {key:'archivo1',nombre:'Archivo 1 (principal)',obligatorio:true},
+  {key:'archivo1',nombre:'Archivo 1 (principal, hoja DETALLE)',obligatorio:true},
   {key:'zeus',nombre:'Archivo Zeus',obligatorio:true},
   {key:'tercerCorte',nombre:'Tercer corte',obligatorio:false},
   {key:'repros',nombre:'REPROS (hoja BASE)',obligatorio:true},
@@ -4809,7 +4809,8 @@ function conLeerYMapear(file,tipo){
         } else {
           if(typeof XLSX==='undefined'){reject({mensaje:'Librería Excel no cargó — usa CSV'});return;}
           const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
-          const hoja=tipo==='repros'?(wb.Sheets['BASE']||wb.Sheets[wb.SheetNames[0]]):wb.Sheets[wb.SheetNames[0]];
+          const hojaBuscada=tipo==='repros'?'BASE':tipo==='archivo1'?'DETALLE':null;
+          const hoja=hojaBuscada?(wb.Sheets[hojaBuscada]||wb.Sheets[wb.SheetNames[0]]):wb.Sheets[wb.SheetNames[0]];
           // raw:false → todo llega como texto formateado (protege códigos de
           // rastreo largos de convertirse en número y perder ceros/precisión)
           matriz=XLSX.utils.sheet_to_json(hoja,{header:1,defval:'',raw:false});
