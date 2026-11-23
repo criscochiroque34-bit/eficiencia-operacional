@@ -4721,7 +4721,7 @@ const CON_SLOT_DEFS=[
   {key:'archivo1',nombre:'Archivo 1 (principal, hoja DETALLE)',obligatorio:true},
   {key:'zeus',nombre:'Archivo Zeus',obligatorio:true},
   {key:'tercerCorte',nombre:'Tercer corte',obligatorio:false},
-  {key:'repros',nombre:'REPROS (hoja BASE)',obligatorio:true},
+  {key:'repros',nombre:'REPROS (hoja BASE)',obligatorio:true,accept:'.xlsx,.xls,.xlsm,.csv'},
 ];
 let CON_ESTADO={archivos:{},resultado:null};
 
@@ -4854,7 +4854,7 @@ function conSlotHtml(d){
   return`<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
     <div><div style="font-weight:600;font-size:.85rem">${d.nombre}${d.obligatorio?'':' <span style="color:var(--ts);font-weight:400;font-size:.68rem">(opcional)</span>'}</div>
     <div id="con-status-${d.key}" style="font-size:.68rem;color:var(--ts);margin-top:3px">Sin archivo</div></div>
-    <div><input type="file" id="con-file-${d.key}" accept=".xlsx,.xls,.csv" style="display:none" onchange="conOnFile('${d.key}',event)">
+    <div><input type="file" id="con-file-${d.key}" accept="${d.accept||'.xlsx,.xls,.csv'}" style="display:none" onchange="conOnFile('${d.key}',event)">
     <button class="btn btn-s btn-sm" onclick="document.getElementById('con-file-${d.key}').click()">Elegir archivo</button></div>
   </div>`;
 }
