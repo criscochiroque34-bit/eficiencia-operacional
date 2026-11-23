@@ -131,6 +131,30 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 .chart-tt .tt-s{font-family:'Inter',sans-serif;font-size:.62rem;color:var(--tm);margin-top:3px}
 .dot-hit:hover ~ circle{r:5}
 
+/* ── Consolidador ── */
+.con-step-h{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.con-step-h span{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--t1);color:#fff;font-size:.7rem;flex-shrink:0}
+.con-step-sub{font-size:.68rem;color:var(--tm);margin-bottom:14px}
+.con-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.con-card{position:relative;background:var(--s2);border:1px solid var(--b1);border-radius:12px;overflow:hidden;padding-top:4px}
+.con-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--con-c,var(--t1))}
+.con-card-body{padding:14px 16px}
+.con-card-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.con-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;display:flex;align-items:center;gap:8px}
+.con-badge{font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.con-badge.ob{background:rgba(124,111,255,.15);color:var(--t1)}
+.con-badge.op{background:var(--s3);color:var(--ts);border:1px solid var(--b1)}
+.con-dropzone{border:2px dashed var(--b2);border-radius:10px;padding:22px 14px;text-align:center;cursor:pointer;transition:all .15s;font-size:.72rem;color:var(--tm)}
+.con-dropzone:hover{border-color:var(--con-c,var(--t1));color:var(--tx)}
+.con-dropzone .ico{font-size:1.4rem;margin-bottom:6px;display:block}
+.con-loaded{border:1px solid rgba(0,200,150,.35);background:rgba(0,200,150,.07);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.con-loaded .nombre{font-size:.74rem;color:var(--tx);font-weight:600;word-break:break-all}
+.con-loaded .meta{font-size:.65rem;color:var(--ok);margin-top:2px}
+.con-quitar{background:transparent;border:1px solid var(--b2);border-radius:6px;padding:4px 10px;color:var(--ts);font-family:'JetBrains Mono',monospace;font-size:.62rem;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.con-quitar:hover{color:var(--red);border-color:var(--red)}
+.con-confirm{background:rgba(0,200,150,.1);border:1px solid rgba(0,200,150,.4);border-radius:8px;padding:11px 14px;font-size:.78rem;color:var(--ok);margin-top:12px;display:flex;align-items:center;gap:8px;font-family:'Inter',sans-serif}
+.con-confirm .ico{font-size:.95rem}
+
 /* ── CANDADO DE ACCESO ── */
 .gate-overlay{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
 .gate-box{max-width:340px;width:100%;text-align:center}
@@ -924,14 +948,16 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 <div class="view" id="v-consolidador">
   <div class="ph"><div><div class="ph-title">Consolidador</div><div class="ph-sub">Une Archivo 1 + Zeus + Tercer corte + REPROS en un solo archivo</div></div></div>
 
+  <div class="con-step-h"><span>1</span>Sube tus archivos</div>
+  <div class="con-step-sub">Arrastra cada archivo a su casilla o haz clic para elegirlo. Los marcados "Obligatorio" son necesarios para poder procesar.</div>
+
   <div style="margin-bottom:16px">
     <label style="display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:5px">Fecha de referencia</label>
     <input type="date" id="con-fecha-ref" style="background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:9px 12px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.88rem;color-scheme:dark;width:100%;max-width:220px">
     <div style="font-size:.62rem;color:var(--ts);margin-top:4px">Si no la cambias, se usa la fecha de hoy. Afecta la columna FECHA de las filas nuevas y el cálculo de "día anterior" del Tercer corte.</div>
   </div>
 
-  <div class="sl">Archivos</div>
-  <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px" id="con-slots"></div>
+  <div class="con-grid" id="con-slots" style="margin-bottom:18px"></div>
 
   <button class="btn btn-p btn-w" id="con-btn-procesar" onclick="conProcesar()" disabled>Procesar consolidado →</button>
   <div id="con-error" style="display:none;background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.4);border-radius:8px;padding:12px 14px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--red)"></div>
@@ -941,13 +967,14 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div id="con-log" style="background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--tm);display:flex;flex-direction:column;gap:6px"></div>
   </div>
 
-  <div id="con-resultado" style="display:none;margin-top:18px">
-    <div class="g3" style="margin-bottom:16px">
+  <div id="con-resultado" style="display:none;margin-top:24px">
+    <div class="con-step-h"><span>2</span>Resultado del consolidado</div>
+    <div id="con-confirm-proceso" class="con-confirm" style="display:none"></div>
+    <div class="g3" style="margin:14px 0 16px">
       <div class="kpi"><div class="kpi-l">Filas finales</div><div class="kpi-v" id="con-r-total" style="color:var(--t1)">—</div></div>
       <div class="kpi"><div class="kpi-l">Filas agregadas</div><div class="kpi-v" id="con-r-nuevas" style="color:var(--ok)">—</div></div>
       <div class="kpi"><div class="kpi-l">Pedidos incompletos</div><div class="kpi-v" id="con-r-incomp" style="color:var(--ora)">—</div></div>
     </div>
-    <button class="btn btn-p btn-w" onclick="conDescargar()">⬇ Descargar consolidado (Excel)</button>
 
     <div style="margin-top:24px">
       <div class="sl">Pedidos incompletos · CCC para copiar</div>
@@ -956,23 +983,28 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       <button class="btn btn-s btn-sm" style="margin-top:8px" onclick="conCopiar('con-incompletos-txt')">Copiar</button>
     </div>
 
-    <div style="margin-top:24px">
-      <div class="sl">Completar pedidos incompletos (opcional)</div>
-      <div style="font-size:.66rem;color:var(--ts);margin-bottom:8px">Sube un archivo con el mismo formato que Zeus — rellena solo las celdas vacías de los pedidos que ya existen, por RASTREO / Código Seguimiento. No crea filas nuevas. Lo que no encuentre, queda igual.</div>
+    <div style="margin-top:28px">
+      <div class="con-step-h"><span>3</span>Completar pedidos incompletos <span style="width:auto;height:auto;background:none;border-radius:0;color:var(--ts);font-weight:400;font-size:.62rem">(opcional)</span></div>
+      <div class="con-step-sub">Sube un archivo con el mismo formato que Zeus — rellena solo las celdas vacías de los pedidos que ya existen, por RASTREO / Código Seguimiento. No crea filas nuevas. Lo que no encuentre, queda igual.</div>
       <div id="con-slot-completar"></div>
+      <div id="con-confirm-completar" class="con-confirm" style="display:none"></div>
     </div>
 
-    <div style="margin-top:24px">
+    <div style="margin-top:28px">
       <div class="sl">Copiar CCC en bloques de 3,000</div>
       <div id="con-ccc-bloques" style="display:flex;flex-direction:column;gap:10px"></div>
     </div>
 
-    <div style="margin-top:24px">
-      <div class="sl">Cruce final · actualizar VALIDAR</div>
-      <div style="font-size:.66rem;color:var(--ts);margin-bottom:8px">Sube el archivo que te devuelve la búsqueda por CCC (columnas RASTREO y ESTADO_TMS, entre otras). Por cada fila del consolidado: si su RASTREO aparece ahí, VALIDAR toma ese ESTADO_TMS; si no aparece, VALIDAR queda en "#N/A".</div>
+    <div style="margin-top:28px">
+      <div class="con-step-h"><span>4</span>Cruce final · actualizar VALIDAR</div>
+      <div class="con-step-sub">Sube el archivo que te devuelve la búsqueda por CCC (columnas RASTREO y ESTADO_TMS, entre otras). Por cada fila del consolidado: si su RASTREO aparece ahí, VALIDAR toma ese ESTADO_TMS; si no aparece, VALIDAR queda en "#N/A".</div>
       <div id="con-slot-cruce"></div>
       <button class="btn btn-p" style="margin-top:10px" id="con-btn-cruce" onclick="conProcesarCruce()" disabled>Procesar cruce →</button>
-      <div id="con-cruce-msg" style="margin-top:8px;font-size:.72rem;min-height:16px"></div>
+      <div id="con-cruce-msg" class="con-confirm" style="display:none;margin-top:10px"></div>
+    </div>
+
+    <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--b1)">
+      <button class="btn btn-p btn-w" onclick="conDescargar()">⬇ Descargar consolidado (Excel)</button>
     </div>
   </div>
 </div>
@@ -4758,10 +4790,10 @@ const CON_MAP={
   cruceCcc:{'rastreo':'rastreo','estado_tms':'estado_tms'},
 };
 const CON_SLOT_DEFS=[
-  {key:'archivo1',nombre:'Archivo 1 (principal, hoja DETALLE)',obligatorio:true},
-  {key:'zeus',nombre:'Archivo Zeus',obligatorio:true},
-  {key:'tercerCorte',nombre:'Tercer corte',obligatorio:false},
-  {key:'repros',nombre:'REPROS (hoja BASE)',obligatorio:true,accept:'.xlsx,.xls,.xlsm,.csv'},
+  {key:'archivo1',nombre:'Archivo 1',sub:'Principal · hoja DETALLE',obligatorio:true,color:'var(--t1)',icono:'📋'},
+  {key:'zeus',nombre:'Archivo Zeus',sub:'Recepción',obligatorio:true,color:'var(--t3)',icono:'⚡'},
+  {key:'tercerCorte',nombre:'Tercer corte',sub:'Despachos adicionales',obligatorio:false,color:'var(--ora)',icono:'📦'},
+  {key:'repros',nombre:'REPROS',sub:'Hoja BASE',obligatorio:true,color:'var(--plan)',icono:'🔁',accept:'.xlsx,.xls,.xlsm,.csv'},
 ];
 let CON_ESTADO={archivos:{},resultado:null};
 
@@ -4926,32 +4958,73 @@ function conInit(){
     $('con-slots').dataset.init='1';
   }
 }
+/* ── Tarjetas de carga (arrastrar/soltar + quitar), reutilizables ── */
+function conSlotDropzoneHtml(fileInputId,color,ondropExpr,texto){
+  texto=texto||'Arrastra el archivo aquí o haz clic para elegirlo';
+  return`<div class="con-dropzone" ondragover="event.preventDefault();event.currentTarget.style.borderColor='${color}'" ondragleave="event.currentTarget.style.borderColor=''" ondrop="${ondropExpr}" onclick="document.getElementById('${fileInputId}').click()"><span class="ico">⬆</span>${texto}</div>`;
+}
+function conSlotLoadedHtml(nombre,metaTxt,quitarExpr){
+  return`<div class="con-loaded"><div><div class="nombre">${escapeHtml(nombre)}</div><div class="meta">✓ ${metaTxt}</div></div><button class="con-quitar" onclick="${quitarExpr}">Quitar</button></div>`;
+}
+function conSlotErrorHtml(fileInputId,color,msg){
+  return`<div class="con-dropzone" style="border-color:var(--red);color:var(--red)" onclick="document.getElementById('${fileInputId}').click()"><span class="ico">⚠</span>${escapeHtml(msg)}<div style="font-size:.6rem;margin-top:4px;color:var(--tm)">Haz clic para intentar de nuevo</div></div>`;
+}
+function conSlotLoadingHtml(){
+  return`<div class="con-dropzone" style="cursor:default;color:var(--tm)">Leyendo archivo…</div>`;
+}
 function conSlotHtml(d){
-  return`<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-    <div><div style="font-weight:600;font-size:.85rem">${d.nombre}${d.obligatorio?'':' <span style="color:var(--ts);font-weight:400;font-size:.68rem">(opcional)</span>'}</div>
-    <div id="con-status-${d.key}" style="font-size:.68rem;color:var(--ts);margin-top:3px">Sin archivo</div></div>
-    <div><input type="file" id="con-file-${d.key}" accept="${d.accept||'.xlsx,.xls,.csv'}" style="display:none" onchange="conOnFile('${d.key}',event)">
-    <button class="btn btn-s btn-sm" onclick="document.getElementById('con-file-${d.key}').click()">Elegir archivo</button></div>
+  return`<div class="con-card" style="--con-c:${d.color}">
+    <div class="con-card-body">
+      <div class="con-card-h">
+        <div class="con-card-title"><span>${d.icono}</span>${d.nombre}</div>
+        <span class="con-badge ${d.obligatorio?'ob':'op'}">${d.obligatorio?'Obligatorio':'Opcional'}</span>
+      </div>
+      ${d.sub?`<div style="font-size:.64rem;color:var(--ts);margin:-6px 0 10px">${d.sub}</div>`:''}
+      <input type="file" id="con-file-${d.key}" accept="${d.accept||'.xlsx,.xls,.csv'}" style="display:none" onchange="conOnFile('${d.key}',event)">
+      <div id="con-slot-inner-${d.key}">${conSlotDropzoneHtml('con-file-'+d.key,d.color,`conOnDrop('${d.key}',event)`)}</div>
+    </div>
   </div>`;
 }
-async function conOnFile(key,ev){
-  const file=ev.target.files[0];if(!file)return;
-  $('con-status-'+key).textContent='Leyendo…';$('con-status-'+key).style.color='var(--tm)';
+function conPintarSlotEstado(key,estado,data){
+  const el=$('con-slot-inner-'+key);if(!el)return;
+  const d=CON_SLOT_DEFS.find(x=>x.key===key);
+  if(estado==='loading')el.innerHTML=conSlotLoadingHtml();
+  else if(estado==='ok')el.innerHTML=conSlotLoadedHtml(data.nombre,`${fmtI(data.filas)} filas cargadas`,`conQuitarArchivo('${key}')`);
+  else if(estado==='error')el.innerHTML=conSlotErrorHtml('con-file-'+key,d.color,data.msg);
+  else el.innerHTML=conSlotDropzoneHtml('con-file-'+key,d.color,`conOnDrop('${key}',event)`);
+}
+async function conCargarArchivo(key,file){
+  if(!file)return;
+  conPintarSlotEstado(key,'loading');
   try{
     const{filas}=await conLeerYMapear(file,key);
     CON_ESTADO.archivos[key]={filas,nombre:file.name};
-    $('con-status-'+key).textContent=`${file.name} · ${filas.length} filas`;
-    $('con-status-'+key).style.color='var(--ok)';
+    conPintarSlotEstado(key,'ok',{nombre:file.name,filas:filas.length});
   }catch(e){
     CON_ESTADO.archivos[key]=null;
-    $('con-status-'+key).textContent=e.mensaje||'Error leyendo el archivo';
-    $('con-status-'+key).style.color='var(--red)';
+    conPintarSlotEstado(key,'error',{msg:e.mensaje||'Error leyendo el archivo'});
   }
+  conActualizarBotonProcesar();
+}
+function conOnFile(key,ev){conCargarArchivo(key,ev.target.files[0]);}
+function conOnDrop(key,ev){
+  ev.preventDefault();if(ev.currentTarget)ev.currentTarget.style.borderColor='';
+  const f=ev.dataTransfer.files[0];if(f)conCargarArchivo(key,f);
+}
+function conQuitarArchivo(key){
+  CON_ESTADO.archivos[key]=null;
+  const inp=$('con-file-'+key);if(inp)inp.value='';
+  conPintarSlotEstado(key,'idle');
+  conActualizarBotonProcesar();
+  toast('Archivo quitado');
+}
+function conActualizarBotonProcesar(){
   $('con-btn-procesar').disabled=!(CON_ESTADO.archivos.archivo1&&CON_ESTADO.archivos.zeus&&CON_ESTADO.archivos.repros);
 }
 function conMostrarError(msg){
   const e=$('con-error');e.style.display='block';e.textContent='⚠ '+msg;
   $('con-log-wrap').style.display='none';$('con-resultado').style.display='none';
+  const cf=$('con-confirm-proceso');if(cf)cf.style.display='none';
 }
 function conProcesar(){
   $('con-error').style.display='none';
@@ -4966,7 +5039,11 @@ function conProcesar(){
   CON_ESTADO.resultado=resultado;
   $('con-log-wrap').style.display='block';
   $('con-log').innerHTML=resultado.log.map(l=>`<div>${escapeHtml(l)}</div>`).join('');
+  const cf=$('con-confirm-proceso');
+  cf.style.display='flex';
+  cf.innerHTML=`<span class="ico">✓</span>Consolidado generado: ${fmtI(resultado.totalFinal)} filas finales (${fmtI(resultado.nuevasAgregadas)} agregadas, ${fmtI(resultado.incompletos.length)} pedidos incompletos).`;
   conActualizarResultado();
+  toast('Consolidado generado ✓');
 }
 function conActualizarResultado(){
   const r=CON_ESTADO.resultado;if(!r)return;
@@ -4980,27 +5057,49 @@ function conActualizarResultado(){
   conRenderSlotCruce();
 }
 function conRenderSlotCruce(){
-  $('con-slot-cruce').innerHTML=`<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-    <div><div style="font-weight:600;font-size:.85rem">Archivo de resultado CCC</div><div id="con-status-cruce" style="font-size:.68rem;color:var(--ts);margin-top:3px">Sin archivo</div></div>
-    <div><input type="file" id="con-file-cruce" accept=".xlsx,.xls,.xlsm,.csv" style="display:none" onchange="conOnFileCruce(event)">
-    <button class="btn btn-s btn-sm" onclick="document.getElementById('con-file-cruce').click()">Elegir archivo</button></div>
+  $('con-slot-cruce').innerHTML=`<div class="con-card" style="--con-c:var(--t1)">
+    <div class="con-card-body">
+      <input type="file" id="con-file-cruce" accept=".xlsx,.xls,.xlsm,.csv" style="display:none" onchange="conOnFileCruce(event)">
+      <div id="con-slot-inner-cruce">${conSlotDropzoneHtml('con-file-cruce','var(--t1)','conOnDropCruce(event)','Arrastra el archivo de resultado CCC o haz clic')}</div>
+    </div>
   </div>`;
+  const cm=$('con-cruce-msg');if(cm)cm.style.display='none';
 }
 let CON_CRUCE_FILAS=null;
-async function conOnFileCruce(ev){
-  const file=ev.target.files[0];if(!file)return;
-  $('con-status-cruce').textContent='Leyendo…';$('con-status-cruce').style.color='var(--tm)';
+async function conCargarArchivoCruce(file){
+  if(!file)return;
+  conPintarSlotGenerico('cruce','loading','var(--t1)');
   $('con-btn-cruce').disabled=true;CON_CRUCE_FILAS=null;
   try{
     const{filas}=await conLeerYMapear(file,'cruceCcc');
     CON_CRUCE_FILAS=filas;
-    $('con-status-cruce').textContent=`${file.name} · ${filas.length} filas`;
-    $('con-status-cruce').style.color='var(--ok)';
+    conPintarSlotGenerico('cruce','ok','var(--t1)',{nombre:file.name,texto:`${fmtI(filas.length)} filas cargadas`});
     $('con-btn-cruce').disabled=false;
   }catch(e){
-    $('con-status-cruce').textContent=e.mensaje||'Error leyendo el archivo';
-    $('con-status-cruce').style.color='var(--red)';
+    conPintarSlotGenerico('cruce','error','var(--t1)',{msg:e.mensaje||'Error leyendo el archivo'});
   }
+}
+function conOnFileCruce(ev){conCargarArchivoCruce(ev.target.files[0]);}
+function conOnDropCruce(ev){
+  ev.preventDefault();if(ev.currentTarget)ev.currentTarget.style.borderColor='';
+  const f=ev.dataTransfer.files[0];if(f)conCargarArchivoCruce(f);
+}
+/* ── Tarjeta genérica para slots "Completar" y "Cruce" (drag/drop + quitar) ── */
+function conPintarSlotGenerico(key,estado,color,data){
+  const el=$('con-slot-inner-'+key);if(!el)return;
+  const fileId='con-file-'+key;
+  const ondropExpr=key==='completar'?'conOnDropCompletar(event)':'conOnDropCruce(event)';
+  if(estado==='loading')el.innerHTML=conSlotLoadingHtml();
+  else if(estado==='ok')el.innerHTML=conSlotLoadedHtml(data.nombre,data.texto,`conQuitarSlotGenerico('${key}')`);
+  else if(estado==='error')el.innerHTML=conSlotErrorHtml(fileId,color,data.msg);
+  else el.innerHTML=conSlotDropzoneHtml(fileId,color,ondropExpr);
+}
+function conQuitarSlotGenerico(key){
+  const inp=$('con-file-'+key);if(inp)inp.value='';
+  if(key==='cruce'){CON_CRUCE_FILAS=null;$('con-btn-cruce').disabled=true;}
+  conPintarSlotGenerico(key,'idle',key==='completar'?'var(--terc)':'var(--t1)');
+  if(key==='completar'){const cf=$('con-confirm-completar');if(cf)cf.style.display='none';}
+  toast('Archivo quitado');
 }
 function conProcesarCruce(){
   const r=CON_ESTADO.resultado;if(!r||!CON_CRUCE_FILAS)return;
@@ -5012,22 +5111,29 @@ function conProcesarCruce(){
     if(datos){fila.validar=datos.estado_tms||'';encontrados++;}
     else{fila.validar='#N/A';sinDato++;}
   });
-  const msg=`Cruce aplicado: ${encontrados} coincidencias · ${sinDato} marcadas #N/A (de ${r.filas.length} filas totales)`;
-  $('con-cruce-msg').style.color='var(--ok)';$('con-cruce-msg').textContent=msg;
+  const msg=`Cruce aplicado: ${fmtI(encontrados)} coincidencias · ${fmtI(sinDato)} marcadas #N/A (de ${fmtI(r.filas.length)} filas totales)`;
+  const cm=$('con-cruce-msg');cm.style.display='flex';cm.innerHTML=`<span class="ico">✓</span>${msg}`;
   r.log.push(msg);
   $('con-log').innerHTML=r.log.map(l=>`<div>${escapeHtml(l)}</div>`).join('');
   toast('Cruce aplicado ✓');
 }
 function conRenderSlotCompletar(){
-  $('con-slot-completar').innerHTML=`<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-    <div><div style="font-weight:600;font-size:.85rem">Archivo de relleno (formato Zeus)</div><div id="con-status-completar" style="font-size:.68rem;color:var(--ts);margin-top:3px">Sin archivo</div></div>
-    <div><input type="file" id="con-file-completar" accept=".xlsx,.xls,.csv" style="display:none" onchange="conOnFileCompletar(event)">
-    <button class="btn btn-s btn-sm" onclick="document.getElementById('con-file-completar').click()">Elegir archivo</button></div>
+  $('con-slot-completar').innerHTML=`<div class="con-card" style="--con-c:var(--terc)">
+    <div class="con-card-body">
+      <input type="file" id="con-file-completar" accept=".xlsx,.xls,.csv" style="display:none" onchange="conOnFileCompletar(event)">
+      <div id="con-slot-inner-completar">${conSlotDropzoneHtml('con-file-completar','var(--terc)','conOnDropCompletar(event)','Arrastra el archivo de relleno (formato Zeus) o haz clic')}</div>
+    </div>
   </div>`;
+  const cf=$('con-confirm-completar');if(cf)cf.style.display='none';
 }
-async function conOnFileCompletar(ev){
-  const file=ev.target.files[0];if(!file)return;
-  $('con-status-completar').textContent='Leyendo…';$('con-status-completar').style.color='var(--tm)';
+function conOnFileCompletar(ev){conProcesarArchivoCompletar(ev.target.files[0]);}
+function conOnDropCompletar(ev){
+  ev.preventDefault();if(ev.currentTarget)ev.currentTarget.style.borderColor='';
+  const f=ev.dataTransfer.files[0];if(f)conProcesarArchivoCompletar(f);
+}
+async function conProcesarArchivoCompletar(file){
+  if(!file)return;
+  conPintarSlotGenerico('completar','loading','var(--terc)');
   try{
     const{filas}=await conLeerYMapear(file,'zeus');
     const r=CON_ESTADO.resultado;
@@ -5046,14 +5152,15 @@ async function conOnFileCompletar(ev){
       if(tocada)pedidosCompletados++;
     });
     r.incompletos=r.filas.filter(f=>CON_CAMPOS_INCOMPLETO.some(c=>!f[c]));
-    $('con-status-completar').textContent=`${file.name} · ${filas.length} filas leídas · ${pedidosCompletados} pedidos completados (${celdas} celdas rellenadas)`;
-    $('con-status-completar').style.color='var(--ok)';
+    conPintarSlotGenerico('completar','ok','var(--terc)',{nombre:file.name,texto:`${fmtI(filas.length)} filas leídas`});
+    const cf=$('con-confirm-completar');
+    cf.style.display='flex';
+    cf.innerHTML=`<span class="ico">✓</span>${fmtI(pedidosCompletados)} pedidos completados (${fmtI(celdas)} celdas rellenadas).`;
     toast(`${pedidosCompletados} pedidos completados ✓`);
     $('con-r-incomp').textContent=fmtI(r.incompletos.length);
     $('con-incompletos-txt').value=r.incompletos.map(f=>f.ccc).join('\n');
   }catch(e){
-    $('con-status-completar').textContent=e.mensaje||'Error leyendo el archivo';
-    $('con-status-completar').style.color='var(--red)';
+    conPintarSlotGenerico('completar','error','var(--terc)',{msg:e.mensaje||'Error leyendo el archivo'});
   }
 }
 function conRenderCccBloques(){
