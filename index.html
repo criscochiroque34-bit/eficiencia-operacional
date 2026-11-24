@@ -948,6 +948,12 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
 <div class="view" id="v-consolidador">
   <div class="ph"><div><div class="ph-title">Consolidador</div><div class="ph-sub">Une Archivo 1 + Zeus + Tercer corte + REPROS en un solo archivo</div></div></div>
 
+  <div class="fp-row" style="margin-bottom:20px">
+    <button class="fp a" id="con-tab-btn-archivos" onclick="conMostrarTab('archivos')">Archivos</button>
+    <button class="fp" id="con-tab-btn-config" onclick="conMostrarTab('config')">⚙ Configuración</button>
+  </div>
+
+  <div id="con-tab-archivos">
   <div class="con-step-h"><span>1</span>Sube tus archivos</div>
   <div class="con-step-sub">Arrastra cada archivo a su casilla o haz clic para elegirlo. Los marcados "Obligatorio" son necesarios para poder procesar.</div>
 
@@ -1009,6 +1015,12 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--b1)">
       <button class="btn btn-p btn-w" onclick="conDescargar()">⬇ Descargar consolidado (Excel)</button>
     </div>
+  </div>
+  </div>
+
+  <div id="con-tab-config" style="display:none">
+    <div class="con-step-sub" style="margin-bottom:20px">Estas son las listas que usan las reglas del cruce final (marcar DESPACHADO, motivos T1/T3, eliminar filas). Agrega, edita o quita valores y dale "Guardar" en cada sección — los cambios no se aplican hasta guardarlos.</div>
+    <div id="con-config-secciones"></div>
   </div>
 </div>
 
@@ -1094,7 +1106,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
       <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Nombre</label><input type="text" id="us-nombre" placeholder="Nombre y apellido" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.78rem"></div>
       <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Rol</label><select id="us-rol" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.78rem"><option value="admin">Admin</option><option value="admin_jr">Admin Jr</option></select></div>
       <div><label style="display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ts);margin-bottom:4px">Clave</label><input type="text" id="us-clave" placeholder="Clave personal" style="width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:.78rem"></div>
-      <button class="btn btn-s btn-sm" id="us-btn-add" onclick="guardarUsuario()">+ Agregar</button>
+      <button class="btn btn-p btn-sm" id="us-btn-add" onclick="guardarUsuario()">💾 Guardar</button>
     </div>
     <div id="us-edit-nota" style="display:none;font-size:.68rem;color:var(--ora);margin-bottom:12px">Editando un usuario — deja la clave vacía para no cambiarla. <a href="#" onclick="cancelarEdicionUsuario();return false" style="color:var(--ora)">Cancelar</a></div>
 
@@ -1167,7 +1179,7 @@ const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const db=supabase.createClient(SUPA_URL,SUPA_KEY);
 
 const S={turno:'t1',turnoHist:'t1',fecha:hoy(),cfg:{},objDia:{},feriados:[],objetivos:[],eventos:[],
-  usuarioActual:null,usuarios:[],horasConsid:[],
+  usuarioActual:null,usuarios:[],horasConsid:[],conReglas:null,
   dias:[],proy:null,calc:{},excelData:null,excelName:'',histMes:[],mesActivo:null,importaciones:[],
   histAnio:null,repAnio:'all'};
 
@@ -4610,11 +4622,11 @@ function editarUsuario(id){
   const u=S.usuarios.find(x=>x.id===id);if(!u)return;
   US_EDIT_ID=id;
   $('us-nombre').value=u.nombre;$('us-rol').value=u.rol;$('us-clave').value='';
-  $('us-edit-nota').style.display='block';$('us-btn-add').textContent='Guardar cambios';
+  $('us-edit-nota').style.display='block';$('us-btn-add').textContent='💾 Guardar cambios';
   $('us-nombre').scrollIntoView({behavior:'smooth',block:'center'});
 }
 function cancelarEdicionUsuario(){
-  US_EDIT_ID=null;$('us-edit-nota').style.display='none';$('us-btn-add').textContent='+ Agregar';
+  US_EDIT_ID=null;$('us-edit-nota').style.display='none';$('us-btn-add').textContent='💾 Guardar';
   $('us-nombre').value='';$('us-clave').value='';
 }
 async function eliminarUsuario(id){
@@ -4788,36 +4800,54 @@ const CON_CAMPOS_INCOMPLETO=['fecha_ingreso','flujo_ingreso','flujo_destino','co
 // Primero se eliminan filas (devolución / rechazo / flujo de reparto) y
 // luego, a las que sobreviven, se les marca ESTADO WH2 = DESPACHADO según
 // VALIDAR — sin tocar las filas que ya son DESPACHADO (p.ej. Tercer corte).
-const CON_VALIDAR_DESPACHADO=['en bodega ol','en ct ol','en destino','en reparto','en transito bodega ol','en transito ct ol',
-  'en transito destino','entregado','entregado en tienda','excepcion de entrega','ingreso local','listo para retirar','transito local'];
-const CON_TMS_RECHAZO=['rechazado','anulado','fallo de entrega'];
-const CON_FLUJO_DESTINO_ELIMINAR=['vans ruteo dinamico','of motorizados','vans rutero estatico','devolucion bu'];
-// Combinaciones FLUJO DE DESTINO + Cobertura que, en una fila que YA es
-// DESPACHADO (recién marcada por la regla de arriba — nunca una que ya lo
-// era desde antes, como las del Tercer corte, esas no se tocan en ninguna
-// lógica), reciben motivo "DESPACHADO T1 <fecha de referencia>".
-const CON_T1_COMBOS=new Set([
-  'ct - provincia|ct chiclayo','ct - provincia|ct chimbote','ct - provincia|ct huancayo',
-  'mbox sender|lima metropolitana','mbox sender|lima periferia','mbox sodimac|lima metropolitana',
-  'of motorizados|lima metropolitana','vans ruteo estatico|lima metropolitana','vans ruteo estatico|lima periferia',
-]);
-// Igual que arriba pero con motivo "DESPACHADO T3 <día anterior>" — mismo
-// criterio de fecha que ya usa el Tercer corte. "cd sodimac|" = FLUJO DE
-// DESTINO "CD SODIMAC" con Cobertura vacía (no cualquier cobertura).
-const CON_T3_COMBOS=new Set([
-  'andes|andes','btl|lima metropolitana','btl|lima periferia','cd sodimac|',
-  'ct - provincia|ct arequipa','ct - provincia|ct cajamarca','ct - provincia|ct cusco',
-  'ct - provincia|ct ica','ct - provincia|ct piura','ct - provincia|ct trujillo','ct - provincia|ctt tarapoto',
-  'ct-dd|ct piura','ctt norte chico|ctt norte chico','ifbf|lima metropolitana','olva|olva','sts|lima metropolitana',
-]);
+// Todo esto es editable desde Consolidador → Configuración (tabla
+// eo_consolidador_reglas); estos son solo los valores de arranque si la
+// tabla todavía no cargó o está vacía.
+const CON_REGLAS_DEFAULT={
+  validar_despachado:['En bodega OL','En CT OL','En Destino','En Reparto','En tránsito bodega OL','En tránsito CT OL',
+    'En tránsito Destino','Entregado','Entregado en tienda','Excepción de Entrega','Ingreso local','Listo para retirar','Tránsito local'],
+  validar_eliminar:['En Devolución'],
+  tms_rechazo:['Rechazado','Anulado','Fallo de entrega'],
+  flujo_destino_eliminar:['VANS RUTEO DINAMICO','OF MOTORIZADOS','VANS RUTERO ESTATICO','DEVOLUCION BU'],
+  combo_t1:[
+    {flujo:'CT - PROVINCIA',cobertura:'CT CHICLAYO'},{flujo:'CT - PROVINCIA',cobertura:'CT CHIMBOTE'},{flujo:'CT - PROVINCIA',cobertura:'CT HUANCAYO'},
+    {flujo:'MBOX SENDER',cobertura:'LIMA METROPOLITANA'},{flujo:'MBOX SENDER',cobertura:'LIMA PERIFERIA'},{flujo:'MBOX SODIMAC',cobertura:'LIMA METROPOLITANA'},
+    {flujo:'OF MOTORIZADOS',cobertura:'LIMA METROPOLITANA'},{flujo:'VANS RUTEO ESTATICO',cobertura:'LIMA METROPOLITANA'},{flujo:'VANS RUTEO ESTATICO',cobertura:'LIMA PERIFERIA'},
+  ],
+  combo_t3:[
+    {flujo:'ANDES',cobertura:'ANDES'},{flujo:'BTL',cobertura:'LIMA METROPOLITANA'},{flujo:'BTL',cobertura:'LIMA PERIFERIA'},{flujo:'CD SODIMAC',cobertura:''},
+    {flujo:'CT - PROVINCIA',cobertura:'CT AREQUIPA'},{flujo:'CT - PROVINCIA',cobertura:'CT CAJAMARCA'},{flujo:'CT - PROVINCIA',cobertura:'CT CUSCO'},
+    {flujo:'CT - PROVINCIA',cobertura:'CT ICA'},{flujo:'CT - PROVINCIA',cobertura:'CT PIURA'},{flujo:'CT - PROVINCIA',cobertura:'CT TRUJILLO'},
+    {flujo:'CT - PROVINCIA',cobertura:'CTT TARAPOTO'},{flujo:'CT-DD',cobertura:'CT PIURA'},{flujo:'CTT NORTE CHICO',cobertura:'CTT NORTE CHICO'},
+    {flujo:'IFBF',cobertura:'LIMA METROPOLITANA'},{flujo:'OLVA',cobertura:'OLVA'},{flujo:'STS',cobertura:'LIMA METROPOLITANA'},
+  ],
+};
+const CON_REGLAS_LABEL={
+  validar_despachado:'VALIDAR → marca DESPACHADO',
+  validar_eliminar:'VALIDAR que elimina la fila',
+  tms_rechazo:'ESTADO TMS que elimina (junto con VALIDAR = Ingreso local)',
+  flujo_destino_eliminar:'FLUJO DE DESTINO que elimina (junto con VALIDAR = Ingreso/Tránsito local)',
+  combo_t1:'FLUJO DE DESTINO + Cobertura → motivo "DESPACHADO T1"',
+  combo_t3:'FLUJO DE DESTINO + Cobertura → motivo "DESPACHADO T3"',
+};
+function conReglaLista(clave){return(S.conReglas&&S.conReglas[clave])||CON_REGLAS_DEFAULT[clave];}
+function conReglaComboSet(clave){
+  return new Set(conReglaLista(clave).map(c=>conNormTxt(c.flujo)+'|'+conNormTxt(c.cobertura)));
+}
 function conAplicarReglasFinales(r,fechaRef){
   const antes=r.filas.length;
+  const validarEliminar=conReglaLista('validar_eliminar').map(conNormTxt);
+  const tmsRechazo=conReglaLista('tms_rechazo').map(conNormTxt);
+  const flujoDestinoEliminar=conReglaLista('flujo_destino_eliminar').map(conNormTxt);
+  const validarDespachado=conReglaLista('validar_despachado').map(conNormTxt);
+  const combosT1=conReglaComboSet('combo_t1');
+  const combosT3=conReglaComboSet('combo_t3');
   let elimPorDevolucion=0,elimPorRechazo=0,elimPorFlujo=0,marcadasDespachado=0,marcadasT1=0,marcadasT3=0,marcadasRevisar=0;
   r.filas=r.filas.filter(f=>{
     const val=conNormTxt(f.validar);
-    if(val==='en devolucion'){elimPorDevolucion++;return false;}
-    if(val==='ingreso local'&&CON_TMS_RECHAZO.includes(conNormTxt(f.estado_tms))){elimPorRechazo++;return false;}
-    if((val==='ingreso local'||val==='transito local')&&CON_FLUJO_DESTINO_ELIMINAR.includes(conNormTxt(f.flujo_destino))){elimPorFlujo++;return false;}
+    if(validarEliminar.includes(val)){elimPorDevolucion++;return false;}
+    if(val==='ingreso local'&&tmsRechazo.includes(conNormTxt(f.estado_tms))){elimPorRechazo++;return false;}
+    if((val==='ingreso local'||val==='transito local')&&flujoDestinoEliminar.includes(conNormTxt(f.flujo_destino))){elimPorFlujo++;return false;}
     return true;
   });
   // Filas que YA eran DESPACHADO antes de esta regla (Tercer corte) — se
@@ -4826,7 +4856,7 @@ function conAplicarReglasFinales(r,fechaRef){
   const nuevasDespachadas=[];
   r.filas.forEach(f=>{
     if(yaEraDespachado.has(f))return;
-    if(CON_VALIDAR_DESPACHADO.includes(conNormTxt(f.validar))){f.estado_wh2='DESPACHADO';marcadasDespachado++;nuevasDespachadas.push(f);}
+    if(validarDespachado.includes(conNormTxt(f.validar))){f.estado_wh2='DESPACHADO';marcadasDespachado++;nuevasDespachadas.push(f);}
   });
   // Motivo de inventario de las filas recién marcadas DESPACHADO: T1 o T3
   // según su combinación de FLUJO DE DESTINO + Cobertura — lo que no
@@ -4835,8 +4865,8 @@ function conAplicarReglasFinales(r,fechaRef){
   const motivoT3=`DESPACHADO T3 ${conAyerDDMM(fechaRef)}`;
   nuevasDespachadas.forEach(f=>{
     const combo=conNormTxt(f.flujo_destino)+'|'+conNormTxt(f.cobertura);
-    if(CON_T1_COMBOS.has(combo)){f.motivo_inventario=motivoT1;marcadasT1++;}
-    else if(CON_T3_COMBOS.has(combo)){f.motivo_inventario=motivoT3;marcadasT3++;}
+    if(combosT1.has(combo)){f.motivo_inventario=motivoT1;marcadasT1++;}
+    else if(combosT3.has(combo)){f.motivo_inventario=motivoT3;marcadasT3++;}
     else{f.motivo_inventario='REVISAR';marcadasRevisar++;}
   });
   r.totalFinal=r.filas.length;
@@ -5025,6 +5055,91 @@ function conInit(){
     $('con-slots').innerHTML=CON_SLOT_DEFS.map(conSlotHtml).join('');
     $('con-slots').dataset.init='1';
   }
+}
+/* ── Configuración de reglas (sub-pestaña) ── */
+function conMostrarTab(tab){
+  $('con-tab-btn-archivos').classList.toggle('a',tab==='archivos');
+  $('con-tab-btn-config').classList.toggle('a',tab==='config');
+  $('con-tab-archivos').style.display=tab==='archivos'?'block':'none';
+  $('con-tab-config').style.display=tab==='config'?'block':'none';
+  if(tab==='config')conRenderConfig();
+}
+const CON_CLAVES_SIMPLE=['validar_despachado','validar_eliminar','tms_rechazo','flujo_destino_eliminar'];
+const CON_CLAVES_COMBO=['combo_t1','combo_t3'];
+let CON_CONFIG_EDIT=null;
+function conRenderConfig(){
+  CON_CONFIG_EDIT={};
+  [...CON_CLAVES_SIMPLE,...CON_CLAVES_COMBO].forEach(clave=>{
+    CON_CONFIG_EDIT[clave]=JSON.parse(JSON.stringify(conReglaLista(clave)));
+  });
+  $('con-config-secciones').innerHTML=[...CON_CLAVES_SIMPLE,...CON_CLAVES_COMBO].map(conSeccionConfigHtml).join('');
+  [...CON_CLAVES_SIMPLE,...CON_CLAVES_COMBO].forEach(conPintarListaConfig);
+}
+function conSeccionConfigHtml(clave){
+  const esCombo=CON_CLAVES_COMBO.includes(clave);
+  return`<div class="con-card" style="--con-c:var(--t1);margin-bottom:16px">
+    <div class="con-card-body">
+      <div class="con-card-h">
+        <div class="con-card-title">${CON_REGLAS_LABEL[clave]}</div>
+        <button class="btn btn-p btn-sm" onclick="conGuardarSeccion('${clave}')">💾 Guardar</button>
+      </div>
+      <div id="con-cfg-lista-${clave}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+      ${esCombo?`<div style="display:flex;gap:6px;flex-wrap:wrap">
+          <input type="text" id="con-cfg-in-${clave}-flujo" placeholder="FLUJO DE DESTINO" style="flex:1;min-width:160px;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.76rem">
+          <input type="text" id="con-cfg-in-${clave}-cob" placeholder="Cobertura (vacío = sin cobertura)" style="flex:1;min-width:160px;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.76rem">
+          <button class="btn btn-s btn-sm" onclick="conAgregarCombo('${clave}')">+ Agregar</button>
+        </div>`
+      :`<div style="display:flex;gap:6px">
+          <input type="text" id="con-cfg-in-${clave}" placeholder="Nuevo valor" style="flex:1;background:var(--s3);border:1px solid var(--b1);border-radius:6px;padding:7px 11px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.76rem">
+          <button class="btn btn-s btn-sm" onclick="conAgregarItem('${clave}')">+ Agregar</button>
+        </div>`}
+      <div id="con-cfg-msg-${clave}" style="font-size:.66rem;margin-top:8px;min-height:14px"></div>
+    </div>
+  </div>`;
+}
+function conPintarListaConfig(clave){
+  const el=$('con-cfg-lista-'+clave);if(!el)return;
+  const esCombo=CON_CLAVES_COMBO.includes(clave);
+  const items=CON_CONFIG_EDIT[clave];
+  if(!items.length){el.innerHTML='<span style="font-size:.68rem;color:var(--ts)">Sin valores</span>';return;}
+  el.innerHTML=items.map((it,i)=>{
+    const texto=esCombo?`${escapeHtml(it.flujo)}${it.cobertura?' + '+escapeHtml(it.cobertura):' (sin cobertura)'}`:escapeHtml(it);
+    return`<span class="pill" style="display:inline-flex;align-items:center;gap:6px">${texto}<button onclick="conQuitarItemConfig('${clave}',${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem;line-height:1;padding:0">×</button></span>`;
+  }).join('');
+}
+function conAgregarItem(clave){
+  const inp=$('con-cfg-in-'+clave);
+  const v=inp.value.trim();if(!v)return;
+  if(!CON_CONFIG_EDIT[clave].some(x=>conNormTxt(x)===conNormTxt(v)))CON_CONFIG_EDIT[clave].push(v);
+  inp.value='';
+  conPintarListaConfig(clave);
+}
+function conAgregarCombo(clave){
+  const flujo=$('con-cfg-in-'+clave+'-flujo').value.trim();
+  const cob=$('con-cfg-in-'+clave+'-cob').value.trim();
+  if(!flujo)return;
+  if(!CON_CONFIG_EDIT[clave].some(x=>conNormTxt(x.flujo)===conNormTxt(flujo)&&conNormTxt(x.cobertura)===conNormTxt(cob)))
+    CON_CONFIG_EDIT[clave].push({flujo,cobertura:cob});
+  $('con-cfg-in-'+clave+'-flujo').value='';$('con-cfg-in-'+clave+'-cob').value='';
+  conPintarListaConfig(clave);
+}
+function conQuitarItemConfig(clave,idx){
+  CON_CONFIG_EDIT[clave].splice(idx,1);
+  conPintarListaConfig(clave);
+}
+async function conGuardarSeccion(clave){
+  const msg=$('con-cfg-msg-'+clave);
+  loading(true);
+  try{
+    const valor=CON_CONFIG_EDIT[clave];
+    const{error}=await db.from('eo_consolidador_reglas').upsert({clave,valor,actualizado_por:S.usuarioActual?.nombre||null},{onConflict:'clave'});
+    if(error)throw error;
+    if(!S.conReglas)S.conReglas={};
+    S.conReglas[clave]=JSON.parse(JSON.stringify(valor));
+    msg.style.color='var(--ok)';msg.textContent='✓ Guardado';
+    toast('Configuración guardada ✓');
+  }catch(e){console.error(e);msg.style.color='var(--red)';msg.textContent='Error al guardar';toast('Error al guardar','error');}
+  finally{loading(false);}
 }
 /* ── Tarjetas de carga (arrastrar/soltar + quitar), reutilizables ── */
 function conSlotDropzoneHtml(fileInputId,color,ondropExpr,texto){
@@ -5338,7 +5453,7 @@ async function cargarTodo(){
   loading(true);
   try{
     const esAdmin=S.usuarioActual?.rol==='admin';
-    const[c,f,o,d,od,ev,hc,us]=await Promise.all([
+    const[c,f,o,d,od,ev,hc,us,cr]=await Promise.all([
       db.from('eo_configuracion').select('*'),
       db.from('eo_feriados').select('*').order('fecha'),
       db.from('eo_objetivos').select('*'),
@@ -5348,7 +5463,8 @@ async function cargarTodo(){
       // Solo admin ve/entra a "Ingresar datos" y "Ajustes" — no hace
       // falta traer esto para admin_jr.
       esAdmin?db.from('eo_horas_consideradas').select('*').order('fecha',{ascending:false}):Promise.resolve({data:[]}),
-      esAdmin?db.from('eo_usuarios').select('id,nombre,rol,activo').order('nombre'):Promise.resolve({data:[]})
+      esAdmin?db.from('eo_usuarios').select('id,nombre,rol,activo').order('nombre'):Promise.resolve({data:[]}),
+      esAdmin?db.from('eo_consolidador_reglas').select('clave,valor'):Promise.resolve({data:[]})
     ]);
     if(c.data)c.data.forEach(r=>{S.cfg[`${r.tipo_dia}_${r.turno}`]=r;});
     S.feriados=f.data||[];
@@ -5357,6 +5473,7 @@ async function cargarTodo(){
     S.eventos=ev.data||[];
     S.horasConsid=hc.data||[];
     S.usuarios=us.data||[];
+    if(esAdmin){S.conReglas={};(cr.data||[]).forEach(r=>{S.conReglas[r.clave]=r.valor;});}
     S.objDia={};
     (od.data||[]).forEach(r=>{S.objDia[r.tipo_dia]=+r.objetivo;});
     if(!Object.keys(S.objDia).length)S.objDia={semana:20,finde:17,feriado:15};
