@@ -4801,9 +4801,18 @@ const CON_T1_COMBOS=new Set([
   'mbox sender|lima metropolitana','mbox sender|lima periferia','mbox sodimac|lima metropolitana',
   'of motorizados|lima metropolitana','vans ruteo estatico|lima metropolitana','vans ruteo estatico|lima periferia',
 ]);
+// Igual que arriba pero con motivo "DESPACHADO T3 <día anterior>" — mismo
+// criterio de fecha que ya usa el Tercer corte. "cd sodimac|" = FLUJO DE
+// DESTINO "CD SODIMAC" con Cobertura vacía (no cualquier cobertura).
+const CON_T3_COMBOS=new Set([
+  'andes|andes','btl|lima metropolitana','btl|lima periferia','cd sodimac|',
+  'ct - provincia|ct arequipa','ct - provincia|ct cajamarca','ct - provincia|ct cusco',
+  'ct - provincia|ct ica','ct - provincia|ct piura','ct - provincia|ct trujillo','ct - provincia|ctt tarapoto',
+  'ct-dd|ct piura','ctt norte chico|ctt norte chico','ifbf|lima metropolitana','olva|olva','sts|lima metropolitana',
+]);
 function conAplicarReglasFinales(r,fechaRef){
   const antes=r.filas.length;
-  let elimPorDevolucion=0,elimPorRechazo=0,elimPorFlujo=0,marcadasDespachado=0,marcadasT1=0;
+  let elimPorDevolucion=0,elimPorRechazo=0,elimPorFlujo=0,marcadasDespachado=0,marcadasT1=0,marcadasT3=0,marcadasRevisar=0;
   r.filas=r.filas.filter(f=>{
     const val=conNormTxt(f.validar);
     if(val==='en devolucion'){elimPorDevolucion++;return false;}
@@ -4812,22 +4821,27 @@ function conAplicarReglasFinales(r,fechaRef){
     return true;
   });
   // Filas que YA eran DESPACHADO antes de esta regla (Tercer corte) — se
-  // excluyen de las dos marcas de abajo, no se tocan en ninguna lógica.
+  // excluyen de las marcas de abajo, no se tocan en ninguna lógica.
   const yaEraDespachado=new Set(r.filas.filter(f=>conNormTxt(f.estado_wh2)==='despachado'));
+  const nuevasDespachadas=[];
   r.filas.forEach(f=>{
     if(yaEraDespachado.has(f))return;
-    if(CON_VALIDAR_DESPACHADO.includes(conNormTxt(f.validar))){f.estado_wh2='DESPACHADO';marcadasDespachado++;}
+    if(CON_VALIDAR_DESPACHADO.includes(conNormTxt(f.validar))){f.estado_wh2='DESPACHADO';marcadasDespachado++;nuevasDespachadas.push(f);}
   });
+  // Motivo de inventario de las filas recién marcadas DESPACHADO: T1 o T3
+  // según su combinación de FLUJO DE DESTINO + Cobertura — lo que no
+  // coincide con ninguna de las dos listas queda en "REVISAR".
   const motivoT1=`DESPACHADO T1 ${conFechaRefDDMM(fechaRef)}`;
-  r.filas.forEach(f=>{
-    if(yaEraDespachado.has(f))return;
-    if(conNormTxt(f.estado_wh2)!=='despachado')return;
+  const motivoT3=`DESPACHADO T3 ${conAyerDDMM(fechaRef)}`;
+  nuevasDespachadas.forEach(f=>{
     const combo=conNormTxt(f.flujo_destino)+'|'+conNormTxt(f.cobertura);
     if(CON_T1_COMBOS.has(combo)){f.motivo_inventario=motivoT1;marcadasT1++;}
+    else if(CON_T3_COMBOS.has(combo)){f.motivo_inventario=motivoT3;marcadasT3++;}
+    else{f.motivo_inventario='REVISAR';marcadasRevisar++;}
   });
   r.totalFinal=r.filas.length;
   r.incompletos=r.filas.filter(f=>CON_CAMPOS_INCOMPLETO.some(c=>!f[c]));
-  return{eliminadas:antes-r.filas.length,elimPorDevolucion,elimPorRechazo,elimPorFlujo,marcadasDespachado,marcadasT1};
+  return{eliminadas:antes-r.filas.length,elimPorDevolucion,elimPorRechazo,elimPorFlujo,marcadasDespachado,marcadasT1,marcadasT3,marcadasRevisar};
 }
 // Mapa: encabezado normalizado (sin tildes/mayúsculas) de la columna de
 // ORIGEN -> clave interna que usa el motor. Define también qué columnas
@@ -5192,6 +5206,8 @@ function conProcesarCruce(){
   if(reglas.eliminadas)r.log.push(`Reglas finales — filas eliminadas: ${fmtI(reglas.eliminadas)} (${fmtI(reglas.elimPorDevolucion)} En Devolución · ${fmtI(reglas.elimPorRechazo)} Ingreso local + Rechazado/Anulado/Fallo de entrega · ${fmtI(reglas.elimPorFlujo)} Ingreso/Tránsito local + flujo de reparto)`);
   if(reglas.marcadasDespachado)r.log.push(`Reglas finales — ESTADO WH2 marcado DESPACHADO en ${fmtI(reglas.marcadasDespachado)} filas (según VALIDAR)`);
   if(reglas.marcadasT1)r.log.push(`Reglas finales — Motivo "DESPACHADO T1 ${conFechaRefDDMM(fechaRef)}" asignado en ${fmtI(reglas.marcadasT1)} filas (según flujo de destino + cobertura)`);
+  if(reglas.marcadasT3)r.log.push(`Reglas finales — Motivo "DESPACHADO T3 ${conAyerDDMM(fechaRef)}" asignado en ${fmtI(reglas.marcadasT3)} filas (según flujo de destino + cobertura)`);
+  if(reglas.marcadasRevisar)r.log.push(`Reglas finales — Motivo "REVISAR" asignado en ${fmtI(reglas.marcadasRevisar)} filas (no calzan con ninguna combinación conocida)`);
 
   $('con-r-total').textContent=fmtI(r.totalFinal);
   $('con-r-incomp').textContent=fmtI(r.incompletos.length);
@@ -5199,7 +5215,7 @@ function conProcesarCruce(){
   conRenderCccBloques();
 
   const cm=$('con-cruce-msg');cm.style.display='flex';
-  cm.innerHTML=`<span class="ico">✓</span>${msg}${reglas.eliminadas?` · ${fmtI(reglas.eliminadas)} filas eliminadas por reglas finales`:''}${reglas.marcadasDespachado?` · ${fmtI(reglas.marcadasDespachado)} marcadas DESPACHADO`:''}${reglas.marcadasT1?` · ${fmtI(reglas.marcadasT1)} con motivo T1`:''}`;
+  cm.innerHTML=`<span class="ico">✓</span>${msg}${reglas.eliminadas?` · ${fmtI(reglas.eliminadas)} filas eliminadas por reglas finales`:''}${reglas.marcadasDespachado?` · ${fmtI(reglas.marcadasDespachado)} marcadas DESPACHADO`:''}${reglas.marcadasT1?` · ${fmtI(reglas.marcadasT1)} con motivo T1`:''}${reglas.marcadasT3?` · ${fmtI(reglas.marcadasT3)} con motivo T3`:''}${reglas.marcadasRevisar?` · ${fmtI(reglas.marcadasRevisar)} para REVISAR`:''}`;
   $('con-log').innerHTML=r.log.map(l=>`<div>${escapeHtml(l)}</div>`).join('');
   toast('Cruce aplicado ✓');
 }
