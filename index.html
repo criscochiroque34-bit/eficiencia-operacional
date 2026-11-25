@@ -1013,7 +1013,7 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
     </div>
 
     <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--b1)">
-      <button class="btn btn-p btn-w" onclick="conDescargar()">⬇ Descargar consolidado (Excel)</button>
+      <button class="btn btn-p btn-w" id="con-btn-descargar" onclick="conDescargar()">⬇ Descargar consolidado (Excel)</button>
     </div>
   </div>
   </div>
@@ -5435,17 +5435,41 @@ function conConstruirResumen(filas){
   filasResumen.push(['Total general',total]);
   return filasResumen;
 }
-function conDescargar(){
+async function conDescargar(){
   const r=CON_ESTADO.resultado;if(!r)return;
   const headers=['FECHA','RASTREO','FECHA DE INGRESO','INGRESO XD','FLUJO DE INGRESO','FLUJO DE DESTINO','Cobertura','Negocio','ESTADO TMS','VALIDAR','ESTADO WH2','ESTADO WH','Motivo de inventario','MES','AÑO','CCC','DINAMICO'];
   const filas=r.filas.map(f=>[f.fecha,f.rastreo,f.fecha_ingreso,f.ingreso_xd,f.flujo_ingreso,f.flujo_destino,f.cobertura,f.negocio,f.estado_tms,f.validar,f.estado_wh2,f.estado_wh,f.motivo_inventario,f.mes,f.anio,f.ccc,f.dinamico]);
-  const wsDetalle=XLSX.utils.aoa_to_sheet([headers,...filas]);
-  const wsResumen=XLSX.utils.aoa_to_sheet(conConstruirResumen(r.filas));
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,wsDetalle,'DETALLE');
-  XLSX.utils.book_append_sheet(wb,wsResumen,'RESUMEN');
+  const resumen=conConstruirResumen(r.filas);
   const fechaRef=$('con-fecha-ref').value||hoy();
-  XLSX.writeFile(wb,`Copia de Kardex ${conFechaRefDDMM(fechaRef)}.xlsx`);
+  const fileName=`Copia de Kardex ${conFechaRefDDMM(fechaRef)}`;
+  // El Excel se arma en el servidor (api/consolidado.js) con una librería
+  // completa — la que corre en el navegador no garantiza escribir color de
+  // encabezado, encabezado fijo ni bordes al exportar.
+  const btn=$('con-btn-descargar');
+  if(btn){btn.disabled=true;btn.textContent='Generando Excel…';}
+  try{
+    const resp=await fetch('/api/consolidado',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fileName,headers,filas,resumen}),
+    });
+    if(!resp.ok){
+      let msg='Error generando el Excel';
+      try{const j=await resp.json();if(j.error)msg=j.error;}catch(e){}
+      throw new Error(msg);
+    }
+    const blob=await resp.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=fileName+'.xlsx';
+    document.body.appendChild(a);a.click();a.remove();
+    URL.revokeObjectURL(url);
+    toast('Excel descargado ✓');
+  }catch(e){
+    console.error(e);
+    toast(e.message||'Error generando el Excel','error');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='⬇ Descargar consolidado (Excel)';}
+  }
 }
 
 /* ═══ INIT ═══ */
