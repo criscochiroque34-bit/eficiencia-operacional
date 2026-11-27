@@ -1019,7 +1019,8 @@ hr{border:0;height:1px;background:var(--b1);margin:24px 0}
   </div>
 
   <div id="con-tab-config" style="display:none">
-    <div class="con-step-sub" style="margin-bottom:20px">Estas son las listas que usan las reglas del cruce final (marcar DESPACHADO, motivos T1/T3, eliminar filas). Agrega, edita o quita valores y dale "Guardar" en cada sección — los cambios no se aplican hasta guardarlos.</div>
+    <div class="con-step-sub" style="margin-bottom:14px">Estas son las listas que usan las reglas del cruce final (marcar DESPACHADO, motivos T1/T3, eliminar filas). Agrega, edita o quita valores y dale "Guardar" en cada sección — los cambios no se aplican hasta guardarlos.</div>
+    <div style="margin-bottom:20px"><button class="btn btn-s btn-sm" onclick="conDescargarConfig()">⬇ Descargar configuración actual (Excel)</button></div>
     <div id="con-config-secciones"></div>
   </div>
 </div>
@@ -5140,6 +5141,22 @@ async function conGuardarSeccion(clave){
     toast('Configuración guardada ✓');
   }catch(e){console.error(e);msg.style.color='var(--red)';msg.textContent='Error al guardar';toast('Error al guardar','error');}
   finally{loading(false);}
+}
+function conDescargarConfig(){
+  if(typeof XLSX==='undefined'){toast('Librería Excel no cargó','error');return;}
+  const filas=[];
+  CON_CLAVES_SIMPLE.forEach(clave=>{
+    conReglaLista(clave).forEach(v=>filas.push([CON_REGLAS_LABEL[clave],v,'']));
+  });
+  CON_CLAVES_COMBO.forEach(clave=>{
+    conReglaLista(clave).forEach(c=>filas.push([CON_REGLAS_LABEL[clave],c.flujo,c.cobertura]));
+  });
+  const ws=XLSX.utils.aoa_to_sheet([['Categoría','Flujo de destino / Valor','Cobertura'],...filas]);
+  ws['!cols']=[{wch:55},{wch:28},{wch:22}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Reglas Consolidador');
+  XLSX.writeFile(wb,`Reglas consolidador ${hoy()}.xlsx`);
+  toast('Configuración descargada ✓');
 }
 /* ── Tarjetas de carga (arrastrar/soltar + quitar), reutilizables ── */
 function conSlotDropzoneHtml(fileInputId,color,ondropExpr,texto){
